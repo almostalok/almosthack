@@ -1,0 +1,15 @@
+{
+  "name": "@almosthack/types",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "license": "MIT",
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@almosthack/config": "workspace:*",
+    "typescript": "^5.4.5"
+  }
+}

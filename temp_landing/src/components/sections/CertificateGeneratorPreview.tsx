@@ -3,13 +3,19 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { FileBadge, Sparkles, Check, ShieldCheck, Share2, Award } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { SpotlightCard } from '@/components/reactbits/SpotlightCard';
+import {
+  IconShieldCert,
+  IconSparkle,
+  IconCheckCircle,
+  IconZapFlash,
+  IconTrophy,
+} from '@/components/ui/CustomIcons';
 
 export function CertificateGeneratorPreview() {
   const [recipientName, setRecipientName] = useState('Alex Chen');
   const [category, setCategory] = useState('1st Place Grand Winner 🏆');
-  const [hackathonName, setHackathonName] = useState('Global AI Hackathon 2026');
   const [copied, setCopied] = useState(false);
 
   const handleTriggerConfetti = () => {
@@ -26,132 +32,124 @@ export function CertificateGeneratorPreview() {
   };
 
   return (
-    <section id="certificates" className="py-28 relative overflow-hidden bg-black text-white">
-      {/* Vercel Ambient Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-cyan-glow blur-[150px] pointer-events-none opacity-35" />
-      <div className="absolute inset-0 vercel-grid opacity-20 pointer-events-none" />
+    <section id="certificates" className="py-28 relative overflow-hidden bg-black text-white bg-noise-fine select-none">
+      {/* Background Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[500px] bg-cyan-glow opacity-25 blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        
+        {/* Section Header with Instrument Serif Accent */}
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full brutalist-tag text-cyan font-mono text-xs font-bold">
-            <FileBadge className="w-4 h-4 text-cyan" />
-            [ HOLOGRAPHIC VERIFICATION ENGINE ]
+          <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-zinc-900 border border-white/15 text-cyan font-mono font-bold text-xs">
+            <IconShieldCert size={14} className="text-cyan" />
+            <span>HOLOGRAPHIC VERIFICATION ENGINE</span>
           </div>
-          <h2 className="font-display text-4xl sm:text-6xl font-bold tracking-tighter text-white uppercase">
-            Cryptographic Certificates. <br />
-            <span className="text-gradient-cyan">Generated In Seconds.</span>
+          <h2 className="font-display text-4xl sm:text-6xl font-black tracking-tight text-white">
+            cryptographic certificates.{' '}
+            <span className="font-serif italic text-cyan text-4xl sm:text-6xl font-normal">
+              generated in seconds.
+            </span>
           </h2>
-          <p className="font-sans text-white/70 text-base sm:text-lg">
-            Instant verifiable badges on IPFS and Solana. Type a recipient name below to test real-time rendering.
+          <p className="font-sans text-zinc-400 text-base sm:text-lg">
+            instant verifiable badges on IPFS and Solana. type a recipient name below to test real-time rendering.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center max-w-6xl mx-auto">
-          
-          {/* Left Column: Interactive Controls */}
-          <div className="lg:col-span-5 p-6 rounded-3xl vercel-card border border-white/20 space-y-5">
-            <h3 className="font-display text-base font-bold text-white flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-cyan" /> Live Generator Controls
-            </h3>
-
-            <div className="space-y-4 text-xs font-mono">
-              <div>
-                <label className="block text-white/70 mb-1.5 font-medium">RECIPIENT NAME</label>
-                <input
-                  type="text"
-                  value={recipientName}
-                  onChange={(e) => setRecipientName(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-black/80 border border-white/20 text-white focus:outline-none focus:border-cyan font-sans"
-                />
-              </div>
-
-              <div>
-                <label className="block text-white/70 mb-1.5 font-medium">AWARD CATEGORY</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-black/80 border border-white/20 text-white focus:outline-none focus:border-cyan font-sans"
-                >
-                  <option value="1st Place Grand Winner 🏆">1st Place Grand Winner 🏆</option>
-                  <option value="Best AI Innovation Track 🤖">Best AI Innovation Track 🤖</option>
-                  <option value="Official Hackathon Mentor 🌟">Official Hackathon Mentor 🌟</option>
-                  <option value="Participant Excellence ⚡">Participant Excellence ⚡</option>
-                </select>
-              </div>
+        <SpotlightCard
+          spotlightColor="rgba(0, 240, 255, 0.18)"
+          className="max-w-6xl mx-auto mac-window border border-white/15 overflow-hidden shadow-2xl p-0"
+        >
+          <div className="mac-window-bar px-6 py-3">
+            <div className="mac-dots">
+              <span className="mac-dot mac-dot-close" />
+              <span className="mac-dot mac-dot-min" />
+              <span className="mac-dot mac-dot-zoom" />
             </div>
-
-            <div className="pt-2 flex flex-col gap-2.5">
-              <button
-                onClick={handleTriggerConfetti}
-                className="w-full py-3.5 rounded-xl bg-white text-black font-display font-bold text-xs hover:bg-white/90 transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Sparkles className="w-4 h-4 text-black" /> Render & Trigger Winner Confetti
-              </button>
-              <button
-                onClick={handleCopyLink}
-                className="w-full py-2.5 rounded-xl bg-surface-50 border border-white/20 hover:bg-white/10 text-white font-mono text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-cyan" /> : <Share2 className="w-3.5 h-3.5" />}
-                <span>{copied ? 'Verification Link Copied!' : 'Copy Verification Link'}</span>
-              </button>
+            <div className="flex items-center gap-2 font-mono text-xs text-zinc-300">
+              <IconShieldCert size={14} className="text-purple-400" />
+              <span>certificate_builder.app</span>
             </div>
+            <div className="w-12" />
           </div>
 
-          {/* Right Column: 3D Asset & Certificate Card Preview */}
-          <div className="lg:col-span-7 space-y-4">
-            <motion.div
-              layout
-              className="p-8 sm:p-10 rounded-3xl vercel-card border border-white/20 shadow-2xl space-y-6 relative overflow-hidden text-center group"
-            >
-              {/* Holographic Watermark Badge */}
-              <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/80 border border-cyan/40 text-[10px] font-mono text-cyan">
-                <ShieldCheck className="w-3.5 h-3.5 text-cyan" /> SOLANA & IPFS VERIFIED
-              </div>
+          <div className="p-8 bg-zinc-950/95 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center font-sans">
+            
+            {/* Left Column: Interactive Controls */}
+            <div className="lg:col-span-5 p-6 rounded-2xl bg-zinc-900/80 border border-white/10 space-y-5">
+              <h3 className="font-display text-base font-bold text-white flex items-center gap-2">
+                <IconSparkle size={16} className="text-cyan" /> Live Generator Controls
+              </h3>
 
-              {/* 3D Certificate Badge Preview */}
-              <div className="relative w-28 h-28 mx-auto rounded-2xl overflow-hidden bg-black/60 p-2 border border-white/20 group-hover:scale-105 transition-transform duration-500">
-                <Image
-                  src="/images/cert-badge-3d.png"
-                  alt="3D Holographic Certificate Trophy"
-                  fill
-                  className="object-cover rounded-xl"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <span className="text-[11px] font-mono tracking-widest uppercase text-white/50">
-                  OFFICIAL CERTIFICATE OF ACHIEVEMENT
-                </span>
-                <h4 className="text-xl font-bold font-display text-white tracking-tight">{hackathonName}</h4>
-              </div>
-
-              <div className="space-y-2 py-4 border-y border-white/15">
-                <p className="text-xs font-mono text-white/60">PRESENTED TO</p>
-                <h3 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-white">
-                  {recipientName || 'Alex Chen'}
-                </h3>
-                <p className="text-xs font-mono text-white/80 pt-2">
-                  FOR SECURING HIGHEST HONOR IN
-                </p>
-                <span className="inline-block px-4 py-1.5 rounded-full text-xs font-mono font-bold bg-cyan/15 text-cyan border border-cyan/40 mt-1">
-                  {category}
-                </span>
-              </div>
-
-              {/* Certificate Footer Stamp */}
-              <div className="flex items-center justify-between pt-2 text-[10px] text-white/40 font-mono">
+              <div className="space-y-4 text-xs font-mono">
                 <div>
-                  <div>ISSUED BY ALMOSTHACK ENGINE</div>
-                  <div>HASH: #AH-CERT-9824-2026</div>
+                  <label className="block text-zinc-400 mb-1.5 font-semibold">RECIPIENT NAME</label>
+                  <input
+                    type="text"
+                    value={recipientName}
+                    onChange={(e) => setRecipientName(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/20 text-white focus:outline-none focus:border-cyan font-sans"
+                  />
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-black/80 border border-white/20 flex items-center justify-center text-cyan">
-                  <Award className="w-5 h-5" />
+
+                <div>
+                  <label className="block text-zinc-400 mb-1.5 font-semibold">AWARD CATEGORY</label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/20 text-white focus:outline-none focus:border-cyan font-sans"
+                  >
+                    <option value="1st Place Grand Winner 🏆">1st Place Grand Winner 🏆</option>
+                    <option value="Best AI Innovation Track 🤖">Best AI Innovation Track 🤖</option>
+                    <option value="Official Hackathon Mentor 🌟">Official Hackathon Mentor 🌟</option>
+                    <option value="Participant Excellence ⚡">Participant Excellence ⚡</option>
+                  </select>
                 </div>
               </div>
-            </motion.div>
-          </div>
 
-        </div>
+              <div className="pt-2 flex flex-col gap-2.5">
+                <button
+                  onClick={handleTriggerConfetti}
+                  className="mac-btn-gloss w-full py-3.5 rounded-xl text-white font-mono text-xs font-bold transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <IconSparkle size={14} className="text-cyan" /> Render &amp; Trigger Winner Confetti
+                </button>
+                <button
+                  onClick={handleCopyLink}
+                  className="w-full py-2.5 rounded-xl bg-zinc-900 border border-white/15 hover:bg-white/10 text-zinc-300 font-mono text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {copied ? <IconCheckCircle size={14} className="text-cyan" /> : <IconZapFlash size={14} className="text-cyan" />}
+                  <span>{copied ? 'Verification Link Copied!' : 'Copy Verification Link'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column: 3D Asset & Certificate Card Preview */}
+            <div className="lg:col-span-7 flex flex-col items-center justify-center">
+              <div className="w-full max-w-md p-6 rounded-2xl bg-zinc-900 border border-white/15 shadow-2xl relative overflow-hidden font-mono space-y-4">
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <div className="flex items-center gap-2 text-cyan font-bold text-xs">
+                    <IconTrophy size={16} className="text-amber-400" />
+                    <span>ALMOSTHACK PROOF-OF-WIN</span>
+                  </div>
+                  <span className="text-[10px] text-zinc-500">ID: #0492</span>
+                </div>
+
+                <div className="text-center py-4 space-y-1">
+                  <div className="text-[11px] text-zinc-400 uppercase">THIS CERTIFIES THAT</div>
+                  <div className="text-2xl font-bold font-display text-white">{recipientName || 'Alex Chen'}</div>
+                  <div className="text-xs text-cyan pt-1">{category}</div>
+                </div>
+
+                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[10px] text-zinc-500">
+                  <span>Solana Hash: 0x8a92...f7b</span>
+                  <span className="text-emerald-400 font-bold">✓ IPFS Verified</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </SpotlightCard>
+
       </div>
     </section>
   );

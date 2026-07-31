@@ -2,7 +2,9 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Play, Sparkles } from 'lucide-react';
+import { SpotlightCard } from '@/components/reactbits/SpotlightCard';
+import { FooterFluidWaves } from '@/components/reactbits/FooterFluidWaves';
+import { IconSparkle, IconArrowRight, IconZapFlash } from '@/components/ui/CustomIcons';
 
 interface FinalCTAProps {
   onOpenDemoModal?: () => void;
@@ -10,43 +12,59 @@ interface FinalCTAProps {
 
 export function FinalCTA({ onOpenDemoModal }: FinalCTAProps) {
   return (
-    <section id="final-cta" className="py-24 relative overflow-hidden bg-background">
-      {/* Background Radiating Orb */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-accent/20 rounded-full blur-[140px] pointer-events-none" />
+    <section id="final-cta" className="py-24 relative overflow-hidden bg-modern-dark text-white select-none">
+      
+      {/* ReactBits Animated Fluid Neon Wave Canvas Background */}
+      <FooterFluidWaves />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-        <div className="p-12 sm:p-16 rounded-3xl bg-surface border border-accent/40 glass-card shadow-2xl space-y-8 relative overflow-hidden">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-accent/20 border border-accent/30 text-accent font-semibold text-xs">
-            <Sparkles className="w-4 h-4" />
-            THE FUTURE OF HACKATHONS
+      {/* Background Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-cyan-glow opacity-30 blur-3xl pointer-events-none" />
+
+      <div className="max-w-5xl mx-auto px-4 relative z-10 text-center">
+        <SpotlightCard
+          spotlightColor="rgba(0, 240, 255, 0.2)"
+          className="mac-window p-10 sm:p-14 border border-white/15 bg-zinc-950/95 shadow-[0_30px_100px_rgba(0,240,255,0.18)] relative overflow-hidden flex flex-col items-center gap-6"
+        >
+          <div className="mac-dots absolute top-4 left-4">
+            <span className="mac-dot mac-dot-close" />
+            <span className="mac-dot mac-dot-min" />
+            <span className="mac-dot mac-dot-zoom" />
           </div>
 
-          <h2 className="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-tight">
-            Ready to build your next hackathon?
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900 border border-white/15 text-cyan font-mono text-xs mt-2">
+            <IconSparkle size={14} className="text-cyan" />
+            <span>the future of hackathons</span>
+          </div>
+
+          <h2 className="text-4xl sm:text-6xl font-extrabold text-white tracking-tight font-display max-w-3xl leading-tight">
+            ready to build your{' '}
+            <span className="font-serif italic text-cyan text-4xl sm:text-6xl font-normal">
+              next hackathon?
+            </span>
           </h2>
 
-          <p className="text-muted text-base sm:text-xl max-w-2xl mx-auto font-normal">
-            Join hundreds of colleges, communities, and tech companies running chaotic-free hackathons with AlmostHack.
+          <p className="text-zinc-400 text-base sm:text-lg max-w-xl mx-auto font-sans">
+            join hundreds of colleges, communities, and tech companies running chaos-free hackathons with AlmostHack.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 w-full sm:w-auto">
             <a
               href="#pricing"
-              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-accent text-white font-semibold text-sm hover:bg-accent-hover transition-all shadow-xl shadow-accent/25 flex items-center justify-center gap-2 group hover:scale-[1.02] active:scale-[0.98]"
+              className="mac-btn-gloss w-full sm:w-auto px-8 py-4 rounded-xl text-white font-mono text-xs font-bold flex items-center justify-center gap-2 shadow-2xl cursor-pointer"
             >
-              <span>Start Free Now</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <span>start free now</span>
+              <IconArrowRight size={14} className="text-cyan" />
             </a>
 
             <button
               onClick={onOpenDemoModal}
-              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-surface-50 border border-white/15 text-white font-semibold text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-2 group"
+              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-zinc-900 border border-white/15 text-zinc-300 hover:text-white font-mono text-xs font-bold hover:border-white/30 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg"
             >
-              <Play className="w-4 h-4 fill-white text-white group-hover:scale-110 transition-transform" />
-              <span>Book 1-on-1 Demo</span>
+              <IconZapFlash size={14} className="text-cyan fill-cyan" />
+              <span>book 1-on-1 demo</span>
             </button>
           </div>
-        </div>
+        </SpotlightCard>
       </div>
     </section>
   );

@@ -2,88 +2,97 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { SpotlightCard } from '@/components/reactbits/SpotlightCard';
 import {
-  UserCheck,
-  Award,
-  Code2,
-  Building,
-  Shield,
-  CheckCircle2,
-  BarChart,
-  Sparkles,
-  Zap,
-  Sliders,
-  Send,
-  Users,
-  FileText
-} from 'lucide-react';
+  IconCpuChip,
+  IconTrophy,
+  IconShieldCert,
+  IconTerminalCode,
+  IconSparkle,
+  IconCheckCircle,
+  IconZapFlash,
+} from '@/components/ui/CustomIcons';
 
 export function InteractiveRoleDashboard() {
   const [activeRole, setActiveRole] = useState<'organizer' | 'judge' | 'participant' | 'sponsor' | 'admin'>('organizer');
 
   const roles = [
-    { id: 'organizer', label: 'Organizer Portal', icon: UserCheck, desc: 'Full event lifecycle control, broadcasts & analytics' },
-    { id: 'judge', label: 'Judge Portal', icon: Award, desc: 'Standardized rubrics, AI fraud checks & score cards' },
-    { id: 'participant', label: 'Participant Hub', icon: Code2, desc: 'Team formation, project submissions & schedules' },
-    { id: 'sponsor', label: 'Sponsor Portal', icon: Building, desc: 'Custom tracks, prize distribution & candidate scouting' },
-    { id: 'admin', label: 'System Admin', icon: Shield, desc: 'Domain management, white-labeling & API integrations' },
+    { id: 'organizer', label: 'Organizer Portal', desc: 'Full event lifecycle control, broadcasts & analytics' },
+    { id: 'judge', label: 'Judge Portal', desc: 'Standardized rubrics, AI fraud checks & score cards' },
+    { id: 'participant', label: 'Participant Hub', desc: 'Team formation, project submissions & schedules' },
+    { id: 'sponsor', label: 'Sponsor Portal', desc: 'Custom tracks, prize distribution & candidate scouting' },
+    { id: 'admin', label: 'System Admin', desc: 'Domain management, white-labeling & API integrations' },
   ];
 
   return (
-    <section id="interactive-demo" className="py-24 relative overflow-hidden bg-[#090B10]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Title */}
+    <section id="interactive-demo" className="py-24 relative overflow-hidden bg-black text-white bg-noise-fine select-none">
+      
+      {/* Background Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[500px] bg-cyan-glow opacity-25 blur-3xl pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        
+        {/* Section Title with Instrument Serif Accent */}
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
-          <span className="text-xs font-mono text-accent tracking-widest uppercase px-3 py-1 rounded-full bg-accent/10 border border-accent/20">
-            ROLE-BASED DESIGN SYSTEM
+          <span className="inline-block px-3.5 py-1 rounded-full bg-zinc-900 border border-white/15 text-xs font-mono text-cyan uppercase tracking-wider">
+            role-based os system
           </span>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
-            Tailored Experiences for Every Role.
+          <h2 className="text-4xl sm:text-5xl font-black text-white tracking-tight font-display">
+            tailored experiences for{' '}
+            <span className="font-serif italic text-cyan text-4xl sm:text-5xl font-normal">
+              every role
+            </span>
           </h2>
-          <p className="text-muted text-base sm:text-lg">
-            Switch views below to test how AlmostHack adapts its interface for organizers, judges, participants, sponsors, and system admins.
+          <p className="text-zinc-400 text-base sm:text-lg font-sans">
+            switch views below to test how AlmostHack adapts its macOS interface for organizers, judges, participants, sponsors, and system admins.
           </p>
         </div>
 
         {/* Role Switcher Tabs */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-10 font-mono">
           {roles.map((r) => {
-            const Icon = r.icon;
             const isSelected = activeRole === r.id;
             return (
               <button
                 key={r.id}
                 onClick={() => setActiveRole(r.id as any)}
-                className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-semibold transition-all ${
+                className={`px-5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
                   isSelected
-                    ? 'bg-accent text-white shadow-lg shadow-accent/25 border border-accent'
-                    : 'bg-surface-50 text-white/60 hover:text-white border border-white/10 hover:border-white/20'
+                    ? 'mac-btn-gloss text-white shadow-xl border-cyan/50 text-cyan'
+                    : 'bg-zinc-900/90 text-zinc-400 hover:text-white border border-white/10 hover:border-white/25'
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                <IconZapFlash size={14} className={isSelected ? 'text-cyan fill-cyan' : 'text-zinc-500'} />
                 <span>{r.label}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Full-Width Interactive Role Preview Shell */}
-        <div className="rounded-3xl border border-white/15 bg-surface/90 backdrop-blur-2xl glass-card overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.9)]">
-          {/* Top Status Bar */}
-          <div className="px-6 py-4 bg-surface-50 border-b border-white/10 flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-3.5 h-3.5 rounded-full bg-accent animate-pulse" />
-              <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
-                VIEW MODE: {activeRole.toUpperCase()} DASHBOARD
-              </span>
+        {/* Full-Width Interactive Role Preview Shell (ReactBits Spotlight Card inside macOS Window) */}
+        <SpotlightCard
+          spotlightColor="rgba(0, 240, 255, 0.15)"
+          className="mac-window border border-white/15 shadow-[0_30px_90px_rgba(0,0,0,0.9)] overflow-hidden"
+        >
+          {/* macOS Top Window Header */}
+          <div className="mac-window-bar px-6 py-3">
+            <div className="mac-dots">
+              <span className="mac-dot mac-dot-close" />
+              <span className="mac-dot mac-dot-min" />
+              <span className="mac-dot mac-dot-zoom" />
             </div>
-            <div className="text-xs text-white/60 font-mono">
-              Status: <span className="text-emerald-400 font-bold">Online & Active</span>
+            <div className="flex items-center gap-2 font-mono text-xs text-zinc-300">
+              <IconTerminalCode size={14} className="text-cyan" />
+              <span className="font-bold text-white">portal_{activeRole}.app</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Live &amp; Active</span>
             </div>
           </div>
 
           {/* Dynamic Content Body */}
-          <div className="p-8 min-h-[380px]">
+          <div className="p-8 bg-zinc-950/95 min-h-[380px] font-sans">
             <AnimatePresence mode="wait">
               {activeRole === 'organizer' && (
                 <motion.div
@@ -93,34 +102,40 @@ export function InteractiveRoleDashboard() {
                   exit={{ opacity: 0, y: -15 }}
                   className="space-y-6"
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-5 rounded-2xl bg-black/40 border border-white/10 space-y-2">
-                      <div className="text-white/50 text-xs font-mono">LIVE REGISTRATION RATE</div>
-                      <div className="text-3xl font-extrabold text-white font-mono">1,420 / 1,500</div>
-                      <div className="text-emerald-400 text-xs flex items-center gap-1">
-                        <BarChart className="w-3.5 h-3.5" /> +24% vs last event
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono">
+                    <div className="p-5 rounded-xl bg-zinc-900/80 border border-white/10 space-y-2">
+                      <div className="text-zinc-500 text-xs uppercase tracking-wider">LIVE REGISTRATION RATE</div>
+                      <div className="text-3xl font-extrabold text-white">1,420 / 1,500</div>
+                      <div className="text-emerald-400 text-xs flex items-center gap-1 font-bold">
+                        <IconCheckCircle size={14} /> 94.6% Checked In
                       </div>
                     </div>
-                    <div className="p-5 rounded-2xl bg-black/40 border border-white/10 space-y-2">
-                      <div className="text-white/50 text-xs font-mono">PROJECT SUBMISSIONS</div>
-                      <div className="text-3xl font-extrabold text-white font-mono">148 Projects</div>
-                      <div className="text-accent text-xs">Submission Deadline: Active</div>
+
+                    <div className="p-5 rounded-xl bg-zinc-900/80 border border-white/10 space-y-2">
+                      <div className="text-zinc-500 text-xs uppercase tracking-wider">AI EVALUATION STATUS</div>
+                      <div className="text-3xl font-extrabold text-cyan">128 Projects</div>
+                      <div className="text-cyan text-xs flex items-center gap-1 font-bold">
+                        <IconCpuChip size={14} /> Auto-Scoring Repos
+                      </div>
                     </div>
-                    <div className="p-5 rounded-2xl bg-black/40 border border-white/10 space-y-2">
-                      <div className="text-white/50 text-xs font-mono">DISCORD & SMS BROADCAST</div>
-                      <div className="text-3xl font-extrabold text-white font-mono">1-Click Dispatch</div>
-                      <div className="text-white/60 text-xs">Send updates to 1,420 hackers instantly</div>
+
+                    <div className="p-5 rounded-xl bg-zinc-900/80 border border-white/10 space-y-2">
+                      <div className="text-zinc-500 text-xs uppercase tracking-wider">PRIZE POOL DISBURSED</div>
+                      <div className="text-3xl font-extrabold text-emerald-400">$50,000</div>
+                      <div className="text-zinc-400 text-xs flex items-center gap-1">
+                        <IconShieldCert size={14} className="text-purple-400" /> Smart Contract Ready
+                      </div>
                     </div>
                   </div>
 
-                  <div className="p-5 rounded-2xl bg-surface-50 border border-white/10 flex flex-wrap items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="font-bold text-white text-sm">Quick Action: Freeze Submissions & Trigger AI Judging</div>
-                      <div className="text-xs text-white/50">Locks project editing and auto-dispatches score sheets to 24 assigned judges.</div>
-                    </div>
-                    <button className="px-5 py-2.5 rounded-xl bg-accent text-white font-semibold text-xs hover:bg-accent-hover transition-all flex items-center gap-2">
-                      <Zap className="w-4 h-4" /> Trigger AI Judging Sequence
-                    </button>
+                  <div className="p-6 rounded-xl bg-zinc-900/60 border border-white/10 space-y-3">
+                    <h4 className="font-display font-bold text-white text-lg flex items-center gap-2">
+                      <IconSparkle size={18} className="text-cyan" />
+                      Organizer Command Control Bar
+                    </h4>
+                    <p className="text-sm text-zinc-300">
+                      Send urgent push announcements, automatically verify team GitHub repos, and resolve judging disputes with one-click AI evaluation summaries.
+                    </p>
                   </div>
                 </motion.div>
               )}
@@ -133,40 +148,17 @@ export function InteractiveRoleDashboard() {
                   exit={{ opacity: 0, y: -15 }}
                   className="space-y-6"
                 >
-                  <div className="p-5 rounded-2xl bg-surface-50 border border-white/10 flex items-center justify-between">
-                    <div>
-                      <div className="font-bold text-white text-sm">Judge Queue: Track A (AI & Machine Learning)</div>
-                      <div className="text-xs text-white/50">You have 6 submissions left to evaluate. Rubric weights applied automatically.</div>
-                    </div>
-                    <span className="px-3 py-1 rounded-full bg-accent/20 text-accent font-mono text-xs font-bold">
-                      Progress: 8/14 Scored
-                    </span>
-                  </div>
-
-                  <div className="p-6 rounded-2xl bg-black/50 border border-accent/30 space-y-4">
-                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                      <div>
-                        <h4 className="text-white font-bold text-base">Project #42: PulseAI Triage Engine</h4>
-                        <p className="text-white/50 text-xs">Team NeuroForge • Submitted 12m ago</p>
-                      </div>
-                      <span className="px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-mono font-bold">
-                        AI Fraud Score: 0.2% (100% Original)
-                      </span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono">
+                    <div className="p-5 rounded-xl bg-zinc-900/80 border border-white/10 space-y-2">
+                      <div className="text-zinc-500 text-xs">ASSIGNED RUBRIC SCORECARD</div>
+                      <div className="text-2xl font-bold text-white">Technical Execution (40%)</div>
+                      <p className="text-xs text-zinc-400">AI pre-scored architecture cleanlines: 9.5/10</p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                      <div className="p-3 rounded-xl bg-surface-50 border border-white/10">
-                        <span className="text-white/50">Technical Depth</span>
-                        <div className="text-lg font-mono font-bold text-white mt-1">9.5 / 10</div>
-                      </div>
-                      <div className="p-3 rounded-xl bg-surface-50 border border-white/10">
-                        <span className="text-white/50">UI / UX Elegance</span>
-                        <div className="text-lg font-mono font-bold text-white mt-1">9.2 / 10</div>
-                      </div>
-                      <div className="p-3 rounded-xl bg-surface-50 border border-white/10">
-                        <span className="text-white/50">Impact Potential</span>
-                        <div className="text-lg font-mono font-bold text-white mt-1">9.8 / 10</div>
-                      </div>
+                    <div className="p-5 rounded-xl bg-zinc-900/80 border border-white/10 space-y-2">
+                      <div className="text-zinc-500 text-xs">AI PLAGIARISM CHECK</div>
+                      <div className="text-2xl font-bold text-emerald-400">100% Original Code</div>
+                      <p className="text-xs text-zinc-400">Checked against 10M+ GitHub repos</p>
                     </div>
                   </div>
                 </motion.div>
@@ -178,36 +170,16 @@ export function InteractiveRoleDashboard() {
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -15 }}
-                  className="space-y-6"
+                  className="space-y-6 font-mono"
                 >
-                  <div className="p-5 rounded-2xl bg-surface-50 border border-white/10 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-accent/20 border border-accent/40 flex items-center justify-center font-bold text-accent">
-                        TN
-                      </div>
-                      <div>
-                        <div className="font-bold text-white text-sm">Team NeuroForge</div>
-                        <div className="text-xs text-white/50">Track: AI Healthcare • 4 Members</div>
-                      </div>
-                    </div>
-                    <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-xs font-semibold border border-emerald-500/30">
-                      Submission Received
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                    <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-2">
-                      <div className="text-white/50 font-mono">SUBMITTED REPOSITORY</div>
-                      <div className="text-white font-mono">github.com/neuroforge/pulse-ai</div>
-                      <div className="text-emerald-400 text-[11px] flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> GitHub Action Build Passed
-                      </div>
-                    </div>
-                    <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-2">
-                      <div className="text-white/50 font-mono">VENUE GATE PASS</div>
-                      <div className="text-white font-mono">QR Token: #AH-9842-2026</div>
-                      <div className="text-accent text-[11px]">Valid for Swag & Meal Desk</div>
-                    </div>
+                  <div className="p-6 rounded-xl bg-zinc-900/80 border border-white/10 space-y-3">
+                    <h4 className="font-display font-bold text-white text-lg flex items-center gap-2">
+                      <IconTrophy size={18} className="text-amber-400" />
+                      Team CyberPunk Project Hub
+                    </h4>
+                    <p className="text-sm text-zinc-300 font-sans">
+                      Connect your GitHub repo, submit your pitch deck, and track live scoring in real time.
+                    </p>
                   </div>
                 </motion.div>
               )}
@@ -218,16 +190,16 @@ export function InteractiveRoleDashboard() {
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -15 }}
-                  className="space-y-6"
+                  className="space-y-6 font-mono"
                 >
-                  <div className="p-5 rounded-2xl bg-surface-50 border border-white/10 flex items-center justify-between">
-                    <div>
-                      <div className="font-bold text-white text-sm">Sponsor Hub: Google Cloud Platform Track</div>
-                      <div className="text-xs text-white/50">$10,000 Special Category Bounty • 48 Teams Competing</div>
-                    </div>
-                    <button className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs border border-white/15">
-                      Export Resume Booklet (.ZIP)
-                    </button>
+                  <div className="p-6 rounded-xl bg-zinc-900/80 border border-white/10 space-y-3">
+                    <h4 className="font-display font-bold text-white text-lg flex items-center gap-2">
+                      <IconShieldCert size={18} className="text-purple-400" />
+                      Custom Sponsor Bounty Track
+                    </h4>
+                    <p className="text-sm text-zinc-300 font-sans">
+                      Set custom API bounties, evaluate teams using your tech stack, and award verified prizes.
+                    </p>
                   </div>
                 </motion.div>
               )}
@@ -238,22 +210,23 @@ export function InteractiveRoleDashboard() {
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -15 }}
-                  className="space-y-6"
+                  className="space-y-6 font-mono"
                 >
-                  <div className="p-5 rounded-2xl bg-surface-50 border border-white/10 flex items-center justify-between">
-                    <div>
-                      <div className="font-bold text-white text-sm">Custom Domain & White-Label Controls</div>
-                      <div className="text-xs text-white/50">hack.youruniversity.edu • Custom SSL Active</div>
-                    </div>
-                    <span className="px-3 py-1 rounded-full bg-accent/20 text-accent font-mono text-xs font-semibold">
-                      Enterprise Tier
-                    </span>
+                  <div className="p-6 rounded-xl bg-zinc-900/80 border border-white/10 space-y-3">
+                    <h4 className="font-display font-bold text-white text-lg flex items-center gap-2">
+                      <IconCpuChip size={18} className="text-cyan" />
+                      White-Label &amp; Domain Admin
+                    </h4>
+                    <p className="text-sm text-zinc-300 font-sans">
+                      Configure custom SSL domains, white-label CSS themes, and webhook integrations.
+                    </p>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
-        </div>
+        </SpotlightCard>
+
       </div>
     </section>
   );

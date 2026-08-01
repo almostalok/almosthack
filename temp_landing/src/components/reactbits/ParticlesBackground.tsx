@@ -1,9 +1,12 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
+import { useTheme } from '@/context/ThemeContext';
 
 export function ParticlesBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -32,7 +35,9 @@ export function ParticlesBackground() {
       vy: (Math.random() - 0.5) * 0.4,
       radius: Math.random() * 1.5 + 0.5,
       alpha: Math.random() * 0.5 + 0.2,
-      color: Math.random() > 0.4 ? 'rgba(0, 240, 255,' : 'rgba(139, 92, 246,',
+      color: Math.random() > 0.4
+        ? (isLight ? 'rgba(2, 132, 199,' : 'rgba(0, 240, 255,')
+        : (isLight ? 'rgba(99, 102, 241,' : 'rgba(139, 92, 246,'),
     }));
 
     const render = () => {
@@ -54,7 +59,7 @@ export function ParticlesBackground() {
         ctx.fillStyle = `${p.color}${p.alpha})`;
         ctx.fill();
 
-        // Connect close particles with thin neon lines
+        // Connect close particles with thin lines
         for (let j = i + 1; j < particles.length; j++) {
           const p2 = particles[j];
           const dx = p.x - p2.x;
@@ -65,7 +70,9 @@ export function ParticlesBackground() {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(0, 240, 255, ${0.15 * (1 - dist / 120)})`;
+            ctx.strokeStyle = isLight
+              ? `rgba(2, 132, 199, ${0.2 * (1 - dist / 120)})`
+              : `rgba(0, 240, 255, ${0.15 * (1 - dist / 120)})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
@@ -81,12 +88,14 @@ export function ParticlesBackground() {
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationFrameId);
     };
-  }, []);
+  }, [isLight]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none fixed inset-0 z-0 opacity-60"
+      className={`pointer-events-none fixed inset-0 z-0 transition-opacity duration-500 ${
+        isLight ? 'opacity-40' : 'opacity-60'
+      }`}
     />
   );
 }

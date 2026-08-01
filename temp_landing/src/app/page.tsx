@@ -26,7 +26,7 @@ export default function Home() {
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
 
   return (
-    <main className="min-h-screen bg-black text-white selection:bg-cyan/30 selection:text-white font-sans relative overflow-x-hidden">
+    <main className="min-h-screen bg-background text-foreground selection:bg-cyan/30 font-sans relative overflow-x-hidden transition-colors duration-300">
       
       {/* ReactBits Dynamic Ambient Particle Starfield Background */}
       <ParticlesBackground />

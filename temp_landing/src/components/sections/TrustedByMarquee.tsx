@@ -1,8 +1,7 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Building2, GraduationCap, Globe2, Rocket, Cpu, ShieldCheck } from 'lucide-react';
+import { GraduationCap, Globe2, Rocket, Cpu, Building2, ShieldCheck } from 'lucide-react';
 
 export function TrustedByMarquee() {
   const partners = [
@@ -18,10 +17,10 @@ export function TrustedByMarquee() {
   ];
 
   return (
-    <section className="py-12 border-y border-white/10 bg-surface/50 overflow-hidden relative">
+    <section className="py-12 border-y mac-border mac-nav-bg overflow-hidden relative transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 mb-6 text-center">
-        <p className="text-xs font-mono tracking-widest uppercase text-white/40">
-          Trusted by leading universities, communities, companies & government programs worldwide
+        <p className="text-xs font-mono tracking-widest uppercase mac-text-muted">
+          Trusted by leading universities, communities, companies &amp; government programs worldwide
         </p>
       </div>
 
@@ -33,16 +32,16 @@ export function TrustedByMarquee() {
             return (
               <div
                 key={`${partner.name}-${index}`}
-                className="flex items-center gap-3 text-white/50 hover:text-white transition-colors cursor-pointer group"
+                className="flex items-center gap-3 mac-text-muted hover:mac-text-main transition-colors cursor-pointer group"
               >
-                <div className="p-2 rounded-xl bg-white/5 group-hover:bg-accent/20 group-hover:text-accent transition-colors border border-white/5">
+                <div className="p-2 rounded-xl mac-pill-bg group-hover:bg-cyan/20 group-hover:text-cyan transition-colors border mac-border">
                   <Icon className="w-5 h-5" />
                 </div>
                 <div className="flex flex-col text-left">
-                  <span className="text-sm font-semibold tracking-tight text-white/80 group-hover:text-white">
+                  <span className="text-sm font-semibold tracking-tight mac-text-main group-hover:text-cyan">
                     {partner.name}
                   </span>
-                  <span className="text-[10px] font-mono text-white/40">{partner.category}</span>
+                  <span className="text-[10px] font-mono mac-text-muted">{partner.category}</span>
                 </div>
               </div>
             );
@@ -56,16 +55,16 @@ export function TrustedByMarquee() {
             return (
               <div
                 key={`dup-${partner.name}-${index}`}
-                className="flex items-center gap-3 text-white/50 hover:text-white transition-colors cursor-pointer group"
+                className="flex items-center gap-3 mac-text-muted hover:mac-text-main transition-colors cursor-pointer group"
               >
-                <div className="p-2 rounded-xl bg-white/5 group-hover:bg-accent/20 group-hover:text-accent transition-colors border border-white/5">
+                <div className="p-2 rounded-xl mac-pill-bg group-hover:bg-cyan/20 group-hover:text-cyan transition-colors border mac-border">
                   <Icon className="w-5 h-5" />
                 </div>
                 <div className="flex flex-col text-left">
-                  <span className="text-sm font-semibold tracking-tight text-white/80 group-hover:text-white">
+                  <span className="text-sm font-semibold tracking-tight mac-text-main group-hover:text-cyan">
                     {partner.name}
                   </span>
-                  <span className="text-[10px] font-mono text-white/40">{partner.category}</span>
+                  <span className="text-[10px] font-mono mac-text-muted">{partner.category}</span>
                 </div>
               </div>
             );

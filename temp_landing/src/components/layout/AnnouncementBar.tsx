@@ -6,7 +6,7 @@ import { IconSparkle, IconArrowRight, IconZapFlash } from '@/components/ui/Custo
 
 export function AnnouncementBar() {
   return (
-    <div className="w-full bg-zinc-950/95 border-b border-white/10 py-2.5 px-4 text-xs font-mono text-zinc-300 overflow-hidden relative z-50 select-none backdrop-blur-md">
+    <div className="w-full mac-nav-bg border-b mac-border py-2.5 px-4 text-xs font-mono mac-text-muted overflow-hidden relative z-50 select-none backdrop-blur-md transition-colors duration-300">
       <div className="max-w-7xl mx-auto flex items-center justify-center gap-3">
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
@@ -17,14 +17,14 @@ export function AnnouncementBar() {
             <IconZapFlash size={12} className="text-cyan fill-cyan" />
             <span>NEW RELEASE v2.4</span>
           </span>
-          <span className="hidden sm:inline text-zinc-300 font-sans">
+          <span className="hidden sm:inline mac-text-muted font-sans">
             now powering{' '}
             <span className="font-serif italic text-cyan text-sm font-normal">
               next-generation hackathons
             </span>{' '}
             worldwide.
           </span>
-          <span className="sm:hidden text-zinc-300 font-sans">
+          <span className="sm:hidden mac-text-muted font-sans">
             powering next-gen hackathons.
           </span>
         </motion.div>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import { ThemeProvider } from '@/context/ThemeContext';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -43,9 +44,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} dark scroll-smooth`}>
-      <body className="bg-background text-white antialiased selection:bg-accent/30 selection:text-white">
-        {children}
+      <body className="bg-background text-foreground antialiased selection:bg-cyan/30 selection:text-white transition-colors duration-300">
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
 }
+

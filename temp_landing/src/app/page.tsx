@@ -46,62 +46,38 @@ export default function Home() {
         onOpenCommandMenu={() => setIsCommandMenuOpen(true)}
       />
 
-      <div className="tech-glow-line" />
-
       {/* 2. Partner Logo Marquee */}
       <TrustedByMarquee />
 
-      <div className="tech-glow-line" />
-
-      {/* 3. The Dream Manifesto in macOS Notes App */}
+      {/* 3. The Dream Manifesto */}
       <NotesManifestoSection />
-
-      <div className="tech-glow-line" />
 
       {/* 4. Interactive Role-Based Dashboard Switcher */}
       <InteractiveRoleDashboard />
 
-      <div className="tech-glow-line" />
-
       {/* 5. Deep Feature Showcase */}
       <FeatureShowcase />
-
-      <div className="tech-glow-line" />
 
       {/* 6. AI Engine Autopilot Core */}
       <AIEngineSection />
 
-      <div className="tech-glow-line" />
-
       {/* 7. Event Lifecycle Timeline */}
       <TimelineSection />
-
-      <div className="tech-glow-line" />
 
       {/* 8. Cryptographic Certificate Generator */}
       <CertificateGeneratorPreview />
 
-      <div className="tech-glow-line" />
-
       {/* 9. Judge Rubric Simulator */}
       <JudgeScoringSimulator />
 
-      <div className="tech-glow-line" />
-
-      {/* 10. Social Proof & Tweet Wall */}
+      {/* 10. Social Proof Wall */}
       <MacSocialProofWall />
 
-      <div className="tech-glow-line" />
-
-      {/* 11. macOS Pricing Windows */}
+      {/* 11. Pricing */}
       <MacPricingSection onOpenDemoModal={() => setIsDemoModalOpen(true)} />
 
-      <div className="tech-glow-line" />
-
-      {/* 12. macOS Accordion FAQ */}
+      {/* 12. FAQ */}
       <MacFaqSection />
-
-      <div className="tech-glow-line" />
 
       {/* 13. Final Conversion Callout */}
       <FinalCTA onOpenDemoModal={() => setIsDemoModalOpen(true)} />

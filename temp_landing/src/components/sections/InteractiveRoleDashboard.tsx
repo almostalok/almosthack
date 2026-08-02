@@ -25,30 +25,27 @@ export function InteractiveRoleDashboard() {
   ];
 
   return (
-    <section id="interactive-demo" className="py-24 relative overflow-hidden bg-black text-white bg-noise-fine select-none">
+    <section id="interactive-demo" className="py-28 relative overflow-hidden bg-[#051C14] text-white select-none transition-colors duration-300">
       
-      {/* Background Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[500px] bg-cyan-glow opacity-25 blur-3xl pointer-events-none" />
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* Section Title with Instrument Serif Accent */}
+        {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
-          <span className="inline-block px-3.5 py-1 rounded-full bg-zinc-900 border border-white/15 text-xs font-mono text-cyan uppercase tracking-wider">
-            role-based os system
+          <span className="optimizely-pill-pink shadow-md">
+            [ ROLE ARCHITECTURE ]
           </span>
-          <h2 className="text-4xl sm:text-5xl font-black text-white tracking-tight font-display">
-            tailored experiences for{' '}
-            <span className="font-serif italic text-cyan text-4xl sm:text-5xl font-normal">
-              every role
+          <h2 className="text-4xl sm:text-6xl font-black text-white tracking-tight font-display">
+            Tailored Experiences for{' '}
+            <span className="serif-accent text-[#ABFF44] font-normal">
+              Every Stakeholder
             </span>
           </h2>
-          <p className="text-zinc-400 text-base sm:text-lg font-sans">
-            switch views below to test how AlmostHack adapts its macOS interface for organizers, judges, participants, sponsors, and system admins.
+          <p className="text-slate-300 text-base sm:text-lg font-sans leading-relaxed">
+            Switch roles below to test how AlmostHack adapts its macOS interface for organizers, judges, participants, sponsors, and system admins.
           </p>
         </div>
 
-        {/* Role Switcher Tabs */}
+        {/* Role Switcher Tabs (Optimizely Tactile Buttons) */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-10 font-mono">
           {roles.map((r) => {
             const isSelected = activeRole === r.id;
@@ -56,43 +53,43 @@ export function InteractiveRoleDashboard() {
               <button
                 key={r.id}
                 onClick={() => setActiveRole(r.id as any)}
-                className={`px-5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                className={`px-5 py-3 text-xs font-bold cursor-pointer flex items-center gap-2 transition-all ${
                   isSelected
-                    ? 'mac-btn-gloss text-white shadow-xl border-cyan/50 text-cyan'
-                    : 'bg-zinc-900/90 text-zinc-400 hover:text-white border border-white/10 hover:border-white/25'
+                    ? 'optimizely-btn-lime shadow-md'
+                    : 'optimizely-btn-dark opacity-85 hover:opacity-100'
                 }`}
               >
-                <IconZapFlash size={14} className={isSelected ? 'text-cyan fill-cyan' : 'text-zinc-500'} />
+                <IconZapFlash size={14} className={isSelected ? 'text-[#072419] fill-[#072419]' : 'text-[#ABFF44]'} />
                 <span>{r.label}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Full-Width Interactive Role Preview Shell (ReactBits Spotlight Card inside macOS Window) */}
+        {/* Role Preview macOS Window */}
         <SpotlightCard
-          spotlightColor="rgba(0, 240, 255, 0.15)"
-          className="mac-window border border-white/15 shadow-[0_30px_90px_rgba(0,0,0,0.9)] overflow-hidden"
+          spotlightColor="rgba(171, 255, 68, 0.15)"
+          className="mac-window border-2 border-[#0D3A29] overflow-hidden"
         >
           {/* macOS Top Window Header */}
-          <div className="mac-window-bar px-6 py-3">
+          <div className="mac-window-bar px-6 py-3.5">
             <div className="mac-dots">
               <span className="mac-dot mac-dot-close" />
               <span className="mac-dot mac-dot-min" />
               <span className="mac-dot mac-dot-zoom" />
             </div>
-            <div className="flex items-center gap-2 font-mono text-xs text-zinc-300">
-              <IconTerminalCode size={14} className="text-cyan" />
-              <span className="font-bold text-white">portal_{activeRole}.app</span>
+            <div className="flex items-center gap-2 font-mono text-xs text-white font-bold">
+              <IconTerminalCode size={14} className="text-[#ABFF44]" />
+              <span>almosthack_{activeRole}_workspace.app</span>
             </div>
-            <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Live &amp; Active</span>
+            <div className="flex items-center gap-2 text-xs font-mono text-[#072419] bg-[#ABFF44] px-3 py-1 rounded-full font-bold">
+              <span className="w-2 h-2 rounded-full bg-[#072419] animate-pulse" />
+              <span>Live System</span>
             </div>
           </div>
 
           {/* Dynamic Content Body */}
-          <div className="p-8 bg-zinc-950/95 min-h-[380px] font-sans">
+          <div className="p-8 bg-[#051C14] min-h-[380px] font-sans">
             <AnimatePresence mode="wait">
               {activeRole === 'organizer' && (
                 <motion.div
@@ -103,38 +100,38 @@ export function InteractiveRoleDashboard() {
                   className="space-y-6"
                 >
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono">
-                    <div className="p-5 rounded-xl bg-zinc-900/80 border border-white/10 space-y-2">
-                      <div className="text-zinc-500 text-xs uppercase tracking-wider">LIVE REGISTRATION RATE</div>
+                    <div className="p-5 rounded-2xl bg-[#0D3A29]/70 border-2 border-[#0D3A29] space-y-2">
+                      <div className="text-[#789887] text-xs uppercase tracking-wider font-bold">LIVE REGISTRATION RATE</div>
                       <div className="text-3xl font-extrabold text-white">1,420 / 1,500</div>
-                      <div className="text-emerald-400 text-xs flex items-center gap-1 font-bold">
+                      <div className="text-[#ABFF44] text-xs flex items-center gap-1 font-bold">
                         <IconCheckCircle size={14} /> 94.6% Checked In
                       </div>
                     </div>
 
-                    <div className="p-5 rounded-xl bg-zinc-900/80 border border-white/10 space-y-2">
-                      <div className="text-zinc-500 text-xs uppercase tracking-wider">AI EVALUATION STATUS</div>
-                      <div className="text-3xl font-extrabold text-cyan">128 Projects</div>
-                      <div className="text-cyan text-xs flex items-center gap-1 font-bold">
-                        <IconCpuChip size={14} /> Auto-Scoring Repos
+                    <div className="p-5 rounded-2xl bg-[#0D3A29]/70 border-2 border-[#0D3A29] space-y-2">
+                      <div className="text-[#789887] text-xs uppercase tracking-wider font-bold">AI EVALUATION ENGINE</div>
+                      <div className="text-3xl font-extrabold text-[#ABFF44]">128 Submissions</div>
+                      <div className="text-[#ABFF44] text-xs flex items-center gap-1 font-bold">
+                        <IconCpuChip size={14} /> Auto-Scoring Active
                       </div>
                     </div>
 
-                    <div className="p-5 rounded-xl bg-zinc-900/80 border border-white/10 space-y-2">
-                      <div className="text-zinc-500 text-xs uppercase tracking-wider">PRIZE POOL DISBURSED</div>
-                      <div className="text-3xl font-extrabold text-emerald-400">$50,000</div>
-                      <div className="text-zinc-400 text-xs flex items-center gap-1">
-                        <IconShieldCert size={14} className="text-purple-400" /> Smart Contract Ready
+                    <div className="p-5 rounded-2xl bg-[#0D3A29]/70 border-2 border-[#0D3A29] space-y-2">
+                      <div className="text-[#789887] text-xs uppercase tracking-wider font-bold">PRIZE DISBURSEMENT</div>
+                      <div className="text-3xl font-extrabold text-emerald-400">$50,000 Pool</div>
+                      <div className="text-[#789887] text-xs flex items-center gap-1">
+                        <IconShieldCert size={14} className="text-purple-400" /> Smart Contracts Ready
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-6 rounded-xl bg-zinc-900/60 border border-white/10 space-y-3">
+                  <div className="p-6 rounded-2xl bg-[#0D3A29] border-2 border-[#ABFF44]/30 space-y-3">
                     <h4 className="font-display font-bold text-white text-lg flex items-center gap-2">
-                      <IconSparkle size={18} className="text-cyan" />
-                      Organizer Command Control Bar
+                      <IconSparkle size={18} className="text-[#ABFF44]" />
+                      Organizer Broadcast &amp; Autopilot Controls
                     </h4>
-                    <p className="text-sm text-zinc-300">
-                      Send urgent push announcements, automatically verify team GitHub repos, and resolve judging disputes with one-click AI evaluation summaries.
+                    <p className="text-sm text-slate-200 leading-relaxed font-sans">
+                      Broadcast announcements across Discord, WhatsApp, and email with 1 click. Let AI monitor submission deadlines, automatically check repo histories, and assign judge workloads.
                     </p>
                   </div>
                 </motion.div>
@@ -149,16 +146,16 @@ export function InteractiveRoleDashboard() {
                   className="space-y-6"
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono">
-                    <div className="p-5 rounded-xl bg-zinc-900/80 border border-white/10 space-y-2">
-                      <div className="text-zinc-500 text-xs">ASSIGNED RUBRIC SCORECARD</div>
+                    <div className="p-5 rounded-2xl bg-[#0D3A29]/70 border-2 border-[#0D3A29] space-y-2">
+                      <div className="text-[#789887] text-xs font-bold">ASSIGNED RUBRIC SCORECARD</div>
                       <div className="text-2xl font-bold text-white">Technical Execution (40%)</div>
-                      <p className="text-xs text-zinc-400">AI pre-scored architecture cleanlines: 9.5/10</p>
+                      <p className="text-xs text-[#789887]">AI pre-scored architecture cleanliness: 9.5/10</p>
                     </div>
 
-                    <div className="p-5 rounded-xl bg-zinc-900/80 border border-white/10 space-y-2">
-                      <div className="text-zinc-500 text-xs">AI PLAGIARISM CHECK</div>
-                      <div className="text-2xl font-bold text-emerald-400">100% Original Code</div>
-                      <p className="text-xs text-zinc-400">Checked against 10M+ GitHub repos</p>
+                    <div className="p-5 rounded-2xl bg-[#0D3A29]/70 border-2 border-[#0D3A29] space-y-2">
+                      <div className="text-[#789887] text-xs font-bold">AI PLAGIARISM CHECK</div>
+                      <div className="text-2xl font-bold text-[#ABFF44]">100% Original Code</div>
+                      <p className="text-xs text-[#789887]">Verified against 10M+ GitHub repos</p>
                     </div>
                   </div>
                 </motion.div>
@@ -172,13 +169,13 @@ export function InteractiveRoleDashboard() {
                   exit={{ opacity: 0, y: -15 }}
                   className="space-y-6 font-mono"
                 >
-                  <div className="p-6 rounded-xl bg-zinc-900/80 border border-white/10 space-y-3">
+                  <div className="p-6 rounded-2xl bg-[#0D3A29]/70 border-2 border-[#0D3A29] space-y-3">
                     <h4 className="font-display font-bold text-white text-lg flex items-center gap-2">
-                      <IconTrophy size={18} className="text-amber-400" />
-                      Team CyberPunk Project Hub
+                      <IconTrophy size={18} className="text-[#ABFF44]" />
+                      Hacker Project Portal &amp; Team Matcher
                     </h4>
-                    <p className="text-sm text-zinc-300 font-sans">
-                      Connect your GitHub repo, submit your pitch deck, and track live scoring in real time.
+                    <p className="text-sm text-slate-200 font-sans leading-relaxed">
+                      Connect your GitHub repository, submit pitch decks, find teammates based on skill gaps, and receive instant cryptographic completion certificates.
                     </p>
                   </div>
                 </motion.div>
@@ -192,13 +189,13 @@ export function InteractiveRoleDashboard() {
                   exit={{ opacity: 0, y: -15 }}
                   className="space-y-6 font-mono"
                 >
-                  <div className="p-6 rounded-xl bg-zinc-900/80 border border-white/10 space-y-3">
+                  <div className="p-6 rounded-2xl bg-[#0D3A29]/70 border-2 border-[#0D3A29] space-y-3">
                     <h4 className="font-display font-bold text-white text-lg flex items-center gap-2">
                       <IconShieldCert size={18} className="text-purple-400" />
-                      Custom Sponsor Bounty Track
+                      Sponsor Bounty Track &amp; Talent Scouting
                     </h4>
-                    <p className="text-sm text-zinc-300 font-sans">
-                      Set custom API bounties, evaluate teams using your tech stack, and award verified prizes.
+                    <p className="text-sm text-slate-200 font-sans leading-relaxed">
+                      Define custom API track bounties, evaluate teams using your tech stack, scout top developer talent, and award prizes effortlessly.
                     </p>
                   </div>
                 </motion.div>
@@ -212,13 +209,13 @@ export function InteractiveRoleDashboard() {
                   exit={{ opacity: 0, y: -15 }}
                   className="space-y-6 font-mono"
                 >
-                  <div className="p-6 rounded-xl bg-zinc-900/80 border border-white/10 space-y-3">
+                  <div className="p-6 rounded-2xl bg-[#0D3A29]/70 border-2 border-[#0D3A29] space-y-3">
                     <h4 className="font-display font-bold text-white text-lg flex items-center gap-2">
-                      <IconCpuChip size={18} className="text-cyan" />
-                      White-Label &amp; Domain Admin
+                      <IconCpuChip size={18} className="text-[#ABFF44]" />
+                      White-Label Domain &amp; Custom Branding Engine
                     </h4>
-                    <p className="text-sm text-zinc-300 font-sans">
-                      Configure custom SSL domains, white-label CSS themes, and webhook integrations.
+                    <p className="text-sm text-slate-200 font-sans leading-relaxed">
+                      Host hackathons on your own custom domain (`hack.yourcompany.com`), customize CSS tokens, and connect custom webhooks for automated workflows.
                     </p>
                   </div>
                 </motion.div>

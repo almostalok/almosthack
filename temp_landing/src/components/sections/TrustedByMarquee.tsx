@@ -17,54 +17,60 @@ export function TrustedByMarquee() {
   ];
 
   return (
-    <section className="py-12 border-y mac-border mac-nav-bg overflow-hidden relative transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 mb-6 text-center">
-        <p className="text-xs font-mono tracking-widest uppercase mac-text-muted">
-          Trusted by leading universities, communities, companies &amp; government programs worldwide
+    <section className="py-12 border-y-2 border-[#0D3A29] bg-[#F5F8F0] text-[#072419] relative overflow-hidden select-none transition-colors duration-300">
+      
+      <div className="max-w-7xl mx-auto px-4 mb-8 text-center">
+        <p className="text-xs font-mono font-bold tracking-widest uppercase text-[#557365]">
+          TRUSTED BY 10,000+ BRANDS, UNIVERSITIES &amp; ENTERPRISE ORGANIZERS
         </p>
       </div>
 
-      {/* Infinite Ticker Container */}
-      <div className="flex overflow-hidden select-none mask-fade">
+      {/* Ticker Container */}
+      <div className="relative flex overflow-hidden">
+        
+        {/* Left / Right Fade Gradients */}
+        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#F5F8F0] to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#F5F8F0] to-transparent z-10 pointer-events-none" />
+
         <div className="flex min-w-full shrink-0 items-center justify-around gap-12 animate-marquee">
           {partners.map((partner, index) => {
             const Icon = partner.icon;
             return (
               <div
                 key={`${partner.name}-${index}`}
-                className="flex items-center gap-3 mac-text-muted hover:mac-text-main transition-colors cursor-pointer group"
+                className="flex items-center gap-3 text-[#072419] hover:text-[#0D3A29] transition-colors cursor-pointer group"
               >
-                <div className="p-2 rounded-xl mac-pill-bg group-hover:bg-cyan/20 group-hover:text-cyan transition-colors border mac-border">
-                  <Icon className="w-5 h-5" />
+                <div className="p-2.5 rounded-xl bg-white border-2 border-[#0D3A29] group-hover:bg-[#ABFF44] transition-all shadow-[ -2px_2px_0_0_#0D3A29]">
+                  <Icon className="w-4 h-4 text-[#072419]" />
                 </div>
                 <div className="flex flex-col text-left">
-                  <span className="text-sm font-semibold tracking-tight mac-text-main group-hover:text-cyan">
+                  <span className="text-xs font-bold tracking-tight text-[#072419] font-display">
                     {partner.name}
                   </span>
-                  <span className="text-[10px] font-mono mac-text-muted">{partner.category}</span>
+                  <span className="text-[9px] font-mono text-[#557365] font-semibold">{partner.category}</span>
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Duplicate Ticker for Seamless Loop */}
+        {/* Loop Duplicate */}
         <div className="flex min-w-full shrink-0 items-center justify-around gap-12 animate-marquee" aria-hidden="true">
           {partners.map((partner, index) => {
             const Icon = partner.icon;
             return (
               <div
                 key={`dup-${partner.name}-${index}`}
-                className="flex items-center gap-3 mac-text-muted hover:mac-text-main transition-colors cursor-pointer group"
+                className="flex items-center gap-3 text-[#072419] hover:text-[#0D3A29] transition-colors cursor-pointer group"
               >
-                <div className="p-2 rounded-xl mac-pill-bg group-hover:bg-cyan/20 group-hover:text-cyan transition-colors border mac-border">
-                  <Icon className="w-5 h-5" />
+                <div className="p-2.5 rounded-xl bg-white border-2 border-[#0D3A29] group-hover:bg-[#ABFF44] transition-all shadow-[ -2px_2px_0_0_#0D3A29]">
+                  <Icon className="w-4 h-4 text-[#072419]" />
                 </div>
                 <div className="flex flex-col text-left">
-                  <span className="text-sm font-semibold tracking-tight mac-text-main group-hover:text-cyan">
+                  <span className="text-xs font-bold tracking-tight text-[#072419] font-display">
                     {partner.name}
                   </span>
-                  <span className="text-[10px] font-mono mac-text-muted">{partner.category}</span>
+                  <span className="text-[9px] font-mono text-[#557365] font-semibold">{partner.category}</span>
                 </div>
               </div>
             );

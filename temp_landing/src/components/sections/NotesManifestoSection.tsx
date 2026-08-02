@@ -2,99 +2,77 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FileText } from 'lucide-react';
+import { FileText, Sparkles } from 'lucide-react';
 
 export function NotesManifestoSection() {
   return (
-    <section id="manifesto" className="py-24 bg-modern-dark mac-text-main relative overflow-hidden select-none transition-colors duration-300">
+    <section id="manifesto" className="py-28 bg-[#051C14] text-white relative overflow-hidden select-none transition-colors duration-300">
       
-      {/* Background Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-purple-900/10 blur-3xl pointer-events-none" />
-
-      <div className="max-w-4xl mx-auto px-4 relative z-10">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10">
         
-        {/* Section Pill Label */}
-        <div className="text-center mb-6">
-          <span className="inline-block px-4 py-1 rounded-full mac-pill-bg border mac-border text-xs font-mono text-cyan uppercase tracking-wider">
-            the dream
+        {/* Section Header */}
+        <div className="text-center mb-10">
+          <span className="optimizely-pill-lime mb-3 shadow-md">
+            [ MANIFESTO ]
           </span>
+          <h2 className="font-display font-black text-3xl sm:text-5xl text-white tracking-tight">
+            Why We Built <span className="serif-accent text-[#ABFF44]">AlmostHack</span>
+          </h2>
         </div>
 
-        {/* macOS Notes Window */}
+        {/* Optimizely Cream Tactile Card */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="notes-doc max-w-2xl mx-auto"
+          className="optimizely-card rounded-3xl max-w-2xl mx-auto p-8 sm:p-12 space-y-6 relative overflow-hidden"
         >
-          {/* macOS Title Bar */}
-          <div className="mac-window-bar px-4 py-2.5">
-            <div className="mac-dots">
-              <span className="mac-dot mac-dot-close" />
-              <span className="mac-dot mac-dot-min" />
-              <span className="mac-dot mac-dot-zoom" />
+          {/* Header Tag */}
+          <div className="flex items-center justify-between border-b-2 border-[#0D3A29] pb-4">
+            <div className="flex items-center gap-2 font-mono text-xs text-[#072419] font-extrabold tracking-wider uppercase">
+              <FileText className="w-4 h-4 text-[#0D3A29]" />
+              <span>THE DREAM &amp; MANIFESTO</span>
             </div>
-            <div className="flex items-center gap-2 font-mono text-xs mac-text-muted">
-              <FileText className="w-3.5 h-3.5 text-amber-500" />
-              <span>manifesto.notes</span>
-            </div>
-            <div className="w-12" />
+            <span className="optimizely-pill-pink">
+              Updated 2026
+            </span>
           </div>
 
-          {/* Notes Document Content */}
-          <div className="p-8 sm:p-10 notes-paper font-sans text-base leading-relaxed mac-text-muted space-y-6">
-            <p className="mac-text-main font-medium text-lg sm:text-xl">
-              we all host hackathons, but managing 100+ team submissions, manually grading code, and chasing down judges is exhausting!
-            </p>
+          {/* Statement Paragraphs */}
+          <p className="text-[#072419] font-extrabold text-lg sm:text-xl leading-relaxed font-display">
+            We all love hosting hackathons, but managing hundreds of team submissions, manually grading code, and chasing down judges is exhausting chaos.
+          </p>
 
-            <p className="mac-text-muted">
-              we just believe it&apos;s an interface and automation problem.
-            </p>
+          <p className="text-[#557365] leading-relaxed font-sans text-sm sm:text-base font-medium">
+            We believe it&apos;s fundamentally an interface and automation problem. With modern frontier AI models, event organizers can finally break out of chaotic spreadsheets, uninspired chat groups, and slow manual rubric scoring.
+          </p>
 
-            <p className="mac-text-muted">
-              we wanna take frontier AI models and make it so event organizers can{' '}
-              <span className="font-serif italic text-cyan text-xl sm:text-2xl font-normal border-b border-cyan/40 pb-0.5">
-                break out of chaotic spreadsheets, uninspired chat groups, and slow manual scoring.
-              </span>
-            </p>
+          <p className="text-[#557365] leading-relaxed font-sans text-sm sm:text-base font-medium">
+            We&apos;re building the AI co-host and evaluation engine that the next generation of hackathon organizers &amp; builders will rely on for seamless, verifiable events.
+          </p>
 
-            <p className="mac-text-muted">
-              we&apos;re building the AI co-host and evaluation engine the next million hackathon organizers &amp; builders will use.
-            </p>
-
-            <p className="mac-text-muted font-mono text-sm">
-              it&apos;s early! try out what we have today and lmk what you think.
-              <span className="text-cyan font-bold animate-blink ml-1">|</span>
-            </p>
-
-            {/* Founder Sign-off Box */}
-            <div className="pt-6 border-t mac-border flex items-center justify-between">
-              <a
-                href="https://x.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 group"
-              >
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan to-blue-600 p-0.5 shadow-lg group-hover:scale-105 transition-transform">
-                  <div className="w-full h-full rounded-full mac-card-bg flex items-center justify-center font-bold text-cyan text-xs font-mono">
-                    AH
-                  </div>
-                </div>
-                <div className="flex flex-col font-mono text-xs">
-                  <span className="mac-text-main font-bold group-hover:text-cyan transition-colors">alok &amp; team,</span>
-                  <span className="mac-text-muted">founders @ almosthack</span>
-                </div>
-              </a>
-
-              <div className="flex items-center gap-2 mac-pill-bg border mac-border px-3 py-1.5 rounded-lg text-xs font-mono mac-text-muted">
-                <svg className="w-3.5 h-3.5 text-cyan fill-cyan" viewBox="0 0 24 24">
-                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                </svg>
-                <span>almosthack v2.4</span>
+          {/* Sign-off Footer */}
+          <div className="pt-6 border-t-2 border-[#0D3A29] flex items-center justify-between">
+            <a
+              href="https://x.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 group"
+            >
+              <div className="w-10 h-10 rounded-full bg-[#ABFF44] border-2 border-[#0D3A29] flex items-center justify-center font-bold text-[#072419] text-xs font-mono shadow-sm group-hover:scale-105 transition-transform">
+                AH
               </div>
-            </div>
+              <div className="flex flex-col font-mono text-xs">
+                <span className="text-[#072419] font-bold group-hover:text-[#0D3A29] transition-colors">alok &amp; team</span>
+                <span className="text-[#557365]">founders @ almosthack</span>
+              </div>
+            </a>
 
+            <div className="optimizely-pill-lime">
+              <Sparkles className="w-3.5 h-3.5 text-[#072419]" />
+              <span>Hackathon OS v2.4</span>
+            </div>
           </div>
         </motion.div>
 

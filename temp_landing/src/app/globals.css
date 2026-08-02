@@ -7,21 +7,21 @@
 
 @layer base {
   :root {
-    --background: #040406;
-    --foreground: #ffffff;
-    --card-bg: rgba(10, 10, 15, 0.92);
-    --border-color: rgba(255, 255, 255, 0.14);
-    --text-muted: #a1a1aa;
-    --nav-bg: rgba(9, 9, 11, 0.9);
+    --background: #051C14;
+    --foreground: #F5F8F0;
+    --card-bg: #0D3A29;
+    --border-color: #0D3A29;
+    --text-muted: #789887;
+    --nav-bg: rgba(5, 28, 20, 0.95);
   }
 
   html.light {
-    --background: #f8fafc;
-    --foreground: #09090b;
-    --card-bg: rgba(255, 255, 255, 0.92);
-    --border-color: rgba(0, 0, 0, 0.12);
-    --text-muted: #64748b;
-    --nav-bg: rgba(248, 250, 252, 0.9);
+    --background: #F5F8F0;
+    --foreground: #072419;
+    --card-bg: #FFFFFF;
+    --border-color: #0D3A29;
+    --text-muted: #557365;
+    --nav-bg: rgba(245, 248, 240, 0.95);
   }
   
   html {
@@ -43,25 +43,26 @@
   }
 
   ::selection {
-    background-color: rgba(0, 240, 255, 0.3);
-    color: var(--foreground);
+    background-color: #ABFF44;
+    color: #072419;
   }
 }
 
-/* Custom Scrollbar */
+/* Custom Optimizely Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 9px;
 }
 ::-webkit-scrollbar-track {
   background: var(--background);
 }
 ::-webkit-scrollbar-thumb {
-  background: #333333;
+  background: #0D3A29;
   border-radius: 4px;
 }
 html.light ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #ABFF44;
+  border: 1px solid #0D3A29;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #555555;
+  background: #ABFF44;
 }

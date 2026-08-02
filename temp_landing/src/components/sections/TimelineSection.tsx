@@ -29,28 +29,32 @@ export function TimelineSection() {
   ];
 
   return (
-    <section className="py-24 relative overflow-hidden bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-28 relative overflow-hidden bg-[#051C14] text-white select-none transition-colors duration-300">
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-20">
-          <span className="text-xs font-mono text-accent tracking-widest uppercase px-3 py-1 rounded-full bg-accent/10 border border-accent/20">
-            EVENT LIFECYCLE PIPELINE
+          <span className="optimizely-pill-pink shadow-md">
+            [ LIFECYCLE PIPELINE ]
           </span>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
-            From zero to grand finale. <br />
-            <span className="text-gradient-accent">In total sync.</span>
+          <h2 className="text-3xl sm:text-6xl font-black text-white tracking-tight font-display">
+            From Zero to Grand Finale.{' '}
+            <span className="serif-accent text-[#ABFF44] font-normal">
+              In Total Sync.
+            </span>
           </h2>
-          <p className="text-muted text-base sm:text-lg">
+          <p className="text-slate-300 text-base sm:text-lg font-sans leading-relaxed">
             Follow the 9 automated stages of a modern hackathon powered by AlmostHack.
           </p>
         </div>
 
         {/* Timeline Container */}
         <div className="relative max-w-4xl mx-auto">
-          {/* Vertical Connecting Glow Line */}
-          <div className="absolute left-1/2 -translate-x-1/2 top-4 bottom-4 w-0.5 bg-gradient-to-b from-accent via-blue-500 to-emerald-500 hidden md:block opacity-40" />
+          {/* Vertical Connecting Line */}
+          <div className="absolute left-1/2 -translate-x-1/2 top-4 bottom-4 w-1 bg-[#0D3A29] hidden md:block" />
 
-          <div className="space-y-12">
+          <div className="space-y-10">
             {steps.map((item, idx) => {
               const Icon = item.icon;
               const isEven = idx % 2 === 0;
@@ -60,37 +64,38 @@ export function TimelineSection() {
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: idx * 0.05 }}
+                  transition={{ duration: 0.5, delay: idx * 0.04 }}
                   className={`flex flex-col md:flex-row items-center gap-8 ${
                     isEven ? 'md:flex-row-reverse' : ''
                   }`}
                 >
-                  {/* Text Card */}
+                  {/* Card Container */}
                   <div className="w-full md:w-1/2">
-                    <div className="p-6 rounded-2xl bg-surface border border-white/10 glass-card-hover glass-card space-y-3">
+                    <div className="optimizely-card rounded-3xl p-6 border-2 border-[#0D3A29] space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-mono font-bold text-accent px-2.5 py-0.5 rounded bg-accent/10 border border-accent/20">
+                        <span className="optimizely-pill-pink text-[10px]">
                           STAGE {item.step}
                         </span>
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        <CheckCircle2 className="w-4 h-4 text-[#0D3A29]" />
                       </div>
-                      <h3 className="text-lg font-bold text-white tracking-tight">{item.title}</h3>
-                      <p className="text-xs text-muted leading-relaxed font-sans">{item.desc}</p>
+                      <h3 className="text-lg font-bold text-[#072419] tracking-tight font-display">{item.title}</h3>
+                      <p className="text-xs text-[#557365] leading-relaxed font-sans font-medium">{item.desc}</p>
                     </div>
                   </div>
 
-                  {/* Center Node Badge */}
-                  <div className="w-12 h-12 rounded-2xl bg-accent border-2 border-white/20 flex items-center justify-center text-white shadow-xl shadow-accent/30 z-10 shrink-0">
-                    <Icon className="w-5 h-5" />
+                  {/* Center Node Icon */}
+                  <div className="w-12 h-12 rounded-2xl bg-[#ABFF44] border-2 border-[#0D3A29] flex items-center justify-center text-[#072419] shadow-[ -3px_3px_0_0_#0D3A29] z-10 shrink-0">
+                    <Icon className="w-5 h-5 text-[#072419]" />
                   </div>
 
-                  {/* Empty Spacer Column for Desktop Symmetry */}
+                  {/* Empty Spacer Column */}
                   <div className="hidden md:block w-1/2" />
                 </motion.div>
               );
             })}
           </div>
         </div>
+
       </div>
     </section>
   );

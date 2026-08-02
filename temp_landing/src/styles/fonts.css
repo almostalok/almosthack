@@ -1,9 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root {
+  --font-display: 'Plus Jakarta Sans', 'Outfit', sans-serif;
   --font-space-grotesk: 'Space Grotesk', sans-serif;
   --font-jetbrains-mono: 'JetBrains Mono', monospace;
-  --font-inter: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-inter: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
   --font-serif: 'Instrument Serif', Georgia, serif;
 }
 
@@ -11,4 +12,3 @@
   font-family: var(--font-serif);
   font-style: italic;
 }
-

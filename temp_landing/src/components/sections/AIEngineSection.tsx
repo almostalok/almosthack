@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { SpotlightCard } from '@/components/reactbits/SpotlightCard';
 import { AICoreCanvas } from '@/components/reactbits/AICoreCanvas';
 import {
@@ -55,37 +54,34 @@ export function AIEngineSection() {
   };
 
   return (
-    <section id="ai-engine" className="py-28 relative overflow-hidden bg-black text-white bg-noise-fine select-none">
-      {/* Background Radial Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] bg-cyan-glow opacity-25 blur-3xl pointer-events-none" />
-
+    <section id="ai-engine" className="py-28 relative overflow-hidden bg-[#051C14] text-white select-none transition-colors duration-300">
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* Section Header with Instrument Serif Accent */}
+        {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-zinc-900 border border-white/15 text-cyan font-mono font-bold text-xs">
-            <IconCpuChip size={14} className="text-cyan" />
-            <span>AI AUTOPILOT CORE</span>
-          </div>
+          <span className="optimizely-pill-pink shadow-md">
+            [ AI AUTOPILOT CORE ]
+          </span>
           <h2 className="font-display text-4xl sm:text-6xl font-black tracking-tight text-white">
-            powered by specialized{' '}
-            <span className="font-serif italic text-cyan text-4xl sm:text-6xl font-normal">
-              hackathon ai
+            Powered by Frontier{' '}
+            <span className="serif-accent text-[#ABFF44] font-normal">
+              Hackathon AI
             </span>
           </h2>
-          <p className="font-sans text-zinc-400 text-base sm:text-lg">
-            automate tedious manual work so organizers can focus on building an unforgettable developer experience.
+          <p className="font-sans text-slate-300 text-base sm:text-lg leading-relaxed">
+            Automate tedious manual work so organizers can focus on building an unforgettable developer experience.
           </p>
         </div>
 
-        {/* 3D Asset Banner & Feature Grid Layout */}
+        {/* 3D Asset Canvas & Feature Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mb-16">
           
-          {/* Left: 3D Holographic AI Core Asset in Spotlight Card */}
+          {/* Left: Holographic Canvas Spotlight Card */}
           <div className="lg:col-span-5">
             <SpotlightCard
-              spotlightColor="rgba(0, 240, 255, 0.2)"
-              className="mac-window p-6 border border-white/15 overflow-hidden group shadow-2xl"
+              spotlightColor="rgba(171, 255, 68, 0.2)"
+              className="mac-window p-6 border-2 border-[#0D3A29] overflow-hidden"
             >
               <div className="mac-window-bar mb-4 px-2 py-1 bg-transparent border-b-0">
                 <div className="mac-dots">
@@ -93,35 +89,35 @@ export function AIEngineSection() {
                   <span className="mac-dot mac-dot-min" />
                   <span className="mac-dot mac-dot-zoom" />
                 </div>
-                <span className="text-[10px] font-mono text-zinc-400">neural_core_v4.2.app</span>
+                <span className="text-[10px] font-mono text-[#789887]">neural_core_v4.2.app</span>
               </div>
 
               <AICoreCanvas />
 
               <div className="mt-4 font-mono text-left space-y-1">
-                <div className="text-xs text-cyan font-bold uppercase flex items-center gap-2">
-                  <IconCpuChip size={14} className="text-cyan" /> Neural Model v4.2 Active
+                <div className="text-xs text-[#ABFF44] font-bold uppercase flex items-center gap-2">
+                  <IconCpuChip size={14} className="text-[#ABFF44]" /> Neural Model v4.2 Active
                 </div>
-                <p className="text-[11px] text-zinc-400">
+                <p className="text-[11px] text-[#789887]">
                   Latency: 18ms • Ephemeral container runtime isolated
                 </p>
               </div>
             </SpotlightCard>
           </div>
 
-          {/* Right: AI Capability Modules Grid */}
+          {/* Right: AI Capabilities Grid */}
           <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
             {aiFeatures.map((feat, idx) => (
               <SpotlightCard
                 key={feat.title}
-                spotlightColor="rgba(0, 240, 255, 0.12)"
-                className="mac-window p-5 border border-white/10 bg-zinc-950/90 hover:border-cyan/40 transition-all"
+                spotlightColor="rgba(171, 255, 68, 0.12)"
+                className="optimizely-card-dark rounded-2xl p-5 border-2 border-[#0D3A29] hover:border-[#ABFF44] transition-all"
               >
-                <div className="flex items-center gap-2 mb-2 font-mono text-xs text-cyan font-bold">
-                  <IconSparkle size={14} className="text-cyan" />
+                <div className="flex items-center gap-2 mb-2 font-mono text-xs text-[#ABFF44] font-bold">
+                  <IconSparkle size={14} className="text-[#ABFF44]" />
                   <span>{feat.title}</span>
                 </div>
-                <p className="text-xs font-sans text-zinc-300 leading-relaxed">
+                <p className="text-xs font-sans text-slate-300 leading-relaxed font-medium">
                   {feat.desc}
                 </p>
               </SpotlightCard>
@@ -132,31 +128,31 @@ export function AIEngineSection() {
 
         {/* Interactive Prompt Sandbox Box */}
         <SpotlightCard
-          spotlightColor="rgba(0, 240, 255, 0.18)"
-          className="mac-window p-8 border border-white/15 bg-zinc-950/95 font-mono shadow-2xl"
+          spotlightColor="rgba(171, 255, 68, 0.18)"
+          className="mac-window p-8 border-2 border-[#0D3A29] bg-[#051C14] font-mono"
         >
-          <div className="mac-window-bar px-4 py-2 mb-6 border-b border-white/10">
+          <div className="mac-window-bar px-4 py-2 mb-6 border-b-2 border-[#0D3A29]">
             <div className="mac-dots">
               <span className="mac-dot mac-dot-close" />
               <span className="mac-dot mac-dot-min" />
               <span className="mac-dot mac-dot-zoom" />
             </div>
-            <div className="flex items-center gap-2 text-xs text-cyan font-bold">
+            <div className="flex items-center gap-2 text-xs text-[#ABFF44] font-bold">
               <IconTerminalCode size={14} />
               <span>ai_prompt_sandbox.terminal</span>
             </div>
             <div className="w-12" />
           </div>
 
-          <div className="flex flex-wrap gap-2 mb-6">
+          <div className="flex flex-wrap gap-3 mb-6">
             {promptDemos.map((demo, idx) => (
               <button
                 key={demo.label}
                 onClick={() => handleRunDemo(idx)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`px-4 py-2 text-xs font-bold cursor-pointer transition-all ${
                   selectedPrompt === idx
-                    ? 'mac-btn-gloss text-cyan border-cyan/50 shadow-lg'
-                    : 'bg-zinc-900 text-zinc-400 hover:text-white border border-white/10'
+                    ? 'optimizely-btn-lime shadow-md'
+                    : 'optimizely-btn-dark opacity-85 hover:opacity-100'
                 }`}
               >
                 {demo.label}
@@ -164,20 +160,20 @@ export function AIEngineSection() {
             ))}
           </div>
 
-          <div className="p-4 rounded-xl bg-black border border-white/10 text-xs space-y-3">
-            <div className="text-zinc-400 flex items-center gap-2">
-              <span className="text-cyan font-bold">&gt;</span> Prompt: &quot;{promptDemos[selectedPrompt].prompt}&quot;
+          <div className="p-5 rounded-2xl bg-[#0D3A29] border-2 border-[#0D3A29] text-xs space-y-3">
+            <div className="text-slate-200 flex items-center gap-2 font-medium">
+              <span className="text-[#ABFF44] font-bold">&gt;</span> Prompt: &quot;{promptDemos[selectedPrompt].prompt}&quot;
             </div>
 
-            <div className="pt-3 border-t border-white/10 text-emerald-400 font-mono leading-relaxed">
+            <div className="pt-3 border-t border-[#051C14] text-[#ABFF44] font-mono leading-relaxed font-semibold">
               {isProcessing ? (
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-cyan animate-ping" />
-                  <span>Processing prompt...</span>
+                  <span className="w-2 h-2 rounded-full bg-[#ABFF44] animate-ping" />
+                  <span>Evaluating with Autopilot Model...</span>
                 </div>
               ) : (
-                <div className="flex items-start gap-2">
-                  <IconVerifiedCheck size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2.5">
+                  <IconVerifiedCheck size={16} className="text-[#ABFF44] shrink-0 mt-0.5" />
                   <span>{promptDemos[selectedPrompt].result}</span>
                 </div>
               )}

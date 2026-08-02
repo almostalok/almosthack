@@ -15,8 +15,6 @@ export function MacSocialProofWall() {
       time: '5/30/26, 10:22 PM',
       reposts: '144',
       likes: '2.7k',
-      accent: 'from-emerald-500/20 to-teal-500/20',
-      borderAccent: 'border-emerald-500/30',
     },
     {
       name: 'Lenny Rachitsky',
@@ -26,8 +24,6 @@ export function MacSocialProofWall() {
       time: '4/27/26, 1:51 PM',
       reposts: '19',
       likes: '526',
-      accent: 'from-amber-500/20 to-orange-500/20',
-      borderAccent: 'border-amber-500/30',
     },
     {
       name: 'William Wang',
@@ -37,8 +33,6 @@ export function MacSocialProofWall() {
       time: '4/6/26, 6:12 PM',
       reposts: '8',
       likes: '151',
-      accent: 'from-blue-500/20 to-cyan-500/20',
-      borderAccent: 'border-cyan-500/30',
     },
     {
       name: 'Josh Pigford',
@@ -48,8 +42,6 @@ export function MacSocialProofWall() {
       time: '4/27/26, 3:21 AM',
       reposts: '4',
       likes: '154',
-      accent: 'from-cyan-500/20 to-blue-500/20',
-      borderAccent: 'border-cyan-500/30',
     },
     {
       name: 'Aaron Epstein',
@@ -59,8 +51,6 @@ export function MacSocialProofWall() {
       time: '6/16/26, 2:12 PM',
       reposts: '4',
       likes: '102',
-      accent: 'from-rose-500/20 to-pink-500/20',
-      borderAccent: 'border-pink-500/30',
     },
     {
       name: 'Sharif Shameem',
@@ -70,45 +60,43 @@ export function MacSocialProofWall() {
       time: '4/25/26, 11:39 PM',
       reposts: '12',
       likes: '310',
-      accent: 'from-purple-500/20 to-indigo-500/20',
-      borderAccent: 'border-purple-500/30',
     },
   ];
 
   return (
-    <section id="feedback" className="py-24 bg-modern-dark text-white relative overflow-hidden select-none">
+    <section id="feedback" className="py-28 bg-[#051C14] text-white relative overflow-hidden select-none transition-colors duration-300">
       
-      {/* Top Marquee Banner */}
-      <div className="w-full overflow-hidden py-4 bg-zinc-950/90 border-y border-white/10 mb-16">
-        <div className="animate-marquee flex gap-12 font-mono text-sm uppercase tracking-widest text-zinc-400">
+      {/* Top Ticker Marquee */}
+      <div className="w-full overflow-hidden py-4 bg-[#F5F8F0] text-[#072419] border-y-2 border-[#0D3A29] mb-16 font-mono text-xs uppercase tracking-widest font-extrabold">
+        <div className="animate-marquee flex gap-12">
           {Array(8).fill(0).map((_, i) => (
             <span key={i} className="flex items-center gap-4 whitespace-nowrap">
-              <span>organizers love it everyday</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan" />
+              <span>Organizers Love AlmostHack Every Day</span>
+              <span className="w-2 h-2 rounded-full bg-[#0D3A29]" />
             </span>
           ))}
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <span className="inline-block px-3.5 py-1 rounded-full bg-zinc-900 border border-white/15 text-xs font-mono text-cyan uppercase tracking-wider mb-4">
-            feedback
+          <span className="optimizely-pill-pink shadow-md mb-3">
+            [ SOCIAL PROOF ]
           </span>
-          <h2 className="font-display text-4xl sm:text-5xl font-extrabold tracking-tight text-white">
-            they use it{' '}
-            <span className="font-serif italic text-cyan text-4xl sm:text-5xl font-normal">
-              everyday
+          <h2 className="font-display text-4xl sm:text-6xl font-black tracking-tight text-white">
+            They Use It{' '}
+            <span className="serif-accent text-[#ABFF44] font-normal">
+              Every Single Event
             </span>
           </h2>
-          <p className="mt-3 text-zinc-400 font-sans text-base">
-            trusted by lead community builders, startup founders, and global dev hackathons.
+          <p className="mt-3 text-slate-300 font-sans text-base leading-relaxed">
+            Trusted by lead community builders, startup founders, and global developer hackathons.
           </p>
         </div>
 
-        {/* 3-Column ReactBits Spotlight Cards Wall */}
+        {/* 3-Column Wall */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {testimonials.map((t, idx) => (
             <motion.div
@@ -116,53 +104,42 @@ export function MacSocialProofWall() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: idx * 0.1 }}
+              transition={{ duration: 0.5, delay: idx * 0.08 }}
             >
               <SpotlightCard
-                spotlightColor="rgba(0, 240, 255, 0.15)"
-                className={`mac-window flex flex-col justify-between overflow-hidden border ${t.borderAccent}`}
+                spotlightColor="rgba(171, 255, 68, 0.15)"
+                className="optimizely-card rounded-3xl flex flex-col justify-between overflow-hidden p-6 hover:shadow-[-7px_7px_0_0_#0D3A29] transition-all"
               >
-                {/* Window Header Bar */}
-                <div className={`mac-window-bar bg-gradient-to-r ${t.accent} border-b border-white/10`}>
-                  <div className="mac-dots">
-                    <span className="mac-dot mac-dot-close" />
-                    <span className="mac-dot mac-dot-min" />
-                    <span className="mac-dot mac-dot-zoom" />
-                  </div>
-                  <span className="text-[10px] font-mono text-zinc-400">tweet.app</span>
-                </div>
-
-                {/* Card Body */}
-                <div className="p-5 bg-zinc-950/90 flex flex-col justify-between flex-1 gap-4 font-sans">
+                <div className="flex flex-col justify-between flex-1 gap-4 font-sans">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-zinc-800 border border-white/15 flex items-center justify-center font-bold text-white font-mono text-sm shadow-md">
+                        <div className="w-10 h-10 rounded-full bg-[#ABFF44] border-2 border-[#0D3A29] flex items-center justify-center font-bold text-[#072419] font-mono text-sm shadow-sm">
                           {t.avatar}
                         </div>
                         <div className="flex flex-col">
-                          <span className="font-display font-bold text-sm text-white flex items-center gap-1">
+                          <span className="font-display font-bold text-sm text-[#072419] flex items-center gap-1">
                             {t.name}
-                            <IconVerifiedCheck size={14} className="text-cyan fill-cyan" />
+                            <IconVerifiedCheck size={14} className="text-[#0D3A29] fill-[#0D3A29]" />
                           </span>
-                          <span className="font-mono text-xs text-zinc-500">{t.handle}</span>
+                          <span className="font-mono text-xs text-[#557365] font-semibold">{t.handle}</span>
                         </div>
                       </div>
-                      <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono text-zinc-400 hover:text-white cursor-pointer transition-colors">
+                      <span className="optimizely-pill-pink text-[9px] px-2 py-0.5">
                         Follow
                       </span>
                     </div>
 
-                    <p className="text-sm text-zinc-200 leading-normal font-normal">
+                    <p className="text-sm text-[#072419] leading-relaxed font-sans font-medium">
                       {t.text}
                     </p>
                   </div>
 
-                  <div className="pt-3 border-t border-white/10 flex items-center justify-between font-mono text-xs text-zinc-500">
+                  <div className="pt-3 border-t-2 border-[#0D3A29] flex items-center justify-between font-mono text-xs text-[#557365] font-bold">
                     <span>{t.time}</span>
                     <div className="flex items-center gap-3">
-                      <span className="hover:text-cyan transition-colors">🔁 {t.reposts}</span>
-                      <span className="hover:text-pink-400 transition-colors">❤️ {t.likes}</span>
+                      <span className="hover:text-[#072419] transition-colors">🔁 {t.reposts}</span>
+                      <span className="hover:text-pink-600 transition-colors">❤️ {t.likes}</span>
                     </div>
                   </div>
                 </div>
@@ -172,9 +149,9 @@ export function MacSocialProofWall() {
         </div>
 
         {/* Bottom Banner */}
-        <div className="mt-16 max-w-3xl mx-auto mac-window p-4 bg-zinc-900/90 border border-white/15 text-center font-mono text-sm text-zinc-300 flex items-center justify-center gap-3 shadow-xl">
-          <IconSparkle size={16} className="text-cyan" />
-          <span><strong className="text-white font-bold">25,000+</strong> happy hackers &amp; 400+ hackathons served.</span>
+        <div className="mt-16 max-w-3xl mx-auto optimizely-card p-5 bg-[#F5F8F0] border-2 border-[#0D3A29] text-center font-mono text-xs sm:text-sm text-[#072419] flex items-center justify-center gap-3 shadow-[-4px_4px_0_0_#0D3A29]">
+          <IconSparkle size={16} className="text-[#0D3A29]" />
+          <span><strong className="text-[#072419] font-black">50,000+</strong> hackers &amp; 400+ hackathons served worldwide.</span>
         </div>
 
       </div>

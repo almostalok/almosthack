@@ -55,3 +55,5 @@ almosthack/
 2. **Repository Intelligence & Commit Auditing (`apps/api/src/modules/repo-audit`):** Integrates GitHub OAuth tokens to pull live commit trees and verify SHA-256 signatures against submission timestamps.
 3. **Double-Blind Judge Calibration (`apps/api/src/modules/judging`):** Evaluates scores against normalized z-score models to eliminate judge bias before finalizing rankings.
 4. **Integrity Engine & AI Analyzer (`packages/utils` + BullMQ microservices):** Runs asynchronous background code similarity checks without blocking main API loops.
+
+BY ALMOSTALOK

@@ -8,14 +8,18 @@ AlmostHack is built as a single monorepo structured around a **Modular Monolith*
 almosthack/
 ├── apps/
 │   ├── api/       # NestJS Modular Monolith API Engine
-│   └── web/       # Next.js App Router Web Interface
+│   ├── web/       # Next.js App Router Web Interface
+│   └── worker/    # NestJS Async Background Worker
 └── packages/
+    ├── api-client/     # Framework-agnostic typed HTTP client & error normalization
     ├── config/         # Shared TypeScript and tooling configurations
     ├── design-system/  # Core design tokens, global styles, and Tailwind utilities
-    ├── ui/             # Cross-application reusable UI component library
+    ├── events/         # Standalone event contracts, envelopes, and versioning
+    ├── hooks/          # Shared custom React hooks
     ├── types/          # Shared TypeScript domain contracts and API types
+    ├── ui/             # Cross-application reusable UI component library
     ├── utils/          # Generic stateless utility functions
-    └── hooks/          # Shared custom React hooks
+    └── validation/     # Shared Zod validation schemas for shared query & boundary contracts
 ```
 
 ---
@@ -39,12 +43,15 @@ The backend is designed as a modular monolith using NestJS. Rather than microser
 - `audit/`: Immutable audit logging & verification streams
 
 ### 2. Monorepo Package Boundaries (`packages/`)
+- **`packages/api-client`**: Framework-agnostic HTTP communication layer (`@almosthack/api-client`) handling request ID propagation, response normalization, timeout handling, and typed HTTP methods.
 - **`packages/config`**: Base TypeScript configurations (`tsconfig.base.json`).
 - **`packages/design-system`**: Design tokens (`colors.ts`, `typography.ts`, `animations.ts`) and global CSS definitions.
-- **`packages/ui`**: Atomic and complex UI components (`Button`, `Card`, `CommandPalette`, `SidebarNav`, `TopHeader`).
-- **`packages/types`**: Cross-boundary interfaces (`user.ts`, `auth.ts`, `audit.ts`, `rbac.ts`).
-- **`packages/utils`**: Pure, stateless helper utilities (`cn`, `formatters`).
+- **`packages/events`**: Standalone event contract envelope (`@almosthack/events`) defining immutable event metadata (`id`, `type`, `version`, `occurredAt`, `correlationId`, `payload`).
 - **`packages/hooks`**: Custom client React hooks (`useTheme`, `useKeyboardShortcuts`, `useCommandPalette`).
+- **`packages/types`**: Cross-boundary interfaces (`user.ts`, `auth.ts`, `audit.ts`, `rbac.ts`, `api.ts`).
+- **`packages/ui`**: Atomic and complex UI components (`Button`, `Card`, `CommandPalette`, `SidebarNav`, `TopHeader`).
+- **`packages/utils`**: Pure, stateless helper utilities (`cn`, `formatters`).
+- **`packages/validation`**: Shared Zod schemas (`@almosthack/validation`) for cross-boundary contracts (pagination, identifiers, sort parameters).
 
 ### 3. Data Ownership & Storage
 - Single PostgreSQL database managed via Prisma ORM (`apps/api/prisma/schema.prisma`).

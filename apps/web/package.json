@@ -10,11 +10,14 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@almosthack/api-client": "workspace:*",
     "@almosthack/design-system": "workspace:*",
+    "@almosthack/events": "workspace:*",
     "@almosthack/hooks": "workspace:*",
     "@almosthack/types": "workspace:*",
     "@almosthack/ui": "workspace:*",
     "@almosthack/utils": "workspace:*",
+    "@almosthack/validation": "workspace:*",
     "@tanstack/react-query": "^5.101.4",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.395.0",

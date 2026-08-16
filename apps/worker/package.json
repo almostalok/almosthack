@@ -11,6 +11,7 @@
     "test": "jest --passWithNoTests"
   },
   "dependencies": {
+    "@almosthack/events": "workspace:*",
     "@almosthack/types": "workspace:*",
     "@almosthack/utils": "workspace:*",
     "@nestjs/common": "^10.4.22",

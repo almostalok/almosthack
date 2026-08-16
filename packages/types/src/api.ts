@@ -1,3 +1,6 @@
+/**
+ * Standard API Success Response Contract
+ */
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
@@ -5,6 +8,7 @@ export interface ApiResponse<T> {
   error?: {
     code: string;
     message: string;
+    requestId?: string;
     details?: unknown;
   };
   meta?: {
@@ -13,4 +17,22 @@ export interface ApiResponse<T> {
     totalCount?: number;
     totalPages?: number;
   };
+}
+
+/**
+ * Standard API Error Detail Structure
+ */
+export interface ApiErrorDetail {
+  code: string;
+  message: string;
+  requestId: string;
+  details?: unknown;
+}
+
+/**
+ * Standard API Error Response Envelope
+ */
+export interface ApiErrorEnvelope {
+  success: false;
+  error: ApiErrorDetail;
 }

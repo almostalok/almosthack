@@ -10,17 +10,18 @@
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
+    "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
     "clean": "turbo run clean && rimraf node_modules"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.3.0",
-    "@commitlint/config-conventional": "^19.2.2",
-    "husky": "^9.0.11",
-    "prettier": "^3.3.2",
-    "rimraf": "^5.0.7",
-    "turbo": "^2.0.4",
-    "typescript": "^5.4.5"
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "husky": "^9.1.7",
+    "prettier": "^3.9.6",
+    "rimraf": "^5.0.10",
+    "turbo": "^2.10.9",
+    "typescript": "^5.9.3"
   },
   "packageManager": "pnpm@9.4.0",
   "engines": {

@@ -10,7 +10,13 @@ export interface SafeUser {
   name: string;
   avatarUrl?: string | null;
   bio?: string | null;
+  college?: string | null;
+  branch?: string | null;
+  graduationYear?: number | null;
+  skills?: string[];
   githubUsername?: string | null;
+  linkedinUrl?: string | null;
+  portfolioUrl?: string | null;
   roles: string[];
 }
 

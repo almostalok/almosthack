@@ -66,6 +66,29 @@ curl -X POST http://localhost:4000/api/v1/infrastructure-test/enqueue \
 
 Check the worker terminal logs to see structured execution output including correlation ID propagation (`req_dev_test_123`), job attempt count, and processing duration.
 
+### 6. User Profile API Testing
+
+To inspect or update current user profile via curl:
+
+```bash
+# Get profile
+curl -X GET http://localhost:4000/api/v1/users/me \
+  -H "Cookie: almosthack_session=<session_token>"
+
+# Update profile
+curl -X PATCH http://localhost:4000/api/v1/users/me \
+  -H "Content-Type: application/json" \
+  -H "Cookie: almosthack_session=<session_token>" \
+  -d '{
+    "bio": "Full-stack engineer",
+    "college": "Stanford University",
+    "branch": "Computer Science",
+    "graduationYear": 2026,
+    "skills": ["React", "NestJS", "PostgreSQL"],
+    "githubUsername": "octocat"
+  }'
+```
+
 ---
 
 ## Command Reference
@@ -79,4 +102,5 @@ Check the worker terminal logs to see structured execution output including corr
 | `pnpm test` | Execute unit and integration tests across all workspaces |
 | `pnpm --filter @almosthack/api test:e2e` | Run API E2E tests |
 | `pnpm clean` | Clean build artifacts (`dist/`, `.next/`, `.turbo/`) |
+
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Command } from 'cmdk';
-import { Search, Trophy, GitBranch, ShieldCheck, Award, Settings, FileText } from 'lucide-react';
+import { Search, Trophy, GitBranch, ShieldCheck, Award, Settings, FileText, User } from 'lucide-react';
 import { cn } from '@almosthack/utils';
 
 export interface CommandPaletteProps {
@@ -42,6 +42,12 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                 className="flex items-center gap-2.5 px-3 py-2 text-zinc-300 hover:bg-zinc-800/80 hover:text-emerald-400 rounded cursor-pointer transition-colors"
               >
                 <Search className="w-3.5 h-3.5" /> Overview Dashboard
+              </Command.Item>
+              <Command.Item
+                onSelect={() => { onSelectAction('/profile'); onClose(); }}
+                className="flex items-center gap-2.5 px-3 py-2 text-zinc-300 hover:bg-zinc-800/80 hover:text-emerald-400 rounded cursor-pointer transition-colors"
+              >
+                <User className="w-3.5 h-3.5" /> User Profile & Identity
               </Command.Item>
               <Command.Item
                 onSelect={() => { onSelectAction('/hackathons'); onClose(); }}

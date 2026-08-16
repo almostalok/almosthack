@@ -15,7 +15,13 @@ export interface SafeUser {
   name: string;
   avatarUrl?: string | null;
   bio?: string | null;
+  college?: string | null;
+  branch?: string | null;
+  graduationYear?: number | null;
+  skills?: string[];
   githubUsername?: string | null;
+  linkedinUrl?: string | null;
+  portfolioUrl?: string | null;
   roles: RoleName[];
 }
 
@@ -94,7 +100,13 @@ export class AuthService {
       name: user.name,
       avatarUrl: user.avatarUrl,
       bio: user.bio,
+      college: user.college,
+      branch: user.branch,
+      graduationYear: user.graduationYear,
+      skills: user.skills,
       githubUsername: user.githubUsername,
+      linkedinUrl: user.linkedinUrl,
+      portfolioUrl: user.portfolioUrl,
       roles: [RoleName.PARTICIPANT],
     };
 
@@ -157,7 +169,13 @@ export class AuthService {
       name: user.name,
       avatarUrl: user.avatarUrl,
       bio: user.bio,
+      college: user.college,
+      branch: user.branch,
+      graduationYear: user.graduationYear,
+      skills: user.skills,
       githubUsername: user.githubUsername,
+      linkedinUrl: user.linkedinUrl,
+      portfolioUrl: user.portfolioUrl,
       roles,
     };
 
@@ -190,7 +208,13 @@ export class AuthService {
       name: user.name,
       avatarUrl: user.avatarUrl,
       bio: user.bio,
+      college: user.college,
+      branch: user.branch,
+      graduationYear: user.graduationYear,
+      skills: user.skills,
       githubUsername: user.githubUsername,
+      linkedinUrl: user.linkedinUrl,
+      portfolioUrl: user.portfolioUrl,
       roles: user.userRoles.map((ur) => ur.role.name as RoleName),
     };
   }

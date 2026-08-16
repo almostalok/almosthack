@@ -45,3 +45,71 @@ export const apiResponseMetaSchema = z.object({
 });
 
 export type ApiResponseMeta = z.infer<typeof apiResponseMetaSchema>;
+
+const safeUrlSchema = z
+  .string()
+  .trim()
+  .url({ message: 'Invalid URL format' })
+  .refine((url) => !url.toLowerCase().startsWith('javascript:'), {
+    message: 'javascript: URLs are not allowed for security reasons',
+  })
+  .refine((url) => /^https?:\/\//i.test(url), {
+    message: 'URL must use HTTP or HTTPS protocol',
+  });
+
+export const updateProfileSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, { message: 'Name must be at least 2 characters long' })
+    .max(100, { message: 'Name cannot exceed 100 characters' })
+    .optional(),
+  avatarUrl: safeUrlSchema.nullable().optional(),
+  bio: z
+    .string()
+    .trim()
+    .max(500, { message: 'Bio cannot exceed 500 characters' })
+    .nullable()
+    .optional(),
+  college: z
+    .string()
+    .trim()
+    .max(150, { message: 'College name cannot exceed 150 characters' })
+    .nullable()
+    .optional(),
+  branch: z
+    .string()
+    .trim()
+    .max(100, { message: 'Branch name cannot exceed 100 characters' })
+    .nullable()
+    .optional(),
+  graduationYear: z
+    .number()
+    .int()
+    .min(1950, { message: 'Graduation year must be at or after 1950' })
+    .max(2100, { message: 'Graduation year must be at or before 2100' })
+    .nullable()
+    .optional(),
+  skills: z
+    .array(
+      z
+        .string()
+        .trim()
+        .max(50, { message: 'Individual skill length cannot exceed 50 characters' })
+    )
+    .max(30, { message: 'Cannot add more than 30 skills' })
+    .optional(),
+  githubUsername: z
+    .string()
+    .trim()
+    .regex(/^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/, {
+      message: 'Invalid GitHub username format',
+    })
+    .nullable()
+    .optional(),
+  linkedinUrl: safeUrlSchema.nullable().optional(),
+  portfolioUrl: safeUrlSchema.nullable().optional(),
+});
+
+export type UpdateProfileSchema = z.infer<typeof updateProfileSchema>;
+

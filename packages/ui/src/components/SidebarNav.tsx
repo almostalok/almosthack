@@ -10,6 +10,7 @@ import {
   Terminal,
   Activity,
   LogOut,
+  User,
 } from 'lucide-react';
 
 export interface NavItem {
@@ -33,6 +34,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
 }) => {
   const navItems: NavItem[] = [
     { id: 'overview', label: 'Overview', href: '/overview', icon: <LayoutDashboard className="w-4 h-4" /> },
+    { id: 'profile', label: 'Profile', href: '/profile', icon: <User className="w-4 h-4" /> },
     { id: 'hackathons', label: 'Hackathons', href: '/hackathons', icon: <Trophy className="w-4 h-4" />, badge: 'LIVE' },
     { id: 'repositories', label: 'Repositories', href: '/repositories', icon: <GitBranch className="w-4 h-4" /> },
     { id: 'judges', label: 'Judge Calibration', href: '/judges', icon: <Award className="w-4 h-4" /> },

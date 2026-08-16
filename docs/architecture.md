@@ -61,3 +61,11 @@ The backend is designed as a modular monolith using NestJS. Rather than microser
 - **Role Foundation**: Automatic server-side assignment of `RoleName.PARTICIPANT` on registration. Client cannot override roles.
 - **API Client Integration**: `@almosthack/api-client` configured with `credentials: 'include'` for cross-origin cookie transmission.
 
+### 6. User Identity & Profile Architecture (`S1-02`)
+- **Data Model**: Profile fields (`college`, `branch`, `graduationYear`, `skills`, `linkedinUrl`, `portfolioUrl`, `avatarUrl`, `bio`) reside on the `User` model in PostgreSQL, ensuring single-table read performance (0 JOIN overhead) and simple lifecycle management.
+- **Endpoints**: `GET /api/v1/users/me` (profile retrieval) & `PATCH /api/v1/users/me` (partial profile update).
+- **Ownership & Authorization**: Derived exclusively from authenticated session (`SessionAuthGuard` + `@CurrentUser()`). Body `userId` parameter is rejected.
+- **Security & Whitelist**: Forbidden fields (`id`, `email`, `roles`, `passwordHash`, `isVerified`, `createdAt`, `updatedAt`, `sessions`) are excluded from DTO and automatically rejected with 400 Bad Request if supplied.
+- **URL & Input Hardening**: String normalization (trimming), skills deduplication, and URL protocol checks (`http://` / `https://` required, `javascript:` protocol rejected).
+
+

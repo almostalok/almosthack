@@ -16,7 +16,8 @@ export class ApiClient {
     this.defaultHeaders = config.defaultHeaders || {};
     this.timeoutMs = config.timeout ?? 10000;
     this.credentials = config.credentials ?? 'include';
-    this.fetchImpl = config.fetch || (typeof fetch !== 'undefined' ? fetch : (globalThis.fetch as typeof fetch));
+    const rawFetch = config.fetch || (typeof fetch !== 'undefined' ? fetch : (globalThis.fetch as typeof fetch));
+    this.fetchImpl = rawFetch ? rawFetch.bind(typeof window !== 'undefined' ? window : globalThis) : rawFetch;
 
     if (!this.fetchImpl) {
       throw new Error('No global fetch implementation found. Pass a fetch implementation in ApiClientConfig.');
@@ -184,4 +185,13 @@ export class ApiClient {
   public delete<T>(path: string, options?: RequestOptions): Promise<T> {
     return this.request<T>(path, { ...options, method: 'DELETE' });
   }
+
+  public getProfile<T = any>(options?: RequestOptions): Promise<T> {
+    return this.get<T>('/users/me', options);
+  }
+
+  public updateProfile<T = any>(body: unknown, options?: RequestOptions): Promise<T> {
+    return this.patch<T>('/users/me', body, options);
+  }
 }
+

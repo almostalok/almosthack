@@ -23,7 +23,13 @@ model User {
   passwordHash   String?
   avatarUrl      String?
   bio            String?
+  college        String?
+  branch         String?
+  graduationYear Int?
+  skills         String[]   @default([])
   githubUsername String?
+  linkedinUrl    String?
+  portfolioUrl   String?
   isVerified     Boolean    @default(false)
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt

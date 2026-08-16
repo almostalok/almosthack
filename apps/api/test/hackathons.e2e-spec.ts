@@ -335,4 +335,48 @@ describe('Hackathon Domain & Lifecycle E2E', () => {
         .expect(403);
     });
   });
+
+  describe('6. Security, Public Access, and Forbidden Field Attacks', () => {
+    it('should reject PATCH requests attempting to mutate status directly', async () => {
+      await request(app.getHttpServer())
+        .patch(`/api/v1/hackathons/${hackathonAId}`)
+        .set('Cookie', cookieUserA)
+        .send({ status: 'LIVE' })
+        .expect(400);
+    });
+
+    it('should reject PATCH requests attempting to mutate organizationId', async () => {
+      await request(app.getHttpServer())
+        .patch(`/api/v1/hackathons/${hackathonAId}`)
+        .set('Cookie', cookieUserA)
+        .send({ organizationId: orgBId })
+        .expect(400);
+    });
+
+    it('should reject PATCH requests attempting to mutate publishedAt timestamp', async () => {
+      await request(app.getHttpServer())
+        .patch(`/api/v1/hackathons/${hackathonAId}`)
+        .set('Cookie', cookieUserA)
+        .send({ publishedAt: new Date().toISOString() })
+        .expect(400);
+    });
+
+    it('should allow User B to read Hackathon A because it is PUBLISHED and PUBLIC', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/hackathons/${hackathonAId}`)
+        .set('Cookie', cookieUserB)
+        .expect(200);
+
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.id).toBe(hackathonAId);
+      expect(res.body.data.visibility).toBe('PUBLIC');
+    });
+
+    it('should block User A from reading Hackathon B while it is DRAFT (even if visibility is PUBLIC)', async () => {
+      await request(app.getHttpServer())
+        .get(`/api/v1/hackathons/${hackathonBId}`)
+        .set('Cookie', cookieUserA)
+        .expect(403);
+    });
+  });
 });

@@ -79,7 +79,7 @@ export class HackathonsService {
     const end = regEndsAt.getTime();
 
     if (nowTime < start) return RegistrationStatus.NOT_OPEN;
-    if (nowTime >= start && nowTime <= end) return RegistrationStatus.OPEN;
+    if (nowTime >= start && nowTime < end) return RegistrationStatus.OPEN;
     return RegistrationStatus.CLOSED;
   }
 
@@ -115,7 +115,20 @@ export class HackathonsService {
   /**
    * Helper: Safely maps database Hackathon record to public response DTO.
    */
-  public mapToResponse(hackathon: any): HackathonResponseDto {
+  public mapToResponse(hackathon: any, now: Date = new Date()): HackathonResponseDto {
+    const effectiveStatus = this.deriveEffectiveStatus(
+      hackathon.status as HackathonStatus,
+      new Date(hackathon.startsAt),
+      new Date(hackathon.endsAt),
+      now
+    );
+
+    const completedAt = hackathon.completedAt
+      ? new Date(hackathon.completedAt).toISOString()
+      : effectiveStatus === HackathonStatus.COMPLETED
+      ? new Date(hackathon.endsAt).toISOString()
+      : null;
+
     return {
       id: hackathon.id,
       organizationId: hackathon.organizationId,
@@ -125,14 +138,14 @@ export class HackathonsService {
       logoUrl: hackathon.logoUrl ?? null,
       websiteUrl: hackathon.websiteUrl ?? null,
       timezone: hackathon.timezone,
-      status: hackathon.status as HackathonStatus,
+      status: effectiveStatus,
       visibility: hackathon.visibility as HackathonVisibility,
       registrationStartsAt: new Date(hackathon.registrationStartsAt).toISOString(),
       registrationEndsAt: new Date(hackathon.registrationEndsAt).toISOString(),
       startsAt: new Date(hackathon.startsAt).toISOString(),
       endsAt: new Date(hackathon.endsAt).toISOString(),
       publishedAt: hackathon.publishedAt ? new Date(hackathon.publishedAt).toISOString() : null,
-      completedAt: hackathon.completedAt ? new Date(hackathon.completedAt).toISOString() : null,
+      completedAt,
       archivedAt: hackathon.archivedAt ? new Date(hackathon.archivedAt).toISOString() : null,
       createdAt: new Date(hackathon.createdAt).toISOString(),
       updatedAt: new Date(hackathon.updatedAt).toISOString(),
@@ -323,13 +336,19 @@ export class HackathonsService {
       });
     }
 
-    // Check organization read permission
-    await this.checkOrganizationPermission(
-      userId,
-      userRoles,
-      hackathon.organizationId,
-      Permission.HACKATHON_READ
-    );
+    // Check access: PUBLIC non-DRAFT hackathons readable by anyone; PRIVATE or DRAFT require org membership
+    const isPublicRead =
+      hackathon.visibility === HackathonVisibility.PUBLIC &&
+      hackathon.status !== HackathonStatus.DRAFT;
+
+    if (!isPublicRead) {
+      await this.checkOrganizationPermission(
+        userId,
+        userRoles,
+        hackathon.organizationId,
+        Permission.HACKATHON_READ
+      );
+    }
 
     return this.mapToResponse(hackathon);
   }

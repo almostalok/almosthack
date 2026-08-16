@@ -151,21 +151,35 @@ describe('HackathonsService Unit Tests', () => {
     const eventStart = new Date('2026-09-10T00:00:00Z');
     const eventEnd = new Date('2026-09-15T00:00:00Z');
 
-    it('should derive RegistrationStatus.NOT_OPEN before registrationStartsAt', () => {
+    it('should derive RegistrationStatus.NOT_OPEN before registrationStartsAt (T < start)', () => {
       const now = new Date('2026-08-25T00:00:00Z');
       expect(service.deriveRegistrationStatus(regStart, regEnd, now)).toBe(
         RegistrationStatus.NOT_OPEN
       );
     });
 
-    it('should derive RegistrationStatus.OPEN within registration window', () => {
+    it('should derive RegistrationStatus.OPEN at exact registrationStartsAt (T = start)', () => {
+      const now = new Date('2026-09-01T00:00:00Z');
+      expect(service.deriveRegistrationStatus(regStart, regEnd, now)).toBe(
+        RegistrationStatus.OPEN
+      );
+    });
+
+    it('should derive RegistrationStatus.OPEN inside registration window (start < T < end)', () => {
       const now = new Date('2026-09-05T00:00:00Z');
       expect(service.deriveRegistrationStatus(regStart, regEnd, now)).toBe(
         RegistrationStatus.OPEN
       );
     });
 
-    it('should derive RegistrationStatus.CLOSED after registrationEndsAt', () => {
+    it('should derive RegistrationStatus.CLOSED at exact registrationEndsAt (T = end)', () => {
+      const now = new Date('2026-09-10T00:00:00Z');
+      expect(service.deriveRegistrationStatus(regStart, regEnd, now)).toBe(
+        RegistrationStatus.CLOSED
+      );
+    });
+
+    it('should derive RegistrationStatus.CLOSED after registrationEndsAt (T > end)', () => {
       const now = new Date('2026-09-11T00:00:00Z');
       expect(service.deriveRegistrationStatus(regStart, regEnd, now)).toBe(
         RegistrationStatus.CLOSED

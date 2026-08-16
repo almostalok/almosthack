@@ -5,6 +5,7 @@ export class ApiClient {
   private readonly baseUrl: string;
   private readonly defaultHeaders: Record<string, string>;
   private readonly timeoutMs: number;
+  private readonly credentials?: RequestCredentials;
   private readonly fetchImpl: typeof fetch;
 
   constructor(config: ApiClientConfig) {
@@ -14,6 +15,7 @@ export class ApiClient {
     this.baseUrl = config.baseUrl.replace(/\/+$/, '');
     this.defaultHeaders = config.defaultHeaders || {};
     this.timeoutMs = config.timeout ?? 10000;
+    this.credentials = config.credentials ?? 'include';
     this.fetchImpl = config.fetch || (typeof fetch !== 'undefined' ? fetch : (globalThis.fetch as typeof fetch));
 
     if (!this.fetchImpl) {
@@ -77,6 +79,7 @@ export class ApiClient {
         headers,
         body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
         signal: controller.signal,
+        credentials: options.credentials ?? this.credentials ?? 'include',
       });
 
       clearTimeout(timeoutId);

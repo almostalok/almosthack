@@ -3,6 +3,7 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -16,6 +17,9 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port', 4000);
   const corsOrigin = configService.get<string>('corsOrigin', 'http://localhost:3000');
+
+  // Cookie Parser Middleware
+  app.use(cookieParser());
 
   // Request ID Top-Level Middleware
   app.use(requestIdMiddleware);

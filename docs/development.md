@@ -59,6 +59,7 @@ To verify the `API → Redis → BullMQ → Worker` pipeline:
 ```bash
 curl -X POST http://localhost:4000/api/v1/infrastructure-test/enqueue \
   -H "Content-Type: application/json" \
+  -H "Cookie: almosthack_session=<session_token>" \
   -H "X-Request-ID: req_dev_test_123" \
   -d '{"message": "Hello Worker", "jobId": "test_job_1"}'
 ```

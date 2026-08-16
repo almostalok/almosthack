@@ -119,4 +119,19 @@ describe('ApiClient', () => {
       }
     }
   });
+
+  it('should include credentials option in fetch request init', async () => {
+    const mockFetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-type': 'application/json' }),
+      json: jest.fn().mockResolvedValue({ success: true, data: {} }),
+    });
+
+    const client = new ApiClient({ baseUrl, credentials: 'include', fetch: mockFetch });
+    await client.get('/auth/me');
+
+    const [, init] = mockFetch.mock.calls[0];
+    expect(init.credentials).toBe('include');
+  });
 });

@@ -126,20 +126,15 @@ describe('Backend Infrastructure (E2E)', () => {
     });
   });
 
-  describe('Infrastructure Queue Endpoint', () => {
-    it('POST /api/v1/infrastructure-test/enqueue should enqueue job and propagate request correlation ID', async () => {
-      const customId = 'req_e2e_test_123';
+  describe('Infrastructure Queue Endpoint Protection', () => {
+    it('POST /api/v1/infrastructure-test/enqueue should reject unauthenticated requests with 401 Unauthorized', async () => {
       const res = await request(app.getHttpServer())
         .post('/api/v1/infrastructure-test/enqueue')
-        .set('X-Request-ID', customId)
-        .send({ message: 'e2e test message', jobId: 'e2e_job_1' })
-        .expect(201);
+        .send({ message: 'unauthenticated test message', jobId: 'e2e_job_1' })
+        .expect(401);
 
-      expect(res.body).toHaveProperty('success', true);
-      expect(res.body.data).toHaveProperty('enqueued', true);
-      expect(res.body.data).toHaveProperty('jobId', 'mocked_job_id_123');
-      expect(res.body.data).toHaveProperty('correlationId', customId);
-      expect(res.body.data).toHaveProperty('queue', 'infrastructure-test');
+      expect(res.body).toHaveProperty('success', false);
+      expect(res.body.error).toHaveProperty('code');
     });
   });
 });

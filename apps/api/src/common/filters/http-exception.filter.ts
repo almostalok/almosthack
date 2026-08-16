@@ -50,11 +50,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
       } else if (typeof resPayload === 'object' && resPayload !== null) {
         const payloadObj = resPayload as Record<string, any>;
 
-        // Handle validation errors (NestJS default ValidationPipe returns array of messages)
         if (Array.isArray(payloadObj.message)) {
           code = 'VALIDATION_ERROR';
           message = payloadObj.message.join('; ');
           details = payloadObj.message;
+        } else if (payloadObj.error && typeof payloadObj.error === 'object') {
+          code = payloadObj.error.code || payloadObj.code || this.getErrorCodeFromStatus(status);
+          message = payloadObj.error.message || payloadObj.message || exception.message;
+          details = payloadObj.error.details || payloadObj.details;
         } else {
           message = payloadObj.message || exception.message;
           code = payloadObj.code || this.getErrorCodeFromStatus(status);

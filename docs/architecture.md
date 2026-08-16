@@ -53,9 +53,11 @@ The backend is designed as a modular monolith using NestJS. Rather than microser
 - **`packages/utils`**: Pure, stateless helper utilities (`cn`, `formatters`).
 - **`packages/validation`**: Shared Zod schemas (`@almosthack/validation`) for cross-boundary contracts (pagination, identifiers, sort parameters).
 
-### 3. Data Ownership & Storage
-- Single PostgreSQL database managed via Prisma ORM (`apps/api/prisma/schema.prisma`).
-- Redis cache & session store for rate-limiting, temporary key storage, and future background worker queueing.
+### 5. Authentication Architecture (Server-Side Session Authentication)
+- **Primary Credential**: Opaque 32-byte cryptographically secure random session token stored in HttpOnly cookie (`almosthack_session`).
+- **Database Storage**: PostgreSQL `sessions` table storing SHA-256 token hash (`tokenHash`), expiration date (7 days), active status (`revokedAt IS NULL`), IP address, and user agent.
+- **Session Protection**: `SessionAuthGuard` validates token hash, checks revocation and absolute expiration, attaches authenticated identity (`request.user`) to NestJS execution context.
+- **Password Hashing**: `bcrypt` with cost factor 10.
+- **Role Foundation**: Automatic server-side assignment of `RoleName.PARTICIPANT` on registration. Client cannot override roles.
+- **API Client Integration**: `@almosthack/api-client` configured with `credentials: 'include'` for cross-origin cookie transmission.
 
-### 4. Future Background Worker Boundary
-Async background jobs (e.g. commit integrity scans, plagiarism checking, batch email delivery) will be executed by dedicated worker processes sharing the core `apps/api` domain modules and Prisma service model, avoiding early microservice decomposition.

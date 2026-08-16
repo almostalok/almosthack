@@ -2,6 +2,7 @@ export interface ApiClientConfig {
   baseUrl: string;
   defaultHeaders?: Record<string, string>;
   timeout?: number;
+  credentials?: RequestCredentials;
   fetch?: typeof fetch;
 }
 
@@ -9,6 +10,7 @@ export interface RequestOptions {
   headers?: Record<string, string>;
   params?: Record<string, string | number | boolean | undefined | null>;
   timeout?: number;
+  credentials?: RequestCredentials;
   requestId?: string;
   signal?: AbortSignal;
 }

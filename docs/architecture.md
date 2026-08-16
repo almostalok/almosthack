@@ -85,6 +85,20 @@ The backend is designed as a modular monolith using NestJS. Rather than microser
 - **Slug Strategy**: Conservative URL-safe slug regex (`[a-z0-9]+(?:-[a-z0-9]+)*`), deterministic normalization, and explicit `409 Conflict` (`ORGANIZATION_SLUG_CONFLICT`) on collision.
 - **Destructive Deletion**: Hard deletion of organization and members inside a transaction, requiring explicit body confirmation matching the organization slug.
 
+### 9. Hackathon Core & Lifecycle Architecture (`S2-01`)
+- **Resource Ownership**: Every `Hackathon` belongs to exactly one `Organization` (`organizationId`), creating an unambiguous authorization and multi-tenant isolation boundary.
+- **State Machine**: Canonical lifecycle states: `DRAFT`, `PUBLISHED`, `LIVE`, `COMPLETED`, `ARCHIVED`. State transitions strictly enforced (`DRAFT` → `PUBLISHED` via `/publish`, `COMPLETED` → `ARCHIVED` via `/archive`).
+- **Independent Registration State**: `RegistrationStatus` (`NOT_OPEN`, `OPEN`, `CLOSED`) is derived independently from registration window timestamps and server UTC time. Hackathon status never conflates registration, round, or submission states.
+- **Server-Authoritative Time**: All lifecycle evaluations derive effective state from database server UTC timestamps (`startsAt`, `endsAt`, `registrationStartsAt`, `registrationEndsAt`). Client local browser clocks are ignored.
+- **Organization-Scoped Slugs**: Slugs are unique per organization (`organizationId` + `slug` unique constraint), allowing `org-a/hackathon` and `org-b/hackathon` to coexist.
+- **Editability Rules**:
+  - `DRAFT`: all configuration fields editable.
+  - `PUBLISHED`: safe metadata and schedule adjustments permitted.
+  - `LIVE`: schedule fields restricted from casual modification.
+  - `COMPLETED` & `ARCHIVED`: read-only operationally.
+- **Audit Trails**: All lifecycle actions emit structured `AuditLog` events (`hackathon.created`, `hackathon.updated`, `hackathon.published`, `hackathon.archived`).
+
+
 
 
 

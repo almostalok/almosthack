@@ -224,6 +224,17 @@ export class AuthorizationService {
       return this.evaluateOrganizationPermission(userId, userRoles, scope.id, permission);
     }
 
+    if (scope && scope.type === ScopeType.HACKATHON && scope.id) {
+      const hackathon = await this.prisma.hackathon.findUnique({
+        where: { id: scope.id },
+        select: { organizationId: true },
+      });
+      if (!hackathon) {
+        return false;
+      }
+      return this.evaluateOrganizationPermission(userId, userRoles, hackathon.organizationId, permission);
+    }
+
     return this.can(userOrContext, permission, scope);
   }
 

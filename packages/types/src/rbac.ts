@@ -51,12 +51,15 @@ export const Permission = {
   ORGANIZATION_TRANSFER_OWNERSHIP: 'organization:transfer_ownership',
   PLATFORM_ORGANIZATION_MANAGE: 'platform:organization_manage',
 
-  // Hackathons (Scope contract placeholders)
+  // Hackathons
   HACKATHON_CREATE: 'hackathon:create',
+  HACKATHON_READ: 'hackathon:read',
   HACKATHON_UPDATE: 'hackathon:update',
   HACKATHON_DELETE: 'hackathon:delete',
   HACKATHON_PUBLISH: 'hackathon:publish',
+  HACKATHON_ARCHIVE: 'hackathon:archive',
   HACKATHON_VIEW: 'hackathon:view',
+
 
   // Submissions
   SUBMISSION_CREATE: 'submission:create',
@@ -115,6 +118,12 @@ export const ORGANIZATION_ROLE_PERMISSIONS: Record<OrganizationRole, PermissionA
     Permission.ORGANIZATION_MEMBER_REMOVE,
     Permission.ORGANIZATION_MEMBER_UPDATE_ROLE,
     Permission.ORGANIZATION_TRANSFER_OWNERSHIP,
+    Permission.HACKATHON_CREATE,
+    Permission.HACKATHON_READ,
+    Permission.HACKATHON_VIEW,
+    Permission.HACKATHON_UPDATE,
+    Permission.HACKATHON_PUBLISH,
+    Permission.HACKATHON_ARCHIVE,
   ],
   [OrganizationRole.ADMIN]: [
     Permission.ORGANIZATION_READ,
@@ -123,10 +132,18 @@ export const ORGANIZATION_ROLE_PERMISSIONS: Record<OrganizationRole, PermissionA
     Permission.ORGANIZATION_MEMBER_ADD,
     Permission.ORGANIZATION_MEMBER_REMOVE,
     Permission.ORGANIZATION_MEMBER_UPDATE_ROLE,
+    Permission.HACKATHON_CREATE,
+    Permission.HACKATHON_READ,
+    Permission.HACKATHON_VIEW,
+    Permission.HACKATHON_UPDATE,
+    Permission.HACKATHON_PUBLISH,
+    Permission.HACKATHON_ARCHIVE,
   ],
   [OrganizationRole.MEMBER]: [
     Permission.ORGANIZATION_READ,
     Permission.ORGANIZATION_MEMBER_READ,
+    Permission.HACKATHON_READ,
+    Permission.HACKATHON_VIEW,
   ],
 };
 

@@ -121,6 +121,39 @@ curl -X DELETE http://localhost:4000/api/v1/organizations/<org_id> \
   -d '{"confirmation": "almosthack-core"}'
 ```
 
+### 8. Hackathon Domain & Lifecycle API Testing
+
+```bash
+# Create hackathon under organization
+curl -X POST http://localhost:4000/api/v1/organizations/<org_id>/hackathons \
+  -H "Content-Type: application/json" \
+  -H "Cookie: almosthack_session=<session_token>" \
+  -d '{
+    "name": "Global AI Sprint 2026",
+    "timezone": "Asia/Kolkata",
+    "registrationStartsAt": "2026-09-01T00:00:00.000Z",
+    "registrationEndsAt": "2026-09-10T00:00:00.000Z",
+    "startsAt": "2026-09-15T00:00:00.000Z",
+    "endsAt": "2026-09-20T00:00:00.000Z"
+  }'
+
+# List organization hackathons
+curl -X GET http://localhost:4000/api/v1/organizations/<org_id>/hackathons \
+  -H "Cookie: almosthack_session=<session_token>"
+
+# Get hackathon effective lifecycle & registration status
+curl -X GET http://localhost:4000/api/v1/hackathons/<hackathon_id>/lifecycle \
+  -H "Cookie: almosthack_session=<session_token>"
+
+# Publish DRAFT hackathon
+curl -X POST http://localhost:4000/api/v1/hackathons/<hackathon_id>/publish \
+  -H "Cookie: almosthack_session=<session_token>"
+
+# Archive COMPLETED hackathon
+curl -X POST http://localhost:4000/api/v1/hackathons/<hackathon_id>/archive \
+  -H "Cookie: almosthack_session=<session_token>"
+```
+
 ---
 
 ## Command Reference

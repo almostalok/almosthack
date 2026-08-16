@@ -1,6 +1,6 @@
 import React from 'react';
 import './globals.css';
-import { AuthProvider } from '../providers/auth-provider';
+import { AuthProvider, QueryProvider } from '../providers';
 
 export const metadata = {
   title: 'almosthack — The Transparent Hackathon Operating System',
@@ -11,7 +11,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark">
       <body className="bg-black text-zinc-100 min-h-screen antialiased selection:bg-emerald-500 selection:text-black font-body">
-        <AuthProvider>{children}</AuthProvider>
+        <QueryProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

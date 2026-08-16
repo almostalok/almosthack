@@ -234,6 +234,35 @@ export class ApiClient {
   public transferOrganizationOwnership<T = any>(organizationId: string, body: { newOwnerId: string }, options?: RequestOptions): Promise<T> {
     return this.post<T>(`/organizations/${organizationId}/transfer-ownership`, body, options);
   }
+
+  // Hackathon Domain APIs
+  public createHackathon<T = any>(organizationId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/organizations/${organizationId}/hackathons`, body, options);
+  }
+
+  public getOrganizationHackathons<T = any>(organizationId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/organizations/${organizationId}/hackathons`, options);
+  }
+
+  public getHackathon<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/hackathons/${hackathonId}`, options);
+  }
+
+  public getHackathonLifecycle<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/hackathons/${hackathonId}/lifecycle`, options);
+  }
+
+  public updateHackathon<T = any>(hackathonId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.patch<T>(`/hackathons/${hackathonId}`, body, options);
+  }
+
+  public publishHackathon<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/hackathons/${hackathonId}/publish`, undefined, options);
+  }
+
+  public archiveHackathon<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/hackathons/${hackathonId}/archive`, undefined, options);
+  }
 }
 
 

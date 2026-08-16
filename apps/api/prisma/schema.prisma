@@ -105,10 +105,54 @@ model Organization {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  members OrganizationMember[]
+  members    OrganizationMember[]
+  hackathons Hackathon[]
 
   @@map("organizations")
 }
+
+enum HackathonStatus {
+  DRAFT
+  PUBLISHED
+  LIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum HackathonVisibility {
+  PRIVATE
+  PUBLIC
+}
+
+model Hackathon {
+  id                   String              @id @default(uuid())
+  organizationId       String
+  name                 String
+  slug                 String
+  description          String?
+  logoUrl              String?
+  websiteUrl           String?
+  timezone             String              @default("UTC")
+  status               HackathonStatus     @default(DRAFT)
+  visibility           HackathonVisibility @default(PRIVATE)
+  registrationStartsAt DateTime
+  registrationEndsAt   DateTime
+  startsAt             DateTime
+  endsAt               DateTime
+  publishedAt          DateTime?
+  completedAt          DateTime?
+  archivedAt           DateTime?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@index([status])
+  @@map("hackathons")
+}
+
 
 model OrganizationMember {
   id             String                   @id @default(uuid())

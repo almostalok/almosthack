@@ -68,4 +68,14 @@ The backend is designed as a modular monolith using NestJS. Rather than microser
 - **Security & Whitelist**: Forbidden fields (`id`, `email`, `roles`, `passwordHash`, `isVerified`, `createdAt`, `updatedAt`, `sessions`) are excluded from DTO and automatically rejected with 400 Bad Request if supplied.
 - **URL & Input Hardening**: String normalization (trimming), skills deduplication, and URL protocol checks (`http://` / `https://` required, `javascript:` protocol rejected).
 
+### 7. RBAC & Authorization Foundation (`S1-03`)
+- **Core Pipeline**: `HTTP Request` → `SessionAuthGuard` (Authentication) → `PermissionsGuard` (Authorization) → `AuthorizationService` (Evaluation) → `Controller Action`.
+- **Role Model**: 6 canonical roles (`ADMIN`, `ORGANIZER`, `JUDGE`, `PARTICIPANT`, `MENTOR`, `SPONSOR`), strictly server-controlled.
+- **Permission Registry**: Strongly-typed `Permission` constants and `PermissionAction` union string values in `@almosthack/types`.
+- **Least Privilege & Admin Semantics**: Roles mapped strictly to permissions (`ROLE_PERMISSIONS`). `ADMIN` receives explicit platform permissions without hidden code bypasses.
+- **Scope Contract Abstraction**: Standardized representation for `GLOBAL`, `ORGANIZATION`, `HACKATHON`, `ROUND`, `TEAM`, `SUBMISSION` scopes via `@RequireScope(...)`. Scope IDs are not blindly trusted and will be evaluated by domain-specific resource resolvers.
+- **Deny-by-Default & Security**: Unauthenticated requests yield `401 Unauthorized`. Forbidden requests yield generic `403 Forbidden` (`FORBIDDEN`) without leaking permission metadata to clients. Failed authorization attempts for protected actions log `AUTHORIZATION_DENIED` to `AuditLog`.
+- **Test Endpoint Isolation**: Development test routes under `/api/v1/auth/test/*` are disabled with 403 Forbidden when `NODE_ENV === 'production'`.
+
+
 

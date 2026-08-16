@@ -466,6 +466,9 @@ importers:
 
   packages/utils:
     dependencies:
+      '@almosthack/types':
+        specifier: workspace:*
+        version: link:../types
       clsx:
         specifier: ^2.1.1
         version: 2.1.1

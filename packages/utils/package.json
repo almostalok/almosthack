@@ -9,6 +9,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@almosthack/types": "workspace:*",
     "clsx": "^2.1.1",
     "tailwind-merge": "^2.6.1"
   },

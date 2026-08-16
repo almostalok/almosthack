@@ -77,5 +77,14 @@ The backend is designed as a modular monolith using NestJS. Rather than microser
 - **Deny-by-Default & Security**: Unauthenticated requests yield `401 Unauthorized`. Forbidden requests yield generic `403 Forbidden` (`FORBIDDEN`) without leaking permission metadata to clients. Failed authorization attempts for protected actions log `AUTHORIZATION_DENIED` to `AuditLog`.
 - **Test Endpoint Isolation**: Development test routes under `/api/v1/auth/test/*` are disabled with 403 Forbidden when `NODE_ENV === 'production'`.
 
+### 8. Organization Domain & Scoped Authorization (`S1-04`)
+- **Resource Boundary**: Real, persistent organization resource model (`Organization` and `OrganizationMember`).
+- **Platform vs Organization Roles**: Platform roles (`RoleName`) and Organization roles (`OrganizationRole`: `OWNER`, `ADMIN`, `MEMBER`) are strictly decoupled. Organization membership is required for organization-scoped operations.
+- **Transactional Invariants**: Every organization is created transactionally with an initial `OWNER`. Sole `OWNER` cannot be demoted or removed. Ownership transfer is atomic (New owner → `OWNER`, Old owner → `ADMIN`).
+- **Scoped Authorization**: Scoped routes evaluate caller's database `OrganizationMember` role permissions via `AuthorizationService.canAsync`. Platform `ADMIN` retains explicit `PLATFORM_ORGANIZATION_MANAGE` operational access.
+- **Slug Strategy**: Conservative URL-safe slug regex (`[a-z0-9]+(?:-[a-z0-9]+)*`), deterministic normalization, and explicit `409 Conflict` (`ORGANIZATION_SLUG_CONFLICT`) on collision.
+- **Destructive Deletion**: Hard deletion of organization and members inside a transaction, requiring explicit body confirmation matching the organization slug.
+
+
 
 

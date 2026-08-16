@@ -1,12 +1,14 @@
 import { Injectable, ForbiddenException, Logger } from '@nestjs/common';
 import {
   RoleName,
+  Permission,
   PermissionAction,
   ScopeContext,
   AuthorizationContext,
   PermissionMode,
   RoleMode,
   ScopeType,
+  ORGANIZATION_ROLE_PERMISSIONS,
 } from '@almosthack/types';
 import {
   getPermissionsForRoles,
@@ -166,6 +168,66 @@ export class AuthorizationService {
   }
 
   /**
+   * Resolves active OrganizationMember record from database.
+   */
+  public async getOrganizationMember(userId: string, organizationId: string) {
+    if (!userId || !organizationId) return null;
+    return this.prisma.organizationMember.findFirst({
+      where: {
+        userId,
+        organizationId,
+        status: 'ACTIVE',
+      },
+    });
+  }
+
+  /**
+   * Evaluates organization-scoped authorization checking platform admin permission
+   * or resolving database OrganizationMember role permissions.
+   */
+  public async evaluateOrganizationPermission(
+    userId: string,
+    userRoles: RoleName[],
+    organizationId: string,
+    permission: PermissionAction
+  ): Promise<boolean> {
+    // 1. Platform ADMIN override check
+    const platformPermissions = getPermissionsForRoles(userRoles || []);
+    if (platformPermissions.includes(Permission.PLATFORM_ORGANIZATION_MANAGE)) {
+      return true;
+    }
+
+    // 2. Resolve organization membership from DB
+    const member = await this.getOrganizationMember(userId, organizationId);
+    if (!member) {
+      return false;
+    }
+
+    // 3. Evaluate organization role permissions
+    const orgRolePermissions =
+      ORGANIZATION_ROLE_PERMISSIONS[member.role as keyof typeof ORGANIZATION_ROLE_PERMISSIONS] || [];
+    return orgRolePermissions.includes(permission);
+  }
+
+  /**
+   * Async permission assertion with full scope context evaluation.
+   */
+  public async canAsync(
+    userOrContext: any,
+    permission: PermissionAction,
+    scope?: ScopeContext
+  ): Promise<boolean> {
+    const userId = userOrContext?.id || userOrContext?.userId;
+    const userRoles = this.extractUserRoles(userOrContext);
+
+    if (scope && scope.type === ScopeType.ORGANIZATION && scope.id) {
+      return this.evaluateOrganizationPermission(userId, userRoles, scope.id, permission);
+    }
+
+    return this.can(userOrContext, permission, scope);
+  }
+
+  /**
    * Safely logs authorization denial events to AuditLog.
    */
   public async logDenied(
@@ -193,3 +255,4 @@ export class AuthorizationService {
     }
   }
 }
+

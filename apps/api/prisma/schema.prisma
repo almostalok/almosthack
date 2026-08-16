@@ -84,12 +84,24 @@ model UserRole {
   @@map("user_roles")
 }
 
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum OrganizationMemberStatus {
+  ACTIVE
+  SUSPENDED
+}
+
 model Organization {
   id          String   @id @default(uuid())
   slug        String   @unique
   name        String
+  description String?
   logoUrl     String?
-  website     String?
+  websiteUrl  String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -99,15 +111,21 @@ model Organization {
 }
 
 model OrganizationMember {
+  id             String                   @id @default(uuid())
   organizationId String
   userId         String
-  role           RoleName @default(ORGANIZER)
-  joinedAt       DateTime @default(now())
+  role           OrganizationRole         @default(MEMBER)
+  status         OrganizationMemberStatus @default(ACTIVE)
+  joinedAt       DateTime                 @default(now())
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@id([organizationId, userId])
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@index([organizationId])
   @@map("organization_members")
 }
 

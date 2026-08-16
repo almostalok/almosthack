@@ -89,6 +89,38 @@ curl -X PATCH http://localhost:4000/api/v1/users/me \
   }'
 ```
 
+### 7. Organization Domain API Testing
+
+```bash
+# Create organization (assigns caller as OWNER)
+curl -X POST http://localhost:4000/api/v1/organizations \
+  -H "Content-Type: application/json" \
+  -H "Cookie: almosthack_session=<session_token>" \
+  -d '{"name": "AlmostHack Core", "slug": "almosthack-core"}'
+
+# Get my active organizations
+curl -X GET http://localhost:4000/api/v1/organizations/me \
+  -H "Cookie: almosthack_session=<session_token>"
+
+# Add member (OWNER / ADMIN)
+curl -X POST http://localhost:4000/api/v1/organizations/<org_id>/members \
+  -H "Content-Type: application/json" \
+  -H "Cookie: almosthack_session=<session_token>" \
+  -d '{"userId": "<target_user_id>", "role": "MEMBER"}'
+
+# Transfer ownership (OWNER only)
+curl -X POST http://localhost:4000/api/v1/organizations/<org_id>/transfer-ownership \
+  -H "Content-Type: application/json" \
+  -H "Cookie: almosthack_session=<session_token>" \
+  -d '{"newOwnerId": "<target_user_id>"}'
+
+# Delete organization (OWNER only, requires slug confirmation)
+curl -X DELETE http://localhost:4000/api/v1/organizations/<org_id> \
+  -H "Content-Type: application/json" \
+  -H "Cookie: almosthack_session=<session_token>" \
+  -d '{"confirmation": "almosthack-core"}'
+```
+
 ---
 
 ## Command Reference

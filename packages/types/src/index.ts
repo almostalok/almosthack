@@ -3,3 +3,5 @@ export * from './auth';
 export * from './user';
 export * from './audit';
 export * from './api';
+export * from './organization';
+

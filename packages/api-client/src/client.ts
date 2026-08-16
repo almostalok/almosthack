@@ -193,5 +193,47 @@ export class ApiClient {
   public updateProfile<T = any>(body: unknown, options?: RequestOptions): Promise<T> {
     return this.patch<T>('/users/me', body, options);
   }
+
+  // Organization Domain APIs
+  public createOrganization<T = any>(body: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>('/organizations', body, options);
+  }
+
+  public getUserOrganizations<T = any>(options?: RequestOptions): Promise<T> {
+    return this.get<T>('/organizations/me', options);
+  }
+
+  public getOrganization<T = any>(organizationId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/organizations/${organizationId}`, options);
+  }
+
+  public updateOrganization<T = any>(organizationId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.patch<T>(`/organizations/${organizationId}`, body, options);
+  }
+
+  public deleteOrganization<T = any>(organizationId: string, body: { confirmation: string }, options?: RequestOptions): Promise<T> {
+    return this.request<T>(`/organizations/${organizationId}`, { ...options, method: 'DELETE', body });
+  }
+
+  public getOrganizationMembers<T = any>(organizationId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/organizations/${organizationId}/members`, options);
+  }
+
+  public addOrganizationMember<T = any>(organizationId: string, body: { userId: string; role?: string }, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/organizations/${organizationId}/members`, body, options);
+  }
+
+  public updateOrganizationMemberRole<T = any>(organizationId: string, userId: string, body: { role: string }, options?: RequestOptions): Promise<T> {
+    return this.patch<T>(`/organizations/${organizationId}/members/${userId}`, body, options);
+  }
+
+  public removeOrganizationMember<T = any>(organizationId: string, userId: string, options?: RequestOptions): Promise<T> {
+    return this.delete<T>(`/organizations/${organizationId}/members/${userId}`, options);
+  }
+
+  public transferOrganizationOwnership<T = any>(organizationId: string, body: { newOwnerId: string }, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/organizations/${organizationId}/transfer-ownership`, body, options);
+  }
 }
+
 

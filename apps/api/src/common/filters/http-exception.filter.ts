@@ -35,9 +35,17 @@ export class HttpExceptionFilter implements ExceptionFilter {
     let message = 'An unexpected internal error occurred';
     let details: any = undefined;
 
-    if (exception instanceof HttpException) {
-      status = exception.getStatus();
-      const resPayload = exception.getResponse();
+    const isHttpException =
+      exception instanceof HttpException ||
+      (typeof exception === 'object' &&
+        exception !== null &&
+        'getStatus' in exception &&
+        typeof (exception as any).getStatus === 'function');
+
+    if (isHttpException) {
+      const httpEx = exception as HttpException;
+      status = httpEx.getStatus();
+      const resPayload = httpEx.getResponse();
 
       // Pass Terminus health check responses untouched
       if (typeof resPayload === 'object' && resPayload !== null && 'status' in resPayload) {
@@ -56,14 +64,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
           details = payloadObj.message;
         } else if (payloadObj.error && typeof payloadObj.error === 'object') {
           code = payloadObj.error.code || payloadObj.code || this.getErrorCodeFromStatus(status);
-          message = payloadObj.error.message || payloadObj.message || exception.message;
+          message = payloadObj.error.message || payloadObj.message || (exception as any).message;
           details = payloadObj.error.details || payloadObj.details;
         } else {
-          message = payloadObj.message || exception.message;
+          message = payloadObj.message || (exception as any).message;
           code = payloadObj.code || this.getErrorCodeFromStatus(status);
         }
       } else {
-        message = exception.message;
+        message = (exception as any).message;
       }
     } else if (this.isPrismaError(exception)) {
       const prismaErr = exception as any;
@@ -81,7 +89,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
         message = 'Database operation failed';
       }
     } else if (exception instanceof Error) {
-      message = exception.message || 'An unexpected error occurred';
+      if (exception.name === 'ZodError' || (exception as any).constructor?.name === 'ZodError') {
+        status = HttpStatus.BAD_REQUEST;
+        code = 'VALIDATION_ERROR';
+        const issues = (exception as any).issues;
+        message = Array.isArray(issues) ? issues.map((i: any) => i.message).join('; ') : exception.message;
+        details = issues;
+      } else {
+        message = exception.message || 'An unexpected error occurred';
+      }
     }
 
     // Log complete internal error details with requestId

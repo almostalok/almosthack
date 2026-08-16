@@ -11,6 +11,7 @@ import {
   PermissionMode,
   RoleMode,
   ScopeContext,
+  ScopeType,
 } from '@almosthack/types';
 import { AuthorizationService } from '../authorization.service';
 import { PERMISSIONS_KEY, PERMISSIONS_MODE_KEY } from '../decorators/permissions.decorator';
@@ -117,32 +118,39 @@ export class PermissionsGuard implements CanActivate {
 
     // 3. Evaluate required permissions if specified
     if (requiredPermissions && requiredPermissions.length > 0) {
-      const permissionsAllowed = this.authorizationService.evaluatePermissions(
-        user,
-        requiredPermissions,
-        permissionsMode
-      );
-
-      if (!permissionsAllowed) {
-        await this.authorizationService.logDenied(
-          user.id,
-          user.email,
-          request.url || 'UNKNOWN_ROUTE',
-          {
-            requiredPermissions,
-            permissionsMode,
-            userRoles: user.roles,
-            scopeContext,
-            path: request.url,
-            method: request.method,
-          }
+      if (!scopeContext || scopeContext.type === ScopeType.GLOBAL) {
+        const permissionsAllowed = this.authorizationService.evaluatePermissions(
+          user,
+          requiredPermissions,
+          permissionsMode
         );
-        throw new ForbiddenException('Forbidden resource');
+
+        if (!permissionsAllowed) {
+          await this.authorizationService.logDenied(
+            user.id,
+            user.email,
+            request.url || 'UNKNOWN_ROUTE',
+            {
+              requiredPermissions,
+              permissionsMode,
+              userRoles: user.roles,
+              scopeContext,
+              path: request.url,
+              method: request.method,
+            }
+          );
+          throw new ForbiddenException('Forbidden resource');
+        }
       }
 
       // Check contract for individual permission + scope evaluation
       for (const permission of requiredPermissions) {
-        if (!this.authorizationService.can(user, permission, scopeContext)) {
+        const isAllowed = await this.authorizationService.canAsync(
+          user,
+          permission,
+          scopeContext
+        );
+        if (!isAllowed) {
           await this.authorizationService.logDenied(
             user.id,
             user.email,

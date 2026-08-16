@@ -22,6 +22,7 @@ describe('PermissionsGuard', () => {
       evaluateRoles: jest.fn(),
       evaluatePermissions: jest.fn(),
       can: jest.fn(),
+      canAsync: jest.fn().mockResolvedValue(true),
       logDenied: jest.fn().mockResolvedValue(undefined),
     };
 

@@ -69,6 +69,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         } else {
           message = payloadObj.message || (exception as any).message;
           code = payloadObj.code || this.getErrorCodeFromStatus(status);
+          details = payloadObj.details;
         }
       } else {
         message = (exception as any).message;

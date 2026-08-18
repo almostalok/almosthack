@@ -275,3 +275,42 @@ export interface ReorderChallengesInput {
   items: ReorderItemInput[];
 }
 
+// ==========================================
+// S2-04: PARTICIPANT REGISTRATION TYPES
+// ==========================================
+
+export enum ParticipantRegistrationStatus {
+  REGISTERED = 'REGISTERED',
+  WITHDRAWN = 'WITHDRAWN',
+}
+
+export interface ParticipantRegistrationEntity {
+  id: string;
+  hackathonId: string;
+  userId: string;
+  trackId: string | null;
+  challengeId: string | null;
+  status: ParticipantRegistrationStatus;
+  registeredAt: string;
+  withdrawnAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  track?: HackathonTrackEntity | null;
+  challenge?: HackathonChallengeEntity | null;
+}
+
+export interface EligibilityCheckResult {
+  isEligible: boolean;
+  reasons: string[];
+}
+
+export interface CreateParticipantRegistrationInput {
+  trackId?: string | null;
+  challengeId?: string | null;
+}
+
+export interface UpdateParticipantRegistrationInput {
+  trackId?: string | null;
+  challengeId?: string | null;
+}
+

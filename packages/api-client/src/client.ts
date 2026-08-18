@@ -329,6 +329,25 @@ export class ApiClient {
   public reorderTrackChallenges<T = any>(trackId: string, body: unknown, options?: RequestOptions): Promise<T> {
     return this.patch<T>(`/tracks/${trackId}/challenges/reorder`, body, options);
   }
+
+  // ==========================================
+  // S2-04: Participant Registration Domain APIs
+  // ==========================================
+  public getHackathonRegistration<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/hackathons/${hackathonId}/registration`, options);
+  }
+
+  public createHackathonRegistration<T = any>(hackathonId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/hackathons/${hackathonId}/registration`, body, options);
+  }
+
+  public updateHackathonRegistration<T = any>(hackathonId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.patch<T>(`/hackathons/${hackathonId}/registration`, body, options);
+  }
+
+  public withdrawFromHackathon<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
+    return this.delete<T>(`/hackathons/${hackathonId}/registration`, options);
+  }
 }
 
 

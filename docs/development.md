@@ -236,6 +236,36 @@ curl -X PATCH http://localhost:4000/api/v1/hackathons/<hackathon_id>/tracks/reor
   }'
 ```
 
+### 11. Participant Registration API Testing
+
+```bash
+# Register current user for hackathon
+curl -X POST http://localhost:4000/api/v1/hackathons/<hackathon_id>/registration \
+  -H "Content-Type: application/json" \
+  -H "Cookie: almosthack_session=<session_token>" \
+  -d '{
+    "trackId": "<track_id>",
+    "challengeId": "<challenge_id>"
+  }'
+
+# Get current user's registration
+curl -X GET http://localhost:4000/api/v1/hackathons/<hackathon_id>/registration \
+  -H "Cookie: almosthack_session=<session_token>"
+
+# Update registration track / challenge selection
+curl -X PATCH http://localhost:4000/api/v1/hackathons/<hackathon_id>/registration \
+  -H "Content-Type: application/json" \
+  -H "Cookie: almosthack_session=<session_token>" \
+  -d '{
+    "trackId": "<new_track_id>",
+    "challengeId": "<new_challenge_id>"
+  }'
+
+# Withdraw from hackathon
+curl -X DELETE http://localhost:4000/api/v1/hackathons/<hackathon_id>/registration \
+  -H "Cookie: almosthack_session=<session_token>"
+```
+
 ---
 
 ## Command Reference

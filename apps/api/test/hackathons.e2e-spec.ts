@@ -1169,7 +1169,110 @@ describe('Hackathon Domain & Lifecycle E2E', () => {
         .expect(409);
     });
   });
+
+  // ====================================================
+  // 12. PARTICIPANT REGISTRATION FLOW (S2-04)
+  // ====================================================
+  describe('12. Participant Registration Flow (S2-04)', () => {
+    let regHackathonId: string;
+    let regTrackId: string;
+    let regChallengeId: string;
+
+    beforeAll(async () => {
+      const now = Date.now();
+      const hRes = await request(app.getHttpServer())
+        .post(`/api/v1/organizations/${orgAId}/hackathons`)
+        .set('Cookie', cookieUserA)
+        .send({
+          name: `Registration Integration Hackathon ${timestamp}`,
+          slug: `reg-integ-${timestamp}`,
+          timezone: 'UTC',
+          registrationStartsAt: new Date(now - 3600000).toISOString(),
+          registrationEndsAt: new Date(now + 86400000).toISOString(),
+          startsAt: new Date(now + 172800000).toISOString(),
+          endsAt: new Date(now + 259200000).toISOString(),
+        })
+        .expect(201);
+      regHackathonId = hRes.body.data.id;
+
+      await request(app.getHttpServer())
+        .post(`/api/v1/hackathons/${regHackathonId}/publish`)
+        .set('Cookie', cookieUserA)
+        .expect(200);
+
+      const tRes = await request(app.getHttpServer())
+        .post(`/api/v1/hackathons/${regHackathonId}/tracks`)
+        .set('Cookie', cookieUserA)
+        .send({
+          name: 'Developer Tooling',
+          slug: 'developer-tooling',
+        })
+        .expect(201);
+      regTrackId = tRes.body.data.id;
+
+      const cRes = await request(app.getHttpServer())
+        .post(`/api/v1/tracks/${regTrackId}/challenges`)
+        .set('Cookie', cookieUserA)
+        .send({
+          name: 'Smart Terminal Emulator',
+          slug: 'smart-terminal-emulator',
+          problemStatement: 'Build a next-gen terminal.',
+          status: 'PUBLISHED',
+        })
+        .expect(201);
+      regChallengeId = cRes.body.data.id;
+    });
+
+    afterAll(async () => {
+      if (regHackathonId) {
+        await prisma.participantRegistration.deleteMany({ where: { hackathonId: regHackathonId } });
+        await prisma.hackathonChallenge.deleteMany({ where: { track: { hackathonId: regHackathonId } } });
+        await prisma.hackathonTrack.deleteMany({ where: { hackathonId: regHackathonId } });
+        await prisma.hackathonConfiguration.deleteMany({ where: { hackathonId: regHackathonId } });
+        await prisma.hackathon.deleteMany({ where: { id: regHackathonId } });
+      }
+    });
+
+    it('should allow user B to register as a participant on Hackathon A', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/hackathons/${regHackathonId}/registration`)
+        .set('Cookie', cookieUserB)
+        .send({
+          trackId: regTrackId,
+          challengeId: regChallengeId,
+        })
+        .expect(201);
+
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.hackathonId).toBe(regHackathonId);
+      expect(res.body.data.status).toBe('REGISTERED');
+      expect(res.body.data.track.name).toBe('Developer Tooling');
+    });
+
+    it('should allow user B to update registration and withdraw', async () => {
+      // Update
+      const updateRes = await request(app.getHttpServer())
+        .patch(`/api/v1/hackathons/${regHackathonId}/registration`)
+        .set('Cookie', cookieUserB)
+        .send({
+          trackId: null,
+          challengeId: null,
+        })
+        .expect(200);
+
+      expect(updateRes.body.data.trackId).toBeNull();
+
+      // Withdraw
+      const withdrawRes = await request(app.getHttpServer())
+        .delete(`/api/v1/hackathons/${regHackathonId}/registration`)
+        .set('Cookie', cookieUserB)
+        .expect(200);
+
+      expect(withdrawRes.body.success).toBe(true);
+    });
+  });
 });
+
 
 
 

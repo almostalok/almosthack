@@ -24,6 +24,9 @@ import {
   ChallengeStatus,
   HackathonTrackEntity,
   HackathonChallengeEntity,
+  ParticipantRegistrationStatus,
+  ParticipantRegistrationEntity,
+  EligibilityCheckResult,
 } from '@almosthack/types';
 import { isValidIanaTimezone, normalizeStringArray } from '@almosthack/validation';
 import { PrismaService } from '../../database/prisma.service';
@@ -44,6 +47,10 @@ import {
   UpdateChallengeDto,
   ReorderChallengesDto,
 } from './dto/challenge.dto';
+import {
+  CreateParticipantRegistrationDto,
+  UpdateParticipantRegistrationDto,
+} from './dto/registration.dto';
 import {
   HackathonResponseDto,
   HackathonLifecycleResponseDto,
@@ -1932,6 +1939,546 @@ export class HackathonsService {
     );
 
     return this.getTrackChallenges(userId, userRoles, trackId);
+  }
+
+  // ====================================================
+  // S2-04: PARTICIPANT REGISTRATION DOMAIN METHODS
+  // ====================================================
+
+  /**
+   * Helper: Formats ParticipantRegistration record to ParticipantRegistrationEntity.
+   */
+  public formatRegistration(reg: any): ParticipantRegistrationEntity {
+    return {
+      id: reg.id,
+      hackathonId: reg.hackathonId,
+      userId: reg.userId,
+      trackId: reg.trackId,
+      challengeId: reg.challengeId,
+      status: reg.status as ParticipantRegistrationStatus,
+      registeredAt: reg.registeredAt instanceof Date ? reg.registeredAt.toISOString() : reg.registeredAt,
+      withdrawnAt: reg.withdrawnAt ? (reg.withdrawnAt instanceof Date ? reg.withdrawnAt.toISOString() : reg.withdrawnAt) : null,
+      createdAt: reg.createdAt instanceof Date ? reg.createdAt.toISOString() : reg.createdAt,
+      updatedAt: reg.updatedAt instanceof Date ? reg.updatedAt.toISOString() : reg.updatedAt,
+      track: reg.track ? this.formatTrack(reg.track) : null,
+      challenge: reg.challenge ? this.formatChallenge(reg.challenge) : null,
+    };
+  }
+
+  /**
+   * Evaluates user profile eligibility against HackathonConfiguration.
+   */
+  public checkUserEligibility(user: any, config: any): EligibilityCheckResult {
+    const reasons: string[] = [];
+
+    if (!config) {
+      return { isEligible: true, reasons: [] };
+    }
+
+    if (config.eligibilityType === EligibilityType.STUDENTS_ONLY) {
+      if (!user?.college || !user.college.trim()) {
+        reasons.push('Student status required: College profile information is missing.');
+      }
+    }
+
+    // Allowed Colleges check
+    if (config.allowedColleges && config.allowedColleges.length > 0) {
+      const userCollegeNorm = (user?.college || '').trim().toLowerCase();
+      const isCollegeAllowed = config.allowedColleges.some(
+        (c: string) => c.trim().toLowerCase() === userCollegeNorm
+      );
+      if (!userCollegeNorm || !isCollegeAllowed) {
+        reasons.push('College is not in the list of allowed institutions.');
+      }
+    }
+
+    // Allowed Branches check
+    if (config.allowedBranches && config.allowedBranches.length > 0) {
+      const userBranchNorm = (user?.branch || '').trim().toLowerCase();
+      const isBranchAllowed = config.allowedBranches.some(
+        (b: string) => b.trim().toLowerCase() === userBranchNorm
+      );
+      if (!userBranchNorm || !isBranchAllowed) {
+        reasons.push('Academic branch is not in the list of allowed branches.');
+      }
+    }
+
+    // Graduation Year range check
+    if (config.graduationYearFrom !== null && config.graduationYearFrom !== undefined) {
+      if (!user?.graduationYear || user.graduationYear < config.graduationYearFrom) {
+        reasons.push(`Graduation year must be on or after ${config.graduationYearFrom}.`);
+      }
+    }
+    if (config.graduationYearTo !== null && config.graduationYearTo !== undefined) {
+      if (!user?.graduationYear || user.graduationYear > config.graduationYearTo) {
+        reasons.push(`Graduation year must be on or before ${config.graduationYearTo}.`);
+      }
+    }
+
+    return {
+      isEligible: reasons.length === 0,
+      reasons,
+    };
+  }
+
+  /**
+   * Retrieves current user's registration for a hackathon.
+   */
+  public async getParticipantRegistration(
+    userId: string,
+    hackathonId: string
+  ): Promise<ParticipantRegistrationEntity | null> {
+    const registration = await this.prisma.participantRegistration.findUnique({
+      where: {
+        hackathonId_userId: {
+          hackathonId,
+          userId,
+        },
+      },
+      include: {
+        track: true,
+        challenge: true,
+      },
+    });
+
+    if (!registration) {
+      return null;
+    }
+
+    return this.formatRegistration(registration);
+  }
+
+  /**
+   * Registers current user for a hackathon (or reactivates a previous withdrawn registration).
+   */
+  public async createParticipantRegistration(
+    userId: string,
+    userEmail: string,
+    hackathonId: string,
+    dto: CreateParticipantRegistrationDto
+  ): Promise<ParticipantRegistrationEntity> {
+    const hackathon = await this.prisma.hackathon.findUnique({
+      where: { id: hackathonId },
+      include: { configuration: true },
+    });
+
+    if (!hackathon) {
+      throw new NotFoundException({
+        code: 'HACKATHON_NOT_FOUND',
+        message: `Hackathon with id '${hackathonId}' was not found.`,
+      });
+    }
+
+    const now = new Date();
+    const effectiveStatus = this.deriveEffectiveStatus(
+      hackathon.status as HackathonStatus,
+      hackathon.startsAt,
+      hackathon.endsAt,
+      now
+    );
+
+    if (
+      effectiveStatus === HackathonStatus.DRAFT ||
+      effectiveStatus === HackathonStatus.COMPLETED ||
+      effectiveStatus === HackathonStatus.ARCHIVED
+    ) {
+      throw new ConflictException({
+        code: 'HACKATHON_REGISTRATION_UNAVAILABLE',
+        message: `Registration is unavailable when hackathon is in '${effectiveStatus}' status.`,
+      });
+    }
+
+    const regStatus = this.deriveRegistrationStatus(
+      hackathon.registrationStartsAt,
+      hackathon.registrationEndsAt,
+      now
+    );
+
+    if (regStatus !== RegistrationStatus.OPEN) {
+      throw new ConflictException({
+        code: 'REGISTRATION_NOT_OPEN',
+        message: `Registration is not open. Current registration window status: ${regStatus}`,
+      });
+    }
+
+    // Evaluate Eligibility
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException({
+        code: 'USER_NOT_FOUND',
+        message: 'User profile not found.',
+      });
+    }
+
+    const config = hackathon.configuration || (await this.ensureConfigurationExists(hackathonId));
+    const eligibility = this.checkUserEligibility(user, config);
+
+    if (!eligibility.isEligible) {
+      throw new ForbiddenException({
+        code: 'REGISTRATION_NOT_ELIGIBLE',
+        message: 'User is not eligible to register for this hackathon.',
+        details: eligibility.reasons,
+      });
+    }
+
+    // Validate Track & Challenge Selection
+    if (dto.trackId) {
+      const track = await this.prisma.hackathonTrack.findUnique({
+        where: { id: dto.trackId },
+      });
+      if (!track || track.hackathonId !== hackathonId) {
+        throw new BadRequestException({
+          code: 'INVALID_TRACK_SELECTION',
+          message: 'Selected track does not belong to this hackathon.',
+        });
+      }
+      if (!track.isActive) {
+        throw new BadRequestException({
+          code: 'TRACK_NOT_ACTIVE',
+          message: 'Selected track is not active.',
+        });
+      }
+    }
+
+    if (dto.challengeId) {
+      if (!dto.trackId) {
+        throw new BadRequestException({
+          code: 'TRACK_REQUIRED_FOR_CHALLENGE',
+          message: 'A track must be selected when selecting a challenge.',
+        });
+      }
+      const challenge = await this.prisma.hackathonChallenge.findUnique({
+        where: { id: dto.challengeId },
+      });
+      if (!challenge || challenge.trackId !== dto.trackId) {
+        throw new BadRequestException({
+          code: 'INVALID_CHALLENGE_SELECTION',
+          message: 'Selected challenge does not belong to the selected track.',
+        });
+      }
+      if (challenge.status !== ChallengeStatus.PUBLISHED) {
+        throw new BadRequestException({
+          code: 'CHALLENGE_NOT_SELECTABLE',
+          message: 'Selected challenge is not published.',
+        });
+      }
+    }
+
+    // Check existing registration
+    const existing = await this.prisma.participantRegistration.findUnique({
+      where: {
+        hackathonId_userId: {
+          hackathonId,
+          userId,
+        },
+      },
+    });
+
+    if (existing) {
+      if (existing.status === ParticipantRegistrationStatus.REGISTERED) {
+        throw new ConflictException({
+          code: 'REGISTRATION_ALREADY_EXISTS',
+          message: 'User is already registered for this hackathon.',
+        });
+      }
+
+      // Reactivate withdrawn registration
+      const [updated] = await this.prisma.$transaction([
+        this.prisma.participantRegistration.update({
+          where: { id: existing.id },
+          data: {
+            status: ParticipantRegistrationStatus.REGISTERED,
+            trackId: dto.trackId || null,
+            challengeId: dto.challengeId || null,
+            registeredAt: now,
+            withdrawnAt: null,
+          },
+          include: {
+            track: true,
+            challenge: true,
+          },
+        }),
+        this.prisma.auditLog.create({
+          data: {
+            actorId: userId,
+            actorEmail: userEmail,
+            action: 'participant.registration_created',
+            targetEntity: 'Hackathon',
+            targetId: hackathonId,
+            metadata: {
+              organizationId: hackathon.organizationId,
+              registrationId: existing.id,
+              trackId: dto.trackId || null,
+              challengeId: dto.challengeId || null,
+              reactivated: true,
+            },
+          },
+        }),
+      ]);
+
+      return this.formatRegistration(updated);
+    }
+
+    // Create new registration atomically with audit log
+    const [created] = await this.prisma.$transaction([
+      this.prisma.participantRegistration.create({
+        data: {
+          hackathonId,
+          userId,
+          trackId: dto.trackId || null,
+          challengeId: dto.challengeId || null,
+          status: ParticipantRegistrationStatus.REGISTERED,
+          registeredAt: now,
+        },
+        include: {
+          track: true,
+          challenge: true,
+        },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          actorId: userId,
+          actorEmail: userEmail,
+          action: 'participant.registration_created',
+          targetEntity: 'Hackathon',
+          targetId: hackathonId,
+          metadata: {
+            organizationId: hackathon.organizationId,
+            trackId: dto.trackId || null,
+            challengeId: dto.challengeId || null,
+          },
+        },
+      }),
+    ]);
+
+    return this.formatRegistration(created);
+  }
+
+  /**
+   * Updates allowed track/challenge selection for current user's registration.
+   */
+  public async updateParticipantRegistration(
+    userId: string,
+    userEmail: string,
+    hackathonId: string,
+    dto: UpdateParticipantRegistrationDto
+  ): Promise<ParticipantRegistrationEntity> {
+    const hackathon = await this.prisma.hackathon.findUnique({
+      where: { id: hackathonId },
+    });
+
+    if (!hackathon) {
+      throw new NotFoundException({
+        code: 'HACKATHON_NOT_FOUND',
+        message: `Hackathon with id '${hackathonId}' was not found.`,
+      });
+    }
+
+    const now = new Date();
+    const effectiveStatus = this.deriveEffectiveStatus(
+      hackathon.status as HackathonStatus,
+      hackathon.startsAt,
+      hackathon.endsAt,
+      now
+    );
+
+    if (effectiveStatus === HackathonStatus.COMPLETED || effectiveStatus === HackathonStatus.ARCHIVED) {
+      throw new ConflictException({
+        code: 'HACKATHON_REGISTRATION_LOCKED',
+        message: `Registration selections cannot be updated when hackathon is in '${effectiveStatus}' status.`,
+      });
+    }
+
+    const existing = await this.prisma.participantRegistration.findUnique({
+      where: {
+        hackathonId_userId: {
+          hackathonId,
+          userId,
+        },
+      },
+    });
+
+    if (!existing) {
+      throw new NotFoundException({
+        code: 'REGISTRATION_NOT_FOUND',
+        message: 'No registration found for this hackathon.',
+      });
+    }
+
+    if (existing.status !== ParticipantRegistrationStatus.REGISTERED) {
+      throw new ConflictException({
+        code: 'REGISTRATION_NOT_ACTIVE',
+        message: 'Cannot update selection on a withdrawn registration.',
+      });
+    }
+
+    const targetTrackId = dto.trackId !== undefined ? (dto.trackId || null) : existing.trackId;
+    let targetChallengeId = dto.challengeId !== undefined ? (dto.challengeId || null) : existing.challengeId;
+
+    if (dto.trackId !== undefined && !dto.trackId) {
+      targetChallengeId = null;
+    }
+
+    // Validate Track
+    if (targetTrackId) {
+      const track = await this.prisma.hackathonTrack.findUnique({
+        where: { id: targetTrackId },
+      });
+      if (!track || track.hackathonId !== hackathonId) {
+        throw new BadRequestException({
+          code: 'INVALID_TRACK_SELECTION',
+          message: 'Selected track does not belong to this hackathon.',
+        });
+      }
+      if (!track.isActive) {
+        throw new BadRequestException({
+          code: 'TRACK_NOT_ACTIVE',
+          message: 'Selected track is not active.',
+        });
+      }
+    }
+
+    // Validate Challenge
+    if (targetChallengeId) {
+      if (!targetTrackId) {
+        throw new BadRequestException({
+          code: 'TRACK_REQUIRED_FOR_CHALLENGE',
+          message: 'A track must be selected when selecting a challenge.',
+        });
+      }
+      const challenge = await this.prisma.hackathonChallenge.findUnique({
+        where: { id: targetChallengeId },
+      });
+      if (!challenge || challenge.trackId !== targetTrackId) {
+        throw new BadRequestException({
+          code: 'INVALID_CHALLENGE_SELECTION',
+          message: 'Selected challenge does not belong to the selected track.',
+        });
+      }
+      if (challenge.status !== ChallengeStatus.PUBLISHED) {
+        throw new BadRequestException({
+          code: 'CHALLENGE_NOT_SELECTABLE',
+          message: 'Selected challenge is not published.',
+        });
+      }
+    }
+
+    const [updated] = await this.prisma.$transaction([
+      this.prisma.participantRegistration.update({
+        where: { id: existing.id },
+        data: {
+          trackId: targetTrackId,
+          challengeId: targetChallengeId,
+        },
+        include: {
+          track: true,
+          challenge: true,
+        },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          actorId: userId,
+          actorEmail: userEmail,
+          action: 'participant.registration_updated',
+          targetEntity: 'Hackathon',
+          targetId: hackathonId,
+          metadata: {
+            organizationId: hackathon.organizationId,
+            registrationId: existing.id,
+            trackId: targetTrackId,
+            challengeId: targetChallengeId,
+          },
+        },
+      }),
+    ]);
+
+    return this.formatRegistration(updated);
+  }
+
+  /**
+   * Withdraws current user's registration from a hackathon.
+   */
+  public async withdrawParticipantRegistration(
+    userId: string,
+    userEmail: string,
+    hackathonId: string
+  ): Promise<{ success: boolean; id: string }> {
+    const hackathon = await this.prisma.hackathon.findUnique({
+      where: { id: hackathonId },
+    });
+
+    if (!hackathon) {
+      throw new NotFoundException({
+        code: 'HACKATHON_NOT_FOUND',
+        message: `Hackathon with id '${hackathonId}' was not found.`,
+      });
+    }
+
+    const now = new Date();
+    const effectiveStatus = this.deriveEffectiveStatus(
+      hackathon.status as HackathonStatus,
+      hackathon.startsAt,
+      hackathon.endsAt,
+      now
+    );
+
+    if (effectiveStatus === HackathonStatus.COMPLETED || effectiveStatus === HackathonStatus.ARCHIVED) {
+      throw new ConflictException({
+        code: 'HACKATHON_REGISTRATION_LOCKED',
+        message: `Cannot withdraw from a hackathon in '${effectiveStatus}' status.`,
+      });
+    }
+
+    const existing = await this.prisma.participantRegistration.findUnique({
+      where: {
+        hackathonId_userId: {
+          hackathonId,
+          userId,
+        },
+      },
+    });
+
+    if (!existing) {
+      throw new NotFoundException({
+        code: 'REGISTRATION_NOT_FOUND',
+        message: 'No registration found for this hackathon.',
+      });
+    }
+
+    if (existing.status === ParticipantRegistrationStatus.WITHDRAWN) {
+      throw new ConflictException({
+        code: 'ALREADY_WITHDRAWN',
+        message: 'Registration has already been withdrawn.',
+      });
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.participantRegistration.update({
+        where: { id: existing.id },
+        data: {
+          status: ParticipantRegistrationStatus.WITHDRAWN,
+          withdrawnAt: now,
+        },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          actorId: userId,
+          actorEmail: userEmail,
+          action: 'participant.registration_withdrawn',
+          targetEntity: 'Hackathon',
+          targetId: hackathonId,
+          metadata: {
+            organizationId: hackathon.organizationId,
+            registrationId: existing.id,
+          },
+        },
+      }),
+    ]);
+
+    return { success: true, id: existing.id };
   }
 }
 

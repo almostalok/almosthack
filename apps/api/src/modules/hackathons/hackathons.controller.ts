@@ -24,6 +24,8 @@ import {
   createChallengeSchema,
   updateChallengeSchema,
   reorderChallengesSchema,
+  createParticipantRegistrationSchema,
+  updateParticipantRegistrationSchema,
 } from '@almosthack/validation';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
@@ -47,6 +49,10 @@ import {
   UpdateChallengeDto,
   ReorderChallengesDto,
 } from './dto/challenge.dto';
+import {
+  CreateParticipantRegistrationDto,
+  UpdateParticipantRegistrationDto,
+} from './dto/registration.dto';
 
 @Controller()
 @UseGuards(SessionAuthGuard, PermissionsGuard)
@@ -615,5 +621,92 @@ export class HackathonsController {
       challengeId
     );
   }
+
+  // ====================================================
+  // S2-04: PARTICIPANT REGISTRATION CONTROLLER ENDPOINTS
+  // ====================================================
+
+  /**
+   * GET /api/v1/hackathons/:hackathonId/registration
+   * Gets current user's registration for a hackathon.
+   */
+  @Get('hackathons/:hackathonId/registration')
+  public async getRegistration(
+    @CurrentUser() user: { id: string },
+    @Param('hackathonId') hackathonId: string
+  ) {
+    return this.hackathonsService.getParticipantRegistration(user.id, hackathonId);
+  }
+
+  /**
+   * POST /api/v1/hackathons/:hackathonId/registration
+   * Registers current user for a hackathon.
+   */
+  @Post('hackathons/:hackathonId/registration')
+  public async registerParticipant(
+    @CurrentUser() user: { id: string; email: string },
+    @Param('hackathonId') hackathonId: string,
+    @Body() dto: CreateParticipantRegistrationDto
+  ) {
+    const parseResult = createParticipantRegistrationSchema.safeParse(dto);
+    if (!parseResult.success) {
+      throw new BadRequestException({
+        code: 'INVALID_REGISTRATION_PAYLOAD',
+        message: 'Invalid registration payload',
+        details: parseResult.error.flatten(),
+      });
+    }
+
+    return this.hackathonsService.createParticipantRegistration(
+      user.id,
+      user.email,
+      hackathonId,
+      parseResult.data as CreateParticipantRegistrationDto
+    );
+  }
+
+  /**
+   * PATCH /api/v1/hackathons/:hackathonId/registration
+   * Updates current user's registration track/challenge selections.
+   */
+  @Patch('hackathons/:hackathonId/registration')
+  public async updateRegistration(
+    @CurrentUser() user: { id: string; email: string },
+    @Param('hackathonId') hackathonId: string,
+    @Body() dto: UpdateParticipantRegistrationDto
+  ) {
+    const parseResult = updateParticipantRegistrationSchema.safeParse(dto);
+    if (!parseResult.success) {
+      throw new BadRequestException({
+        code: 'INVALID_REGISTRATION_PAYLOAD',
+        message: 'Invalid registration update payload',
+        details: parseResult.error.flatten(),
+      });
+    }
+
+    return this.hackathonsService.updateParticipantRegistration(
+      user.id,
+      user.email,
+      hackathonId,
+      parseResult.data as UpdateParticipantRegistrationDto
+    );
+  }
+
+  /**
+   * DELETE /api/v1/hackathons/:hackathonId/registration
+   * Withdraws current user's registration from a hackathon.
+   */
+  @Delete('hackathons/:hackathonId/registration')
+  public async withdrawRegistration(
+    @CurrentUser() user: { id: string; email: string },
+    @Param('hackathonId') hackathonId: string
+  ) {
+    return this.hackathonsService.withdrawParticipantRegistration(
+      user.id,
+      user.email,
+      hackathonId
+    );
+  }
 }
+
 

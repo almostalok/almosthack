@@ -121,6 +121,23 @@ The backend is designed as a modular monolith using NestJS. Rather than microser
 - **Multi-Tenant Isolation & Nested Scope**: Validates parent-child relationships and organization membership. Cross-tenant or mismatched parent accesses are rejected with `403 Forbidden` / `404 Not Found`.
 - **Audit Trails**: Track and Challenge CRUD/reorder mutations emit structured `AuditLog` records (`hackathon.track_created`, `hackathon.track_updated`, `hackathon.track_deleted`, `hackathon.tracks_reordered`, `hackathon.challenge_created`, `hackathon.challenge_updated`, `hackathon.challenge_deleted`, `hackathon.challenges_reordered`).
 
+### 12. Participant Registration Architecture (`S2-04`)
+- **Domain Hierarchy**: `User -> ParticipantRegistration -> Hackathon (-> Track -> Challenge)`
+  - `ParticipantRegistration`: Belongs to `User` and `Hackathon`. `@@unique([hackathonId, userId])` enforces one registration per participant per hackathon at the database layer.
+- **Server-Authoritative Evaluation**:
+  - Registration window is evaluated against S2-01 authoritative registration window: $[registrationStartsAt, registrationEndsAt)$.
+  - Lifecycle state enforcement: registrations are blocked when hackathon is `DRAFT`, `COMPLETED`, or `ARCHIVED`.
+  - Eligibility evaluation: validated against S2-02 `HackathonConfiguration` (student requirement, allowed colleges, allowed branches, graduation year bounds).
+- **Parent Scope Integrity**:
+  - `trackId`: must belong to target `Hackathon` and be active.
+  - `challengeId`: must belong to selected `HackathonTrack` and be `PUBLISHED`.
+- **Reactivation & Idempotency**:
+  - Withdrawn participants (`status = WITHDRAWN`) can reactivate registration during an open window without creating duplicate database rows.
+- **Concurrency & Race Condition Defense**:
+  - Unique composite constraint prevents duplicate concurrent registrations.
+- **Audit Trails**: Registration events emit structured `AuditLog` records (`participant.registration_created`, `participant.registration_updated`, `participant.registration_withdrawn`).
+
+
 
 
 

@@ -484,4 +484,22 @@ export const reorderChallengesSchema = z
 
 export type ReorderChallengesSchema = z.infer<typeof reorderChallengesSchema>;
 
+// ==========================================
+// S2-04: PARTICIPANT REGISTRATION SCHEMAS
+// ==========================================
+
+export const createParticipantRegistrationSchema = z.object({
+  trackId: z.string().uuid({ message: 'trackId must be a valid UUID' }).nullable().optional(),
+  challengeId: z.string().uuid({ message: 'challengeId must be a valid UUID' }).nullable().optional(),
+});
+
+export type CreateParticipantRegistrationSchema = z.infer<typeof createParticipantRegistrationSchema>;
+
+export const updateParticipantRegistrationSchema = z.object({
+  trackId: z.string().uuid({ message: 'trackId must be a valid UUID' }).nullable().optional(),
+  challengeId: z.string().uuid({ message: 'challengeId must be a valid UUID' }).nullable().optional(),
+});
+
+export type UpdateParticipantRegistrationSchema = z.infer<typeof updateParticipantRegistrationSchema>;
+
 

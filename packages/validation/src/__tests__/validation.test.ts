@@ -13,6 +13,8 @@ import {
   createChallengeSchema,
   updateChallengeSchema,
   reorderChallengesSchema,
+  createParticipantRegistrationSchema,
+  updateParticipantRegistrationSchema,
 } from '../hackathon';
 
 describe('Shared Validation Schemas', () => {
@@ -243,6 +245,55 @@ describe('Shared Validation Schemas', () => {
       expect(res.success).toBe(true);
     });
   });
+
+  describe('Participant Registration Validation Schemas (S2-04)', () => {
+    const validTrackId = '123e4567-e89b-12d3-a456-426614174001';
+    const validChallengeId = '123e4567-e89b-12d3-a456-426614174002';
+
+    it('should accept empty payload, track-only, and track+challenge payload', () => {
+      expect(createParticipantRegistrationSchema.safeParse({}).success).toBe(true);
+      expect(
+        createParticipantRegistrationSchema.safeParse({
+          trackId: validTrackId,
+        }).success
+      ).toBe(true);
+      expect(
+        createParticipantRegistrationSchema.safeParse({
+          trackId: validTrackId,
+          challengeId: validChallengeId,
+        }).success
+      ).toBe(true);
+    });
+
+    it('should reject invalid UUIDs for trackId or challengeId', () => {
+      expect(
+        createParticipantRegistrationSchema.safeParse({
+          trackId: 'not-a-uuid',
+        }).success
+      ).toBe(false);
+      expect(
+        createParticipantRegistrationSchema.safeParse({
+          challengeId: 'not-a-uuid',
+        }).success
+      ).toBe(false);
+    });
+
+    it('should validate update participant registration payload', () => {
+      expect(
+        updateParticipantRegistrationSchema.safeParse({
+          trackId: null,
+          challengeId: null,
+        }).success
+      ).toBe(true);
+      expect(
+        updateParticipantRegistrationSchema.safeParse({
+          trackId: validTrackId,
+          challengeId: validChallengeId,
+        }).success
+      ).toBe(true);
+    });
+  });
 });
+
 
 

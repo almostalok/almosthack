@@ -88,6 +88,17 @@ describe('HackathonsService Unit Tests', () => {
         delete: jest.fn(),
         aggregate: jest.fn().mockResolvedValue({ _max: { displayOrder: 0 } }),
       },
+      user: {
+        findUnique: jest.fn(),
+      },
+      participantRegistration: {
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+      },
       $transaction: jest.fn().mockImplementation(async (arg) => {
         if (Array.isArray(arg)) {
           return Promise.all(arg);
@@ -868,6 +879,251 @@ describe('HackathonsService Unit Tests', () => {
       expect(prisma.auditLog.create).toHaveBeenCalled();
     });
   });
+
+  describe('11. Participant Registration (S2-04)', () => {
+    const mockParticipantUser = {
+      id: 'participant-user-1',
+      email: 'student@example.com',
+      name: 'Student Participant',
+      college: 'MIT',
+      branch: 'Computer Science',
+      graduationYear: 2026,
+      skills: ['TypeScript', 'Python'],
+    };
+
+    const openHackathon = {
+      ...sampleHackathonRecord,
+      status: HackathonStatus.PUBLISHED,
+      visibility: HackathonVisibility.PUBLIC,
+      registrationStartsAt: new Date(Date.now() - 3600000), // 1h ago
+      registrationEndsAt: new Date(Date.now() + 3600000),   // 1h in future
+      startsAt: new Date(Date.now() + 7200000),             // 2h in future
+      endsAt: new Date(Date.now() + 86400000),
+      configuration: {
+        id: 'cfg-1',
+        hackathonId: sampleHackathonRecord.id,
+        eligibilityType: 'OPEN',
+        allowedBranches: [],
+        allowedColleges: [],
+        graduationYearFrom: null,
+        graduationYearTo: null,
+      },
+    };
+
+    const sampleTrack = {
+      id: 'track-uuid-1',
+      hackathonId: sampleHackathonRecord.id,
+      name: 'AI Agents',
+      slug: 'ai-agents',
+      shortDescription: 'Build AI agents',
+      description: 'Full description of AI track',
+      displayOrder: 1,
+      isActive: true,
+      createdAt: new Date('2026-08-16T12:00:00Z'),
+      updatedAt: new Date('2026-08-16T12:00:00Z'),
+    };
+
+    const sampleChallenge = {
+      id: 'challenge-uuid-1',
+      trackId: sampleTrack.id,
+      name: 'Autonomous PR Reviewer',
+      slug: 'autonomous-pr-reviewer',
+      description: 'Review PRs',
+      problemStatement: 'Design an AI system to review Git pull requests.',
+      requirements: 'Outputs markdown diff comments.',
+      constraints: 'Fast response.',
+      expectedOutcome: 'Working prototype.',
+      resources: [],
+      displayOrder: 1,
+      status: 'PUBLISHED',
+      createdAt: new Date('2026-08-16T12:00:00Z'),
+      updatedAt: new Date('2026-08-16T12:00:00Z'),
+    };
+
+    const sampleRegistration = {
+      id: 'reg-uuid-1',
+      hackathonId: sampleHackathonRecord.id,
+      userId: mockParticipantUser.id,
+      trackId: sampleTrack.id,
+      challengeId: sampleChallenge.id,
+      status: 'REGISTERED',
+      registeredAt: new Date(),
+      withdrawnAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      track: sampleTrack,
+      challenge: sampleChallenge,
+    };
+
+    it('should correctly evaluate user eligibility criteria', () => {
+      // Open eligibility
+      expect(service.checkUserEligibility(mockParticipantUser, { eligibilityType: 'OPEN' }).isEligible).toBe(true);
+
+      // Student only - valid college
+      expect(service.checkUserEligibility(mockParticipantUser, { eligibilityType: 'STUDENTS_ONLY' }).isEligible).toBe(true);
+      // Student only - missing college
+      expect(service.checkUserEligibility({ ...mockParticipantUser, college: '' }, { eligibilityType: 'STUDENTS_ONLY' }).isEligible).toBe(false);
+
+      // Allowed colleges (normalized)
+      expect(service.checkUserEligibility(mockParticipantUser, { allowedColleges: ['mit', 'stanford'] }).isEligible).toBe(true);
+      expect(service.checkUserEligibility(mockParticipantUser, { allowedColleges: ['harvard', 'oxford'] }).isEligible).toBe(false);
+
+      // Allowed branches (normalized)
+      expect(service.checkUserEligibility(mockParticipantUser, { allowedBranches: ['Computer Science', 'Electrical'] }).isEligible).toBe(true);
+      expect(service.checkUserEligibility(mockParticipantUser, { allowedBranches: ['Mechanical'] }).isEligible).toBe(false);
+
+      // Graduation year range
+      expect(service.checkUserEligibility(mockParticipantUser, { graduationYearFrom: 2025, graduationYearTo: 2027 }).isEligible).toBe(true);
+      expect(service.checkUserEligibility(mockParticipantUser, { graduationYearFrom: 2027 }).isEligible).toBe(false);
+      expect(service.checkUserEligibility(mockParticipantUser, { graduationYearTo: 2024 }).isEligible).toBe(false);
+    });
+
+    it('should register participant successfully during open registration window', async () => {
+      prisma.hackathon.findUnique.mockResolvedValue(openHackathon);
+      prisma.user.findUnique.mockResolvedValue(mockParticipantUser);
+      prisma.hackathonTrack.findUnique.mockResolvedValue(sampleTrack);
+      prisma.hackathonChallenge.findUnique.mockResolvedValue(sampleChallenge);
+      prisma.participantRegistration.findUnique.mockResolvedValue(null);
+      (prisma.$transaction as jest.Mock).mockResolvedValue([sampleRegistration, {}]);
+
+      const res = await service.createParticipantRegistration(
+        mockParticipantUser.id,
+        mockParticipantUser.email,
+        openHackathon.id,
+        {
+          trackId: sampleTrack.id,
+          challengeId: sampleChallenge.id,
+        }
+      );
+
+      expect(res.id).toBe(sampleRegistration.id);
+      expect(res.status).toBe('REGISTERED');
+      expect(prisma.$transaction).toHaveBeenCalled();
+    });
+
+    it('should reject registration when registration window is closed', async () => {
+      const closedHackathon = {
+        ...openHackathon,
+        registrationStartsAt: new Date(Date.now() - 7200000),
+        registrationEndsAt: new Date(Date.now() - 3600000), // ended 1h ago
+      };
+      prisma.hackathon.findUnique.mockResolvedValue(closedHackathon);
+
+      await expect(
+        service.createParticipantRegistration(
+          mockParticipantUser.id,
+          mockParticipantUser.email,
+          closedHackathon.id,
+          {}
+        )
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should reject registration when user is ineligible', async () => {
+      const restrictedHackathon = {
+        ...openHackathon,
+        configuration: {
+          id: 'cfg-restricted',
+          hackathonId: sampleHackathonRecord.id,
+          eligibilityType: 'OPEN',
+          allowedColleges: ['Stanford University'], // User is from MIT
+          allowedBranches: [],
+          graduationYearFrom: null,
+          graduationYearTo: null,
+        },
+      };
+      prisma.hackathon.findUnique.mockResolvedValue(restrictedHackathon);
+      prisma.user.findUnique.mockResolvedValue(mockParticipantUser);
+
+      await expect(
+        service.createParticipantRegistration(
+          mockParticipantUser.id,
+          mockParticipantUser.email,
+          restrictedHackathon.id,
+          {}
+        )
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should reject registration on duplicate active registration', async () => {
+      prisma.hackathon.findUnique.mockResolvedValue(openHackathon);
+      prisma.user.findUnique.mockResolvedValue(mockParticipantUser);
+      prisma.participantRegistration.findUnique.mockResolvedValue(sampleRegistration);
+
+      await expect(
+        service.createParticipantRegistration(
+          mockParticipantUser.id,
+          mockParticipantUser.email,
+          openHackathon.id,
+          {}
+        )
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should reactivate registration when user was previously withdrawn', async () => {
+      const withdrawnRegistration = {
+        ...sampleRegistration,
+        status: 'WITHDRAWN',
+        withdrawnAt: new Date(),
+      };
+      prisma.hackathon.findUnique.mockResolvedValue(openHackathon);
+      prisma.user.findUnique.mockResolvedValue(mockParticipantUser);
+      prisma.participantRegistration.findUnique.mockResolvedValue(withdrawnRegistration);
+      (prisma.$transaction as jest.Mock).mockResolvedValue([
+        { ...sampleRegistration, status: 'REGISTERED', withdrawnAt: null },
+        {},
+      ]);
+
+      const res = await service.createParticipantRegistration(
+        mockParticipantUser.id,
+        mockParticipantUser.email,
+        openHackathon.id,
+        {}
+      );
+
+      expect(res.status).toBe('REGISTERED');
+      expect(prisma.$transaction).toHaveBeenCalled();
+    });
+
+    it('should update participant registration selection', async () => {
+      prisma.hackathon.findUnique.mockResolvedValue(openHackathon);
+      prisma.participantRegistration.findUnique.mockResolvedValue(sampleRegistration);
+      prisma.hackathonTrack.findUnique.mockResolvedValue(sampleTrack);
+      prisma.hackathonChallenge.findUnique.mockResolvedValue(sampleChallenge);
+      (prisma.$transaction as jest.Mock).mockResolvedValue([
+        { ...sampleRegistration, trackId: sampleTrack.id },
+        {},
+      ]);
+
+      const res = await service.updateParticipantRegistration(
+        mockParticipantUser.id,
+        mockParticipantUser.email,
+        openHackathon.id,
+        {
+          trackId: sampleTrack.id,
+        }
+      );
+
+      expect(res.id).toBe(sampleRegistration.id);
+      expect(prisma.$transaction).toHaveBeenCalled();
+    });
+
+    it('should withdraw registration and log audit', async () => {
+      prisma.hackathon.findUnique.mockResolvedValue(openHackathon);
+      prisma.participantRegistration.findUnique.mockResolvedValue(sampleRegistration);
+      (prisma.$transaction as jest.Mock).mockResolvedValue([{}, {}]);
+
+      const res = await service.withdrawParticipantRegistration(
+        mockParticipantUser.id,
+        mockParticipantUser.email,
+        openHackathon.id
+      );
+
+      expect(res.success).toBe(true);
+      expect(prisma.$transaction).toHaveBeenCalled();
+    });
+  });
 });
+
 
 

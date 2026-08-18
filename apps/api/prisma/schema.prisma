@@ -39,6 +39,7 @@ model User {
   orgMemberships OrganizationMember[]
   notifications  Notification[]
   sessions       Session[]
+  registrations  ParticipantRegistration[]
 
   @@map("users")
 }
@@ -148,6 +149,7 @@ model Hackathon {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   configuration HackathonConfiguration?
   tracks        HackathonTrack[]
+  registrations ParticipantRegistration[]
 
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -231,6 +233,7 @@ model HackathonTrack {
 
   hackathon        Hackathon            @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
   challenges       HackathonChallenge[]
+  registrations    ParticipantRegistration[]
 
   @@unique([hackathonId, slug])
   @@index([hackathonId])
@@ -261,12 +264,42 @@ model HackathonChallenge {
   updatedAt        DateTime        @updatedAt
 
   track            HackathonTrack  @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  registrations    ParticipantRegistration[]
 
   @@unique([trackId, slug])
   @@index([trackId])
   @@index([status])
   @@index([displayOrder])
   @@map("hackathon_challenges")
+}
+
+enum ParticipantRegistrationStatus {
+  REGISTERED
+  WITHDRAWN
+}
+
+model ParticipantRegistration {
+  id           String                        @id @default(uuid())
+  hackathonId  String
+  userId       String
+  trackId      String?
+  challengeId  String?
+  status       ParticipantRegistrationStatus @default(REGISTERED)
+  registeredAt DateTime                      @default(now())
+  withdrawnAt  DateTime?
+  createdAt    DateTime                      @default(now())
+  updatedAt    DateTime                      @updatedAt
+
+  hackathon    Hackathon                     @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  user         User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track        HackathonTrack?               @relation(fields: [trackId], references: [id], onDelete: SetNull)
+  challenge    HackathonChallenge?           @relation(fields: [challengeId], references: [id], onDelete: SetNull)
+
+  @@unique([hackathonId, userId])
+  @@index([hackathonId])
+  @@index([userId])
+  @@index([status])
+  @@map("participant_registrations")
 }
 
 

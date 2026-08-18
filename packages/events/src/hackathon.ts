@@ -126,4 +126,33 @@ export interface HackathonChallengesReorderedPayload {
   reorderedAt: string;
 }
 
+// ==========================================
+// S2-04: PARTICIPANT REGISTRATION EVENTS
+// ==========================================
+
+export interface ParticipantRegistrationCreatedPayload {
+  registrationId: string;
+  hackathonId: string;
+  userId: string;
+  trackId: string | null;
+  challengeId: string | null;
+  registeredAt: string;
+}
+
+export interface ParticipantRegistrationUpdatedPayload {
+  registrationId: string;
+  hackathonId: string;
+  userId: string;
+  trackId: string | null;
+  challengeId: string | null;
+  updatedAt: string;
+}
+
+export interface ParticipantRegistrationWithdrawnPayload {
+  registrationId: string;
+  hackathonId: string;
+  userId: string;
+  withdrawnAt: string;
+}
+
 

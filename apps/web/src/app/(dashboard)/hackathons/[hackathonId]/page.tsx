@@ -20,15 +20,32 @@ import {
   Award,
   Sliders,
   FileText,
+  UserCheck,
+  UserX,
+  CheckCircle2,
+  AlertCircle,
+  Sparkles,
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
-import { HackathonEntity, HackathonLifecycleResponse } from '@almosthack/types';
+import {
+  HackathonEntity,
+  HackathonLifecycleResponse,
+  HackathonTrackEntity,
+  HackathonChallengeEntity,
+  ParticipantRegistrationEntity,
+  ParticipantRegistrationStatus,
+} from '@almosthack/types';
 
 export default function HackathonDetailPage() {
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
   const hackathonId = params.hackathonId as string;
+
+  // Selected track & challenge for registration form
+  const [selectedTrackId, setSelectedTrackId] = React.useState<string>('');
+  const [selectedChallengeId, setSelectedChallengeId] = React.useState<string>('');
+  const [formError, setFormError] = React.useState<string | null>(null);
 
   // Fetch hackathon details
   const {
@@ -47,6 +64,39 @@ export default function HackathonDetailPage() {
     enabled: !!hackathonId,
   });
 
+  // Fetch current user's registration
+  const {
+    data: registration,
+    isLoading: isLoadingRegistration,
+  } = useQuery<ParticipantRegistrationEntity | null>({
+    queryKey: ['hackathon-registration', hackathonId],
+    queryFn: () => apiClient.getHackathonRegistration(hackathonId),
+    enabled: !!hackathonId,
+  });
+
+  // Fetch active tracks
+  const { data: tracks = [] } = useQuery<HackathonTrackEntity[]>({
+    queryKey: ['hackathon-tracks', hackathonId],
+    queryFn: () => apiClient.getHackathonTracks(hackathonId),
+    enabled: !!hackathonId,
+  });
+
+  // Fetch challenges for selected track
+  const effectiveTrackId = selectedTrackId || registration?.trackId || '';
+  const { data: challenges = [] } = useQuery<HackathonChallengeEntity[]>({
+    queryKey: ['track-challenges', effectiveTrackId],
+    queryFn: () => apiClient.getTrackChallenges(effectiveTrackId),
+    enabled: !!effectiveTrackId,
+  });
+
+  // Synchronize initial selections from existing registration
+  React.useEffect(() => {
+    if (registration && registration.status === ParticipantRegistrationStatus.REGISTERED) {
+      if (registration.trackId) setSelectedTrackId(registration.trackId);
+      if (registration.challengeId) setSelectedChallengeId(registration.challengeId);
+    }
+  }, [registration]);
+
   // Publish mutation
   const publishMutation = useMutation({
     mutationFn: () => apiClient.publishHackathon(hackathonId),
@@ -62,6 +112,44 @@ export default function HackathonDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hackathon', hackathonId] });
       queryClient.invalidateQueries({ queryKey: ['hackathon-lifecycle', hackathonId] });
+    },
+  });
+
+  // Register mutation
+  const registerMutation = useMutation({
+    mutationFn: (payload: { trackId?: string | null; challengeId?: string | null }) =>
+      apiClient.createHackathonRegistration(hackathonId, payload),
+    onSuccess: () => {
+      setFormError(null);
+      queryClient.invalidateQueries({ queryKey: ['hackathon-registration', hackathonId] });
+    },
+    onError: (err: any) => {
+      setFormError(err?.message || 'Failed to register for hackathon');
+    },
+  });
+
+  // Update selection mutation
+  const updateSelectionMutation = useMutation({
+    mutationFn: (payload: { trackId?: string | null; challengeId?: string | null }) =>
+      apiClient.updateHackathonRegistration(hackathonId, payload),
+    onSuccess: () => {
+      setFormError(null);
+      queryClient.invalidateQueries({ queryKey: ['hackathon-registration', hackathonId] });
+    },
+    onError: (err: any) => {
+      setFormError(err?.message || 'Failed to update registration selection');
+    },
+  });
+
+  // Withdraw mutation
+  const withdrawMutation = useMutation({
+    mutationFn: () => apiClient.withdrawFromHackathon(hackathonId),
+    onSuccess: () => {
+      setFormError(null);
+      queryClient.invalidateQueries({ queryKey: ['hackathon-registration', hackathonId] });
+    },
+    onError: (err: any) => {
+      setFormError(err?.message || 'Failed to withdraw from hackathon');
     },
   });
 
@@ -283,7 +371,227 @@ export default function HackathonDetailPage() {
         )}
       </Card>
 
+      {/* S2-04: PARTICIPANT REGISTRATION CARD */}
+      <Card className="p-6 bg-gradient-to-br from-zinc-900/90 to-zinc-950 border-zinc-800 shadow-xl space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+              <UserCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-zinc-100 font-heading">
+                Participant Registration
+              </h2>
+              <p className="text-xs font-mono text-zinc-400">
+                Server-authoritative enrollment, track selection, and withdrawal management.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {isLoadingRegistration ? (
+              <Badge variant="outline">Checking status...</Badge>
+            ) : registration?.status === ParticipantRegistrationStatus.REGISTERED ? (
+              <Badge variant="success" className="px-3 py-1 text-xs">
+                <CheckCircle2 className="w-3.5 h-3.5 mr-1 inline" /> REGISTERED
+              </Badge>
+            ) : registration?.status === ParticipantRegistrationStatus.WITHDRAWN ? (
+              <Badge variant="warning" className="px-3 py-1 text-xs">
+                <UserX className="w-3.5 h-3.5 mr-1 inline" /> WITHDRAWN
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="px-3 py-1 text-xs">
+                NOT REGISTERED
+              </Badge>
+            )}
+          </div>
+        </div>
+
+        {formError && (
+          <div className="p-3 bg-red-950/40 border border-red-800/60 rounded-lg text-xs font-mono text-red-300 flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+            <span>{formError}</span>
+          </div>
+        )}
+
+        {registration?.status === ParticipantRegistrationStatus.REGISTERED ? (
+          <div className="space-y-4">
+            <div className="p-4 bg-emerald-950/20 border border-emerald-800/40 rounded-xl space-y-2">
+              <div className="flex items-center gap-2 text-xs font-mono font-bold text-emerald-400">
+                <Sparkles className="w-4 h-4" /> You are registered for this hackathon
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono text-zinc-300 pt-1">
+                <div>
+                  <span className="text-zinc-500 block">Registered At:</span>
+                  <span className="text-zinc-200">{new Date(registration.registeredAt).toLocaleString()}</span>
+                </div>
+                <div>
+                  <span className="text-zinc-500 block">Selected Track:</span>
+                  <span className="text-zinc-200">{registration.track?.name || 'General / Unassigned'}</span>
+                </div>
+                <div>
+                  <span className="text-zinc-500 block">Selected Challenge:</span>
+                  <span className="text-zinc-200">{registration.challenge?.name || 'Unassigned'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Selection Update & Withdrawal Controls */}
+            {effectiveHackathonStatus !== 'COMPLETED' && effectiveHackathonStatus !== 'ARCHIVED' && (
+              <div className="space-y-4 pt-2">
+                <h3 className="text-xs font-mono font-bold text-zinc-300 uppercase tracking-wider">
+                  Update Track & Challenge Selection
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-mono text-zinc-400">Track</label>
+                    <select
+                      value={selectedTrackId}
+                      onChange={(e) => {
+                        setSelectedTrackId(e.target.value);
+                        setSelectedChallengeId('');
+                      }}
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono text-zinc-200 focus:outline-none focus:border-emerald-500"
+                    >
+                      <option value="">No Track Selected</option>
+                      {tracks.filter((t) => t.isActive).map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-mono text-zinc-400">Challenge</label>
+                    <select
+                      value={selectedChallengeId}
+                      onChange={(e) => setSelectedChallengeId(e.target.value)}
+                      disabled={!effectiveTrackId}
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono text-zinc-200 focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+                    >
+                      <option value="">No Challenge Selected</option>
+                      {challenges.filter((c) => c.status === 'PUBLISHED').map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    isLoading={updateSelectionMutation.isPending}
+                    onClick={() =>
+                      updateSelectionMutation.mutate({
+                        trackId: selectedTrackId || null,
+                        challengeId: selectedChallengeId || null,
+                      })
+                    }
+                  >
+                    Save Selection Changes
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    isLoading={withdrawMutation.isPending}
+                    onClick={() => {
+                      if (window.confirm('Are you sure you want to withdraw your registration from this hackathon?')) {
+                        withdrawMutation.mutate();
+                      }
+                    }}
+                  >
+                    Withdraw Registration
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* NOT REGISTERED OR WITHDRAWN FORM */
+          <div className="space-y-4">
+            {effectiveRegistrationStatus === 'OPEN' && effectiveHackathonStatus !== 'DRAFT' && effectiveHackathonStatus !== 'COMPLETED' && effectiveHackathonStatus !== 'ARCHIVED' ? (
+              <div className="space-y-4">
+                <p className="text-xs font-mono text-zinc-400 leading-relaxed">
+                  Registration is currently <span className="text-emerald-400 font-bold">OPEN</span>. Choose an optional track and challenge to participate.
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-mono text-zinc-400">Track (Optional)</label>
+                    <select
+                      value={selectedTrackId}
+                      onChange={(e) => {
+                        setSelectedTrackId(e.target.value);
+                        setSelectedChallengeId('');
+                      }}
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono text-zinc-200 focus:outline-none focus:border-emerald-500"
+                    >
+                      <option value="">General / No Track Selected</option>
+                      {tracks.filter((t) => t.isActive).map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-mono text-zinc-400">Challenge (Optional)</label>
+                    <select
+                      value={selectedChallengeId}
+                      onChange={(e) => setSelectedChallengeId(e.target.value)}
+                      disabled={!selectedTrackId}
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono text-zinc-200 focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+                    >
+                      <option value="">No Challenge Selected</option>
+                      {challenges.filter((c) => c.status === 'PUBLISHED').map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <Button
+                    size="md"
+                    variant="primary"
+                    className="w-full sm:w-auto"
+                    isLoading={registerMutation.isPending}
+                    onClick={() =>
+                      registerMutation.mutate({
+                        trackId: selectedTrackId || null,
+                        challengeId: selectedChallengeId || null,
+                      })
+                    }
+                  >
+                    {registration?.status === ParticipantRegistrationStatus.WITHDRAWN ? 'Re-register for Hackathon' : 'Register for Hackathon'}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-4 bg-zinc-950/60 border border-zinc-800 rounded-xl space-y-1.5">
+                <div className="flex items-center gap-2 text-xs font-mono font-bold text-zinc-300">
+                  <AlertCircle className="w-4 h-4 text-amber-400" />
+                  Registration Unavailable
+                </div>
+                <p className="text-xs font-mono text-zinc-500 leading-relaxed">
+                  Registration window is currently <span className="text-zinc-300 font-bold">{effectiveRegistrationStatus}</span> and event status is <span className="text-zinc-300 font-bold">{effectiveHackathonStatus}</span>. Participant enrollment is closed.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </Card>
+
       {/* PLACEHOLDERS FOR FUTURE SPRINT DOMAINS */}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
         <Card className="p-5 border-zinc-800/80 bg-zinc-950/40 space-y-2 opacity-60">
           <div className="flex items-center gap-2 text-zinc-400 text-xs font-mono font-bold">

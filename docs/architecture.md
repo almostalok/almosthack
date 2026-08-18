@@ -135,12 +135,20 @@ The backend is designed as a modular monolith using NestJS. Rather than microser
   - Withdrawn participants (`status = WITHDRAWN`) can reactivate registration during an open window without creating duplicate database rows.
 - **Concurrency & Race Condition Defense**:
   - Unique composite constraint prevents duplicate concurrent registrations.
-- **Audit Trails**: Registration events emit structured `AuditLog` records (`participant.registration_created`, `participant.registration_updated`, `participant.registration_withdrawn`).
 
-
-
-
-
-
-
-
+### 13. Teams & Team Formation Architecture (`S2-05`)
+- **Domain Hierarchy**: `Hackathon -> Team -> TeamMember -> User` & `TeamInvitation -> User`
+  - `Team`: Belongs 1:N to `Hackathon` (`onDelete: Cascade`). Slugs scoped per hackathon (`@@unique([hackathonId, slug])`).
+  - `TeamMember`: Belongs 1:N to `Team` (`onDelete: Cascade`) and references `User`. `@@unique([teamId, userId])` prevents duplicate memberships.
+  - `TeamInvitation`: Belongs 1:N to `Team` (`onDelete: Cascade`) and references `inviteeUserId` and `invitedByUserId`.
+- **Core Invariants & Rules**:
+  - **Prerequisite Registration**: A user must have an active `ParticipantRegistration` (`REGISTERED`) in the target hackathon to create or join a team.
+  - **One-Team-Per-Hackathon**: A user cannot be an active member of more than one team per hackathon. Enforced via interactive database transactions and row-level locks on `ParticipantRegistration`.
+  - **Captain Invariant**: Creator automatically becomes the `CAPTAIN`. Exactly one active Captain exists per team at all times. A Captain must transfer captaincy or dissolve the team to leave.
+  - **Team Sizing**: `minTeamSize` and `maxTeamSize` from S2-02 `HackathonConfiguration` are strictly enforced upon invitations and acceptance.
+  - **Participation Mode**: If `participationMode === 'INDIVIDUAL'`, team creation is rejected (`409 Conflict`).
+- **Invitation Lifecycle & Concurrency**:
+  - State machine: `PENDING` -> `ACCEPTED` / `DECLINED` / `CANCELLED` / `EXPIRED`.
+  - Accepting an invitation automatically cancels all other pending invitations for that user across the hackathon.
+  - Interactive transactions guarantee race-condition-safe execution for parallel team creation and acceptance.
+- **Audit Trails**: Team events emit structured `AuditLog` records (`team.created`, `team.updated`, `team.dissolved`, `team.invitation_created`, `team.invitation_cancelled`, `team.invitation_declined`, `team.member_joined`, `team.member_left`, `team.member_removed`, `team.captain_transferred`).

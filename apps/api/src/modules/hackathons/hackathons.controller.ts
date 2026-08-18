@@ -26,6 +26,10 @@ import {
   reorderChallengesSchema,
   createParticipantRegistrationSchema,
   updateParticipantRegistrationSchema,
+  createTeamSchema,
+  updateTeamSchema,
+  inviteTeamMemberSchema,
+  transferCaptaincySchema,
 } from '@almosthack/validation';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
@@ -53,6 +57,12 @@ import {
   CreateParticipantRegistrationDto,
   UpdateParticipantRegistrationDto,
 } from './dto/registration.dto';
+import {
+  CreateTeamDto,
+  UpdateTeamDto,
+  InviteTeamMemberDto,
+  TransferCaptaincyDto,
+} from './dto/team.dto';
 
 @Controller()
 @UseGuards(SessionAuthGuard, PermissionsGuard)
@@ -707,6 +717,264 @@ export class HackathonsController {
       hackathonId
     );
   }
+
+  // ====================================================
+  // S2-05: TEAMS & TEAM FORMATION CONTROLLER ENDPOINTS
+  // ====================================================
+
+  /**
+   * POST /api/v1/hackathons/:hackathonId/teams
+   * Creates a new team in the hackathon. Creator automatically becomes CAPTAIN.
+   */
+  @Post('hackathons/:hackathonId/teams')
+  public async createTeam(
+    @CurrentUser() user: { id: string; email: string },
+    @Param('hackathonId') hackathonId: string,
+    @Body() dto: CreateTeamDto
+  ) {
+    const parseResult = createTeamSchema.safeParse(dto);
+    if (!parseResult.success) {
+      throw new BadRequestException({
+        code: 'INVALID_TEAM_PAYLOAD',
+        message: 'Invalid team creation payload',
+        details: parseResult.error.flatten(),
+      });
+    }
+
+    return this.hackathonsService.createTeam(
+      hackathonId,
+      user.id,
+      user.email,
+      parseResult.data as CreateTeamDto
+    );
+  }
+
+  /**
+   * GET /api/v1/hackathons/:hackathonId/teams/me
+   * Gets current user's active team in this hackathon.
+   */
+  @Get('hackathons/:hackathonId/teams/me')
+  public async getMyTeam(
+    @CurrentUser() user: { id: string },
+    @Param('hackathonId') hackathonId: string
+  ) {
+    return this.hackathonsService.getMyTeam(hackathonId, user.id);
+  }
+
+  /**
+   * GET /api/v1/hackathons/:hackathonId/teams/my-invitations
+   * Gets pending invitations for current user in this hackathon.
+   */
+  @Get('hackathons/:hackathonId/teams/my-invitations')
+  public async getMyTeamInvitations(
+    @CurrentUser() user: { id: string },
+    @Param('hackathonId') hackathonId: string
+  ) {
+    return this.hackathonsService.getMyTeamInvitations(hackathonId, user.id);
+  }
+
+  /**
+   * GET /api/v1/teams/:teamId
+   * Gets a team by ID.
+   */
+  @Get('teams/:teamId')
+  public async getTeam(
+    @CurrentUser() user: { id: string },
+    @Param('teamId') teamId: string
+  ) {
+    return this.hackathonsService.getTeamById(teamId, user.id);
+  }
+
+  /**
+   * PATCH /api/v1/teams/:teamId
+   * Updates team details (name, slug, description). Captain only.
+   */
+  @Patch('teams/:teamId')
+  public async updateTeam(
+    @CurrentUser() user: { id: string; email: string },
+    @Param('teamId') teamId: string,
+    @Body() dto: UpdateTeamDto
+  ) {
+    const parseResult = updateTeamSchema.safeParse(dto);
+    if (!parseResult.success) {
+      throw new BadRequestException({
+        code: 'INVALID_TEAM_PAYLOAD',
+        message: 'Invalid team update payload',
+        details: parseResult.error.flatten(),
+      });
+    }
+
+    return this.hackathonsService.updateTeam(
+      teamId,
+      user.id,
+      user.email,
+      parseResult.data as UpdateTeamDto
+    );
+  }
+
+  /**
+   * DELETE /api/v1/teams/:teamId
+   * Dissolves a team. Captain only.
+   */
+  @Delete('teams/:teamId')
+  public async dissolveTeam(
+    @CurrentUser() user: { id: string; email: string },
+    @Param('teamId') teamId: string
+  ) {
+    return this.hackathonsService.dissolveTeam(teamId, user.id, user.email);
+  }
+
+  /**
+   * POST /api/v1/teams/:teamId/invitations
+   * Invites a participant to the team. Captain only.
+   */
+  @Post('teams/:teamId/invitations')
+  public async inviteTeamMember(
+    @CurrentUser() user: { id: string; email: string },
+    @Param('teamId') teamId: string,
+    @Body() dto: InviteTeamMemberDto
+  ) {
+    const parseResult = inviteTeamMemberSchema.safeParse(dto);
+    if (!parseResult.success) {
+      throw new BadRequestException({
+        code: 'INVALID_INVITATION_PAYLOAD',
+        message: 'Invalid team invitation payload',
+        details: parseResult.error.flatten(),
+      });
+    }
+
+    return this.hackathonsService.inviteTeamMember(
+      teamId,
+      user.id,
+      user.email,
+      parseResult.data as InviteTeamMemberDto
+    );
+  }
+
+  /**
+   * GET /api/v1/teams/:teamId/invitations
+   * Gets pending invitations for a team. Captain only.
+   */
+  @Get('teams/:teamId/invitations')
+  public async getTeamInvitations(
+    @CurrentUser() user: { id: string },
+    @Param('teamId') teamId: string
+  ) {
+    return this.hackathonsService.getTeamInvitations(teamId, user.id);
+  }
+
+  /**
+   * DELETE /api/v1/teams/:teamId/invitations/:invitationId
+   * Cancels a pending team invitation. Captain only.
+   */
+  @Delete('teams/:teamId/invitations/:invitationId')
+  public async cancelTeamInvitation(
+    @CurrentUser() user: { id: string; email: string },
+    @Param('teamId') teamId: string,
+    @Param('invitationId') invitationId: string
+  ) {
+    return this.hackathonsService.cancelTeamInvitation(
+      teamId,
+      invitationId,
+      user.id,
+      user.email
+    );
+  }
+
+  /**
+   * POST /api/v1/invitations/:invitationId/accept
+   * Accepts a team invitation. Invitee only.
+   */
+  @Post('invitations/:invitationId/accept')
+  @HttpCode(HttpStatus.OK)
+  public async acceptTeamInvitation(
+    @CurrentUser() user: { id: string; email: string },
+    @Param('invitationId') invitationId: string
+  ) {
+    return this.hackathonsService.acceptTeamInvitation(
+      invitationId,
+      user.id,
+      user.email
+    );
+  }
+
+  /**
+   * POST /api/v1/invitations/:invitationId/decline
+   * Declines a team invitation. Invitee only.
+   */
+  @Post('invitations/:invitationId/decline')
+  @HttpCode(HttpStatus.OK)
+  public async declineTeamInvitation(
+    @CurrentUser() user: { id: string; email: string },
+    @Param('invitationId') invitationId: string
+  ) {
+    return this.hackathonsService.declineTeamInvitation(
+      invitationId,
+      user.id,
+      user.email
+    );
+  }
+
+  /**
+   * POST /api/v1/teams/:teamId/leave
+   * Leaves a team. Active member (non-captain) only.
+   */
+  @Post('teams/:teamId/leave')
+  @HttpCode(HttpStatus.OK)
+  public async leaveTeam(
+    @CurrentUser() user: { id: string; email: string },
+    @Param('teamId') teamId: string
+  ) {
+    return this.hackathonsService.leaveTeam(teamId, user.id, user.email);
+  }
+
+  /**
+   * POST /api/v1/teams/:teamId/members/:memberId/remove
+   * Removes a member from the team. Captain only.
+   */
+  @Post('teams/:teamId/members/:memberId/remove')
+  @HttpCode(HttpStatus.OK)
+  public async removeTeamMember(
+    @CurrentUser() user: { id: string; email: string },
+    @Param('teamId') teamId: string,
+    @Param('memberId') memberId: string
+  ) {
+    return this.hackathonsService.removeTeamMember(
+      teamId,
+      memberId,
+      user.id,
+      user.email
+    );
+  }
+
+  /**
+   * POST /api/v1/teams/:teamId/captain/transfer
+   * Transfers captaincy to another active member. Captain only.
+   */
+  @Post('teams/:teamId/captain/transfer')
+  @HttpCode(HttpStatus.OK)
+  public async transferCaptaincy(
+    @CurrentUser() user: { id: string; email: string },
+    @Param('teamId') teamId: string,
+    @Body() dto: TransferCaptaincyDto
+  ) {
+    const parseResult = transferCaptaincySchema.safeParse(dto);
+    if (!parseResult.success) {
+      throw new BadRequestException({
+        code: 'INVALID_TRANSFER_PAYLOAD',
+        message: 'Invalid captain transfer payload',
+        details: parseResult.error.flatten(),
+      });
+    }
+
+    return this.hackathonsService.transferCaptaincy(
+      teamId,
+      user.id,
+      user.email,
+      parseResult.data as TransferCaptaincyDto
+    );
+  }
 }
+
 
 

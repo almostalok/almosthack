@@ -155,4 +155,96 @@ export interface ParticipantRegistrationWithdrawnPayload {
   withdrawnAt: string;
 }
 
+// ==========================================
+// S2-05: TEAMS & TEAM FORMATION EVENTS
+// ==========================================
+
+export interface TeamCreatedPayload {
+  teamId: string;
+  hackathonId: string;
+  name: string;
+  slug: string;
+  captainUserId: string;
+  createdAt: string;
+}
+
+export interface TeamUpdatedPayload {
+  teamId: string;
+  hackathonId: string;
+  updatedFields: string[];
+  updatedBy: string;
+  updatedAt: string;
+}
+
+export interface TeamMemberJoinedPayload {
+  teamId: string;
+  hackathonId: string;
+  userId: string;
+  role: string;
+  joinedAt: string;
+}
+
+export interface TeamMemberLeftPayload {
+  teamId: string;
+  hackathonId: string;
+  userId: string;
+  leftAt: string;
+}
+
+export interface TeamMemberRemovedPayload {
+  teamId: string;
+  hackathonId: string;
+  userId: string;
+  removedBy: string;
+  removedAt: string;
+}
+
+export interface TeamInvitationCreatedPayload {
+  invitationId: string;
+  teamId: string;
+  hackathonId: string;
+  inviteeUserId: string;
+  invitedByUserId: string;
+  createdAt: string;
+}
+
+export interface TeamInvitationAcceptedPayload {
+  invitationId: string;
+  teamId: string;
+  hackathonId: string;
+  inviteeUserId: string;
+  acceptedAt: string;
+}
+
+export interface TeamInvitationDeclinedPayload {
+  invitationId: string;
+  teamId: string;
+  hackathonId: string;
+  inviteeUserId: string;
+  declinedAt: string;
+}
+
+export interface TeamInvitationCancelledPayload {
+  invitationId: string;
+  teamId: string;
+  hackathonId: string;
+  cancelledBy: string;
+  cancelledAt: string;
+}
+
+export interface TeamCaptainTransferredPayload {
+  teamId: string;
+  hackathonId: string;
+  oldCaptainUserId: string;
+  newCaptainUserId: string;
+  transferredAt: string;
+}
+
+export interface TeamDissolvedPayload {
+  teamId: string;
+  hackathonId: string;
+  dissolvedBy: string;
+  dissolvedAt: string;
+}
+
 

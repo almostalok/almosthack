@@ -502,4 +502,76 @@ export const updateParticipantRegistrationSchema = z.object({
 
 export type UpdateParticipantRegistrationSchema = z.infer<typeof updateParticipantRegistrationSchema>;
 
+// ==========================================
+// S2-05: TEAMS & TEAM FORMATION SCHEMAS
+// ==========================================
+
+export const createTeamSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, { message: 'Team name must be at least 2 characters' })
+    .max(100, { message: 'Team name cannot exceed 100 characters' }),
+  slug: z
+    .string()
+    .trim()
+    .min(2, { message: 'Team slug must be at least 2 characters' })
+    .max(120, { message: 'Team slug cannot exceed 120 characters' })
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+      message: 'Slug must consist of lowercase alphanumeric characters separated by single hyphens',
+    })
+    .optional(),
+  description: z
+    .string()
+    .trim()
+    .max(1000, { message: 'Team description cannot exceed 1,000 characters' })
+    .nullable()
+    .optional(),
+});
+
+export type CreateTeamSchema = z.infer<typeof createTeamSchema>;
+
+export const updateTeamSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, { message: 'Team name must be at least 2 characters' })
+    .max(100, { message: 'Team name cannot exceed 100 characters' })
+    .optional(),
+  slug: z
+    .string()
+    .trim()
+    .min(2, { message: 'Team slug must be at least 2 characters' })
+    .max(120, { message: 'Team slug cannot exceed 120 characters' })
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+      message: 'Slug must consist of lowercase alphanumeric characters separated by single hyphens',
+    })
+    .optional(),
+  description: z
+    .string()
+    .trim()
+    .max(1000, { message: 'Team description cannot exceed 1,000 characters' })
+    .nullable()
+    .optional(),
+});
+
+export type UpdateTeamSchema = z.infer<typeof updateTeamSchema>;
+
+export const inviteTeamMemberSchema = z
+  .object({
+    inviteeUserId: z.string().uuid({ message: 'inviteeUserId must be a valid UUID' }).optional(),
+    inviteeEmail: z.string().email({ message: 'inviteeEmail must be a valid email address' }).optional(),
+  })
+  .refine((data) => data.inviteeUserId || data.inviteeEmail, {
+    message: 'Either inviteeUserId or inviteeEmail must be provided',
+  });
+
+export type InviteTeamMemberSchema = z.infer<typeof inviteTeamMemberSchema>;
+
+export const transferCaptaincySchema = z.object({
+  targetMemberId: z.string().uuid({ message: 'targetMemberId must be a valid UUID' }),
+});
+
+export type TransferCaptaincySchema = z.infer<typeof transferCaptaincySchema>;
+
 

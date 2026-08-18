@@ -348,7 +348,67 @@ export class ApiClient {
   public withdrawFromHackathon<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
     return this.delete<T>(`/hackathons/${hackathonId}/registration`, options);
   }
+
+  // ==========================================
+  // S2-05: Team Formation Domain APIs
+  // ==========================================
+  public createTeam<T = any>(hackathonId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/hackathons/${hackathonId}/teams`, body, options);
+  }
+
+  public getMyTeam<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/hackathons/${hackathonId}/teams/me`, options);
+  }
+
+  public getMyTeamInvitations<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/hackathons/${hackathonId}/teams/my-invitations`, options);
+  }
+
+  public getTeam<T = any>(teamId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/teams/${teamId}`, options);
+  }
+
+  public updateTeam<T = any>(teamId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.patch<T>(`/teams/${teamId}`, body, options);
+  }
+
+  public dissolveTeam<T = any>(teamId: string, options?: RequestOptions): Promise<T> {
+    return this.delete<T>(`/teams/${teamId}`, options);
+  }
+
+  public inviteTeamMember<T = any>(teamId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/teams/${teamId}/invitations`, body, options);
+  }
+
+  public getTeamInvitations<T = any>(teamId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/teams/${teamId}/invitations`, options);
+  }
+
+  public cancelTeamInvitation<T = any>(teamId: string, invitationId: string, options?: RequestOptions): Promise<T> {
+    return this.delete<T>(`/teams/${teamId}/invitations/${invitationId}`, options);
+  }
+
+  public acceptTeamInvitation<T = any>(invitationId: string, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/invitations/${invitationId}/accept`, {}, options);
+  }
+
+  public declineTeamInvitation<T = any>(invitationId: string, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/invitations/${invitationId}/decline`, {}, options);
+  }
+
+  public leaveTeam<T = any>(teamId: string, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/teams/${teamId}/leave`, {}, options);
+  }
+
+  public removeTeamMember<T = any>(teamId: string, memberId: string, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/teams/${teamId}/members/${memberId}/remove`, {}, options);
+  }
+
+  public transferTeamCaptaincy<T = any>(teamId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/teams/${teamId}/captain/transfer`, body, options);
+  }
 }
+
 
 
 

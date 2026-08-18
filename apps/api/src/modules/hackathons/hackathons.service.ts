@@ -27,6 +27,12 @@ import {
   ParticipantRegistrationStatus,
   ParticipantRegistrationEntity,
   EligibilityCheckResult,
+  TeamStatus,
+  TeamMemberRole,
+  TeamMemberStatus,
+  TeamInvitationStatus,
+  TeamEntity,
+  TeamInvitationEntity,
 } from '@almosthack/types';
 import { isValidIanaTimezone, normalizeStringArray } from '@almosthack/validation';
 import { PrismaService } from '../../database/prisma.service';
@@ -51,6 +57,12 @@ import {
   CreateParticipantRegistrationDto,
   UpdateParticipantRegistrationDto,
 } from './dto/registration.dto';
+import {
+  CreateTeamDto,
+  UpdateTeamDto,
+  InviteTeamMemberDto,
+  TransferCaptaincyDto,
+} from './dto/team.dto';
 import {
   HackathonResponseDto,
   HackathonLifecycleResponseDto,
@@ -2480,6 +2492,1403 @@ export class HackathonsService {
 
     return { success: true, id: existing.id };
   }
+
+  // ==========================================
+  // S2-05: TEAMS & TEAM FORMATION DOMAIN
+  // ==========================================
+
+  public formatTeam(team: any, currentUserId?: string): TeamEntity {
+    const activeMembers = (team.members || []).filter((m: any) => m.status === TeamMemberStatus.ACTIVE);
+    const isCaptain = currentUserId ? activeMembers.some((m: any) => m.userId === currentUserId && m.role === TeamMemberRole.CAPTAIN) : false;
+
+    return {
+      id: team.id,
+      hackathonId: team.hackathonId,
+      name: team.name,
+      slug: team.slug,
+      description: team.description ?? null,
+      createdByUserId: team.createdByUserId,
+      status: team.status as TeamStatus,
+      createdAt: team.createdAt instanceof Date ? team.createdAt.toISOString() : team.createdAt,
+      updatedAt: team.updatedAt instanceof Date ? team.updatedAt.toISOString() : team.updatedAt,
+      memberCount: activeMembers.length,
+      members: (team.members || []).map((m: any) => ({
+        id: m.id,
+        teamId: m.teamId,
+        userId: m.userId,
+        role: m.role as TeamMemberRole,
+        status: m.status as TeamMemberStatus,
+        joinedAt: m.joinedAt instanceof Date ? m.joinedAt.toISOString() : m.joinedAt,
+        leftAt: m.leftAt ? (m.leftAt instanceof Date ? m.leftAt.toISOString() : m.leftAt) : null,
+        createdAt: m.createdAt instanceof Date ? m.createdAt.toISOString() : m.createdAt,
+        updatedAt: m.updatedAt instanceof Date ? m.updatedAt.toISOString() : m.updatedAt,
+        user: m.user
+          ? {
+              id: m.user.id,
+              name: m.user.name,
+              email: m.user.email,
+              avatarUrl: m.user.avatarUrl ?? null,
+              college: m.user.college ?? null,
+              branch: m.user.branch ?? null,
+              skills: m.user.skills || [],
+            }
+          : undefined,
+      })),
+      invitations: isCaptain && team.invitations
+        ? team.invitations.map((inv: any) => ({
+            id: inv.id,
+            teamId: inv.teamId,
+            inviteeUserId: inv.inviteeUserId,
+            invitedByUserId: inv.invitedByUserId,
+            status: inv.status as TeamInvitationStatus,
+            expiresAt: inv.expiresAt instanceof Date ? inv.expiresAt.toISOString() : inv.expiresAt,
+            respondedAt: inv.respondedAt ? (inv.respondedAt instanceof Date ? inv.respondedAt.toISOString() : inv.respondedAt) : null,
+            createdAt: inv.createdAt instanceof Date ? inv.createdAt.toISOString() : inv.createdAt,
+            updatedAt: inv.updatedAt instanceof Date ? inv.updatedAt.toISOString() : inv.updatedAt,
+            inviteeUser: inv.inviteeUser
+              ? {
+                  id: inv.inviteeUser.id,
+                  name: inv.inviteeUser.name,
+                  email: inv.inviteeUser.email,
+                  avatarUrl: inv.inviteeUser.avatarUrl ?? null,
+                  college: inv.inviteeUser.college ?? null,
+                  branch: inv.inviteeUser.branch ?? null,
+                  skills: inv.inviteeUser.skills || [],
+                }
+              : undefined,
+          }))
+        : undefined,
+    };
+  }
+
+  public async createTeam(
+    hackathonId: string,
+    userId: string,
+    userEmail: string,
+    dto: CreateTeamDto,
+  ): Promise<TeamEntity> {
+    const hackathon = await this.prisma.hackathon.findUnique({
+      where: { id: hackathonId },
+      include: { configuration: true },
+    });
+
+    if (!hackathon) {
+      throw new NotFoundException({
+        code: 'HACKATHON_NOT_FOUND',
+        message: 'Hackathon not found.',
+      });
+    }
+
+    const now = new Date();
+    const effectiveStatus = this.deriveEffectiveStatus(
+      hackathon.status as HackathonStatus,
+      hackathon.startsAt,
+      hackathon.endsAt,
+      now
+    );
+    if (
+      effectiveStatus === HackathonStatus.DRAFT ||
+      effectiveStatus === HackathonStatus.COMPLETED ||
+      effectiveStatus === HackathonStatus.ARCHIVED
+    ) {
+      throw new ConflictException({
+        code: 'TEAM_FORMATION_UNAVAILABLE',
+        message: `Team formation is unavailable when hackathon is in '${effectiveStatus}' status.`,
+      });
+    }
+
+    if (hackathon.configuration?.participationMode === ParticipationMode.INDIVIDUAL) {
+      throw new ConflictException({
+        code: 'TEAMS_NOT_ALLOWED',
+        message: 'This hackathon only permits individual participation.',
+      });
+    }
+
+    // Verify user registration
+    const registration = await this.prisma.participantRegistration.findUnique({
+      where: {
+        hackathonId_userId: {
+          hackathonId,
+          userId,
+        },
+      },
+    });
+
+    if (!registration || registration.status !== ParticipantRegistrationStatus.REGISTERED) {
+      throw new ForbiddenException({
+        code: 'NOT_REGISTERED',
+        message: 'You must be registered for this hackathon to create a team.',
+      });
+    }
+
+    const name = dto.name.trim();
+    const slug = dto.slug?.trim().toLowerCase() || this.generateSlug(name);
+    const description = dto.description?.trim() || null;
+
+    // Create Team, Captain TeamMember, and AuditLog atomically in interactive transaction
+    const team = await this.prisma.$transaction(async (tx) => {
+      // Row lock participant registration for this hackathon to prevent concurrent team creation
+      await tx.participantRegistration.update({
+        where: {
+          hackathonId_userId: {
+            hackathonId,
+            userId,
+          },
+        },
+        data: {
+          updatedAt: new Date(),
+        },
+      });
+
+      // Re-verify inside transaction to prevent race conditions
+      const existingActiveMembership = await tx.teamMember.findFirst({
+        where: {
+          userId,
+          status: TeamMemberStatus.ACTIVE,
+          team: {
+            hackathonId,
+            status: TeamStatus.ACTIVE,
+          },
+        },
+      });
+
+      if (existingActiveMembership) {
+        throw new ConflictException({
+          code: 'ALREADY_ON_TEAM',
+          message: 'You are already an active member of a team in this hackathon.',
+        });
+      }
+
+      // Verify slug uniqueness in hackathon
+      const existingTeamWithSlug = await tx.team.findUnique({
+        where: {
+          hackathonId_slug: {
+            hackathonId,
+            slug,
+          },
+        },
+      });
+
+      if (existingTeamWithSlug) {
+        throw new ConflictException({
+          code: 'TEAM_ALREADY_EXISTS',
+          message: `A team with slug '${slug}' already exists in this hackathon.`,
+        });
+      }
+
+      const createdTeam = await tx.team.create({
+        data: {
+          hackathonId,
+          name,
+          slug,
+          description,
+          createdByUserId: userId,
+          status: TeamStatus.ACTIVE,
+          members: {
+            create: {
+              userId,
+              role: TeamMemberRole.CAPTAIN,
+              status: TeamMemberStatus.ACTIVE,
+            },
+          },
+        },
+        include: {
+          members: {
+            include: { user: true },
+          },
+          invitations: {
+            include: {
+              inviteeUser: true,
+              invitedByUser: true,
+            },
+          },
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          actorId: userId,
+          actorEmail: userEmail,
+          action: 'team.created',
+          targetEntity: 'Team',
+          targetId: createdTeam.id,
+          metadata: {
+            organizationId: hackathon.organizationId,
+            hackathonId,
+            name,
+            slug,
+          },
+        },
+      });
+
+      return createdTeam;
+    });
+
+    return this.formatTeam(team, userId);
+  }
+
+  public async getMyTeam(hackathonId: string, userId: string): Promise<TeamEntity | null> {
+    const membership = await this.prisma.teamMember.findFirst({
+      where: {
+        userId,
+        status: TeamMemberStatus.ACTIVE,
+        team: {
+          hackathonId,
+          status: TeamStatus.ACTIVE,
+        },
+      },
+      include: {
+        team: {
+          include: {
+            members: {
+              include: { user: true },
+            },
+            invitations: {
+              where: {
+                status: TeamInvitationStatus.PENDING,
+                expiresAt: { gt: new Date() },
+              },
+              include: {
+                inviteeUser: true,
+                invitedByUser: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!membership || !membership.team) {
+      return null;
+    }
+
+    return this.formatTeam(membership.team, userId);
+  }
+
+  public async getMyTeamInvitations(hackathonId: string, userId: string): Promise<TeamInvitationEntity[]> {
+    const invitations = await this.prisma.teamInvitation.findMany({
+      where: {
+        inviteeUserId: userId,
+        status: TeamInvitationStatus.PENDING,
+        expiresAt: { gt: new Date() },
+        team: {
+          hackathonId,
+          status: TeamStatus.ACTIVE,
+        },
+      },
+      include: {
+        team: {
+          include: {
+            members: {
+              include: { user: true },
+            },
+          },
+        },
+        invitedByUser: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return invitations.map((inv) => ({
+      id: inv.id,
+      teamId: inv.teamId,
+      inviteeUserId: inv.inviteeUserId,
+      invitedByUserId: inv.invitedByUserId,
+      status: inv.status as TeamInvitationStatus,
+      expiresAt: inv.expiresAt.toISOString(),
+      respondedAt: inv.respondedAt ? inv.respondedAt.toISOString() : null,
+      createdAt: inv.createdAt.toISOString(),
+      updatedAt: inv.updatedAt.toISOString(),
+      team: this.formatTeam(inv.team, userId),
+      invitedByUser: inv.invitedByUser
+        ? {
+            id: inv.invitedByUser.id,
+            name: inv.invitedByUser.name,
+            email: inv.invitedByUser.email,
+            avatarUrl: inv.invitedByUser.avatarUrl ?? null,
+            college: inv.invitedByUser.college ?? null,
+            branch: inv.invitedByUser.branch ?? null,
+            skills: inv.invitedByUser.skills || [],
+          }
+        : undefined,
+    }));
+  }
+
+  public async getTeamById(teamId: string, userId: string): Promise<TeamEntity> {
+    const team = await this.prisma.team.findUnique({
+      where: { id: teamId },
+      include: {
+        members: {
+          include: { user: true },
+        },
+        invitations: {
+          include: {
+            inviteeUser: true,
+            invitedByUser: true,
+          },
+        },
+      },
+    });
+
+    if (!team || team.status === TeamStatus.DISSOLVED) {
+      throw new NotFoundException({
+        code: 'TEAM_NOT_FOUND',
+        message: 'Team not found.',
+      });
+    }
+
+    return this.formatTeam(team, userId);
+  }
+
+  public async updateTeam(
+    teamId: string,
+    userId: string,
+    userEmail: string,
+    dto: UpdateTeamDto,
+  ): Promise<TeamEntity> {
+    const team = await this.prisma.team.findUnique({
+      where: { id: teamId },
+      include: {
+        hackathon: true,
+        members: {
+          include: { user: true },
+        },
+      },
+    });
+
+    if (!team || team.status === TeamStatus.DISSOLVED) {
+      throw new NotFoundException({
+        code: 'TEAM_NOT_FOUND',
+        message: 'Team not found.',
+      });
+    }
+
+    const now = new Date();
+    const effectiveStatus = this.deriveEffectiveStatus(
+      team.hackathon.status as HackathonStatus,
+      team.hackathon.startsAt,
+      team.hackathon.endsAt,
+      now
+    );
+    if (
+      effectiveStatus === HackathonStatus.COMPLETED ||
+      effectiveStatus === HackathonStatus.ARCHIVED
+    ) {
+      throw new ConflictException({
+        code: 'HACKATHON_LOCKED',
+        message: 'Team cannot be updated after hackathon is completed or archived.',
+      });
+    }
+
+    const isCaptain = team.members.some(
+      (m) => m.userId === userId && m.role === TeamMemberRole.CAPTAIN && m.status === TeamMemberStatus.ACTIVE,
+    );
+
+    if (!isCaptain) {
+      throw new ForbiddenException({
+        code: 'FORBIDDEN',
+        message: 'Only the team captain can update team details.',
+      });
+    }
+
+    const updateData: any = {};
+    if (dto.name !== undefined) {
+      updateData.name = dto.name.trim();
+    }
+    if (dto.description !== undefined) {
+      updateData.description = dto.description?.trim() || null;
+    }
+    if (dto.slug !== undefined) {
+      const slug = dto.slug.trim().toLowerCase();
+      if (slug !== team.slug) {
+        const conflict = await this.prisma.team.findUnique({
+          where: {
+            hackathonId_slug: {
+              hackathonId: team.hackathonId,
+              slug,
+            },
+          },
+        });
+        if (conflict) {
+          throw new ConflictException({
+            code: 'TEAM_ALREADY_EXISTS',
+            message: `A team with slug '${slug}' already exists in this hackathon.`,
+          });
+        }
+        updateData.slug = slug;
+      }
+    }
+
+    const [updated] = await this.prisma.$transaction([
+      this.prisma.team.update({
+        where: { id: teamId },
+        data: updateData,
+        include: {
+          members: {
+            include: { user: true },
+          },
+          invitations: {
+            include: {
+              inviteeUser: true,
+              invitedByUser: true,
+            },
+          },
+        },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          actorId: userId,
+          actorEmail: userEmail,
+          action: 'team.updated',
+          targetEntity: 'Team',
+          targetId: teamId,
+          metadata: {
+            organizationId: team.hackathon.organizationId,
+            hackathonId: team.hackathonId,
+            updatedFields: Object.keys(updateData),
+          },
+        },
+      }),
+    ]);
+
+    return this.formatTeam(updated, userId);
+  }
+
+  public async dissolveTeam(
+    teamId: string,
+    userId: string,
+    userEmail: string,
+  ): Promise<{ success: true }> {
+    const team = await this.prisma.team.findUnique({
+      where: { id: teamId },
+      include: {
+        hackathon: true,
+        members: true,
+      },
+    });
+
+    if (!team || team.status === TeamStatus.DISSOLVED) {
+      throw new NotFoundException({
+        code: 'TEAM_NOT_FOUND',
+        message: 'Team not found.',
+      });
+    }
+
+    const now = new Date();
+    const effectiveStatus = this.deriveEffectiveStatus(
+      team.hackathon.status as HackathonStatus,
+      team.hackathon.startsAt,
+      team.hackathon.endsAt,
+      now
+    );
+    if (
+      effectiveStatus === HackathonStatus.COMPLETED ||
+      effectiveStatus === HackathonStatus.ARCHIVED
+    ) {
+      throw new ConflictException({
+        code: 'HACKATHON_LOCKED',
+        message: 'Team cannot be dissolved after hackathon is completed or archived.',
+      });
+    }
+
+    const isCaptain = team.members.some(
+      (m) => m.userId === userId && m.role === TeamMemberRole.CAPTAIN && m.status === TeamMemberStatus.ACTIVE,
+    );
+
+    if (!isCaptain) {
+      throw new ForbiddenException({
+        code: 'FORBIDDEN',
+        message: 'Only the team captain can dissolve the team.',
+      });
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.team.update({
+        where: { id: teamId },
+        data: { status: TeamStatus.DISSOLVED },
+      }),
+      this.prisma.teamMember.updateMany({
+        where: { teamId, status: TeamMemberStatus.ACTIVE },
+        data: { status: TeamMemberStatus.LEFT, leftAt: now },
+      }),
+      this.prisma.teamInvitation.updateMany({
+        where: { teamId, status: TeamInvitationStatus.PENDING },
+        data: { status: TeamInvitationStatus.CANCELLED, respondedAt: now },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          actorId: userId,
+          actorEmail: userEmail,
+          action: 'team.dissolved',
+          targetEntity: 'Team',
+          targetId: teamId,
+          metadata: {
+            organizationId: team.hackathon.organizationId,
+            hackathonId: team.hackathonId,
+          },
+        },
+      }),
+    ]);
+
+    return { success: true };
+  }
+
+  public async inviteTeamMember(
+    teamId: string,
+    userId: string,
+    userEmail: string,
+    dto: InviteTeamMemberDto,
+  ): Promise<TeamInvitationEntity> {
+    const team = await this.prisma.team.findUnique({
+      where: { id: teamId },
+      include: {
+        hackathon: {
+          include: { configuration: true },
+        },
+        members: {
+          where: { status: TeamMemberStatus.ACTIVE },
+        },
+      },
+    });
+
+    if (!team || team.status === TeamStatus.DISSOLVED) {
+      throw new NotFoundException({
+        code: 'TEAM_NOT_FOUND',
+        message: 'Team not found.',
+      });
+    }
+
+    const now = new Date();
+    const effectiveStatus = this.deriveEffectiveStatus(
+      team.hackathon.status as HackathonStatus,
+      team.hackathon.startsAt,
+      team.hackathon.endsAt,
+      now
+    );
+    if (
+      effectiveStatus === HackathonStatus.COMPLETED ||
+      effectiveStatus === HackathonStatus.ARCHIVED
+    ) {
+      throw new ConflictException({
+        code: 'HACKATHON_LOCKED',
+        message: 'Invitations cannot be created after hackathon is completed or archived.',
+      });
+    }
+
+    const isCaptain = team.members.some(
+      (m) => m.userId === userId && m.role === TeamMemberRole.CAPTAIN,
+    );
+
+    if (!isCaptain) {
+      throw new ForbiddenException({
+        code: 'FORBIDDEN',
+        message: 'Only the team captain can invite members.',
+      });
+    }
+
+    // Resolve invitee user
+    let invitee: any = null;
+    if (dto.inviteeUserId) {
+      invitee = await this.prisma.user.findUnique({ where: { id: dto.inviteeUserId } });
+    } else if (dto.inviteeEmail) {
+      invitee = await this.prisma.user.findUnique({ where: { email: dto.inviteeEmail.trim().toLowerCase() } });
+    }
+
+    if (!invitee) {
+      throw new NotFoundException({
+        code: 'USER_NOT_FOUND',
+        message: 'Invitee user not found.',
+      });
+    }
+
+    if (invitee.id === userId) {
+      throw new BadRequestException({
+        code: 'CANNOT_INVITE_SELF',
+        message: 'You cannot invite yourself to your own team.',
+      });
+    }
+
+    // Check invitee is registered for this hackathon
+    const inviteeReg = await this.prisma.participantRegistration.findUnique({
+      where: {
+        hackathonId_userId: {
+          hackathonId: team.hackathonId,
+          userId: invitee.id,
+        },
+      },
+    });
+
+    if (!inviteeReg || inviteeReg.status !== ParticipantRegistrationStatus.REGISTERED) {
+      throw new BadRequestException({
+        code: 'INVITEE_NOT_REGISTERED',
+        message: 'The invited user is not registered for this hackathon.',
+      });
+    }
+
+    // Check invitee is not already active member on any active team in this hackathon
+    const alreadyOnTeam = await this.prisma.teamMember.findFirst({
+      where: {
+        userId: invitee.id,
+        status: TeamMemberStatus.ACTIVE,
+        team: {
+          hackathonId: team.hackathonId,
+          status: TeamStatus.ACTIVE,
+        },
+      },
+    });
+
+    if (alreadyOnTeam) {
+      throw new ConflictException({
+        code: 'ALREADY_ON_TEAM',
+        message: 'The invited user is already an active member of a team in this hackathon.',
+      });
+    }
+
+    // Check max team size
+    const maxTeamSize = team.hackathon.configuration?.maxTeamSize ?? 4;
+    if (team.members.length >= maxTeamSize) {
+      throw new ConflictException({
+        code: 'TEAM_SIZE_LIMIT_REACHED',
+        message: `Team has reached its maximum size of ${maxTeamSize} members.`,
+      });
+    }
+
+    // Check for existing pending invitation
+    const existingPending = await this.prisma.teamInvitation.findFirst({
+      where: {
+        teamId,
+        inviteeUserId: invitee.id,
+        status: TeamInvitationStatus.PENDING,
+        expiresAt: { gt: new Date() },
+      },
+    });
+
+    if (existingPending) {
+      throw new ConflictException({
+        code: 'INVITATION_ALREADY_EXISTS',
+        message: 'A pending invitation for this user already exists.',
+      });
+    }
+
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+    const [invitation] = await this.prisma.$transaction([
+      this.prisma.teamInvitation.create({
+        data: {
+          teamId,
+          inviteeUserId: invitee.id,
+          invitedByUserId: userId,
+          status: TeamInvitationStatus.PENDING,
+          expiresAt,
+        },
+        include: {
+          inviteeUser: true,
+          invitedByUser: true,
+        },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          actorId: userId,
+          actorEmail: userEmail,
+          action: 'team.invitation_created',
+          targetEntity: 'Team',
+          targetId: teamId,
+          metadata: {
+            organizationId: team.hackathon.organizationId,
+            hackathonId: team.hackathonId,
+            inviteeUserId: invitee.id,
+          },
+        },
+      }),
+    ]);
+
+    return {
+      id: invitation.id,
+      teamId: invitation.teamId,
+      inviteeUserId: invitation.inviteeUserId,
+      invitedByUserId: invitation.invitedByUserId,
+      status: invitation.status as TeamInvitationStatus,
+      expiresAt: invitation.expiresAt.toISOString(),
+      respondedAt: invitation.respondedAt ? invitation.respondedAt.toISOString() : null,
+      createdAt: invitation.createdAt.toISOString(),
+      updatedAt: invitation.updatedAt.toISOString(),
+      inviteeUser: {
+        id: invitation.inviteeUser.id,
+        name: invitation.inviteeUser.name,
+        email: invitation.inviteeUser.email,
+        avatarUrl: invitation.inviteeUser.avatarUrl ?? null,
+        college: invitation.inviteeUser.college ?? null,
+        branch: invitation.inviteeUser.branch ?? null,
+        skills: invitation.inviteeUser.skills || [],
+      },
+    };
+  }
+
+  public async getTeamInvitations(teamId: string, userId: string): Promise<TeamInvitationEntity[]> {
+    const team = await this.prisma.team.findUnique({
+      where: { id: teamId },
+      include: {
+        members: { where: { status: TeamMemberStatus.ACTIVE } },
+      },
+    });
+
+    if (!team || team.status === TeamStatus.DISSOLVED) {
+      throw new NotFoundException({
+        code: 'TEAM_NOT_FOUND',
+        message: 'Team not found.',
+      });
+    }
+
+    const isCaptain = team.members.some(
+      (m) => m.userId === userId && m.role === TeamMemberRole.CAPTAIN,
+    );
+
+    if (!isCaptain) {
+      throw new ForbiddenException({
+        code: 'FORBIDDEN',
+        message: 'Only the team captain can view team invitations.',
+      });
+    }
+
+    const invitations = await this.prisma.teamInvitation.findMany({
+      where: { teamId },
+      include: {
+        inviteeUser: true,
+        invitedByUser: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return invitations.map((inv) => ({
+      id: inv.id,
+      teamId: inv.teamId,
+      inviteeUserId: inv.inviteeUserId,
+      invitedByUserId: inv.invitedByUserId,
+      status: inv.status as TeamInvitationStatus,
+      expiresAt: inv.expiresAt.toISOString(),
+      respondedAt: inv.respondedAt ? inv.respondedAt.toISOString() : null,
+      createdAt: inv.createdAt.toISOString(),
+      updatedAt: inv.updatedAt.toISOString(),
+      inviteeUser: inv.inviteeUser
+        ? {
+            id: inv.inviteeUser.id,
+            name: inv.inviteeUser.name,
+            email: inv.inviteeUser.email,
+            avatarUrl: inv.inviteeUser.avatarUrl ?? null,
+            college: inv.inviteeUser.college ?? null,
+            branch: inv.inviteeUser.branch ?? null,
+            skills: inv.inviteeUser.skills || [],
+          }
+        : undefined,
+      invitedByUser: inv.invitedByUser
+        ? {
+            id: inv.invitedByUser.id,
+            name: inv.invitedByUser.name,
+            email: inv.invitedByUser.email,
+            avatarUrl: inv.invitedByUser.avatarUrl ?? null,
+            college: inv.invitedByUser.college ?? null,
+            branch: inv.invitedByUser.branch ?? null,
+            skills: inv.invitedByUser.skills || [],
+          }
+        : undefined,
+    }));
+  }
+
+  public async cancelTeamInvitation(
+    teamId: string,
+    invitationId: string,
+    userId: string,
+    userEmail: string,
+  ): Promise<{ success: true }> {
+    const team = await this.prisma.team.findUnique({
+      where: { id: teamId },
+      include: {
+        hackathon: true,
+        members: { where: { status: TeamMemberStatus.ACTIVE } },
+      },
+    });
+
+    if (!team || team.status === TeamStatus.DISSOLVED) {
+      throw new NotFoundException({
+        code: 'TEAM_NOT_FOUND',
+        message: 'Team not found.',
+      });
+    }
+
+    const isCaptain = team.members.some(
+      (m) => m.userId === userId && m.role === TeamMemberRole.CAPTAIN,
+    );
+
+    if (!isCaptain) {
+      throw new ForbiddenException({
+        code: 'FORBIDDEN',
+        message: 'Only the team captain can cancel invitations.',
+      });
+    }
+
+    const invitation = await this.prisma.teamInvitation.findFirst({
+      where: { id: invitationId, teamId },
+    });
+
+    if (!invitation) {
+      throw new NotFoundException({
+        code: 'INVITATION_NOT_FOUND',
+        message: 'Invitation not found.',
+      });
+    }
+
+    if (invitation.status !== TeamInvitationStatus.PENDING) {
+      throw new ConflictException({
+        code: 'INVITATION_NOT_PENDING',
+        message: `Cannot cancel an invitation with status '${invitation.status}'.`,
+      });
+    }
+
+    const now = new Date();
+
+    await this.prisma.$transaction([
+      this.prisma.teamInvitation.update({
+        where: { id: invitationId },
+        data: {
+          status: TeamInvitationStatus.CANCELLED,
+          respondedAt: now,
+        },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          actorId: userId,
+          actorEmail: userEmail,
+          action: 'team.invitation_cancelled',
+          targetEntity: 'Team',
+          targetId: teamId,
+          metadata: {
+            organizationId: team.hackathon.organizationId,
+            hackathonId: team.hackathonId,
+            invitationId,
+          },
+        },
+      }),
+    ]);
+
+    return { success: true };
+  }
+
+  public async acceptTeamInvitation(
+    invitationId: string,
+    userId: string,
+    userEmail: string,
+  ): Promise<{ success: true; teamId: string }> {
+    const invitation = await this.prisma.teamInvitation.findUnique({
+      where: { id: invitationId },
+      include: {
+        team: {
+          include: {
+            hackathon: {
+              include: { configuration: true },
+            },
+            members: {
+              where: { status: TeamMemberStatus.ACTIVE },
+            },
+          },
+        },
+      },
+    });
+
+    if (!invitation) {
+      throw new NotFoundException({
+        code: 'INVITATION_NOT_FOUND',
+        message: 'Invitation not found.',
+      });
+    }
+
+    if (invitation.inviteeUserId !== userId) {
+      throw new ForbiddenException({
+        code: 'INVITATION_NOT_YOURS',
+        message: 'You are not the recipient of this invitation.',
+      });
+    }
+
+    if (invitation.status !== TeamInvitationStatus.PENDING) {
+      throw new ConflictException({
+        code: 'INVITATION_NOT_PENDING',
+        message: `Cannot accept an invitation with status '${invitation.status}'.`,
+      });
+    }
+
+    const now = new Date();
+    if (invitation.expiresAt <= now) {
+      await this.prisma.teamInvitation.update({
+        where: { id: invitationId },
+        data: { status: TeamInvitationStatus.EXPIRED, respondedAt: now },
+      });
+      throw new ConflictException({
+        code: 'INVITATION_EXPIRED',
+        message: 'This invitation has expired.',
+      });
+    }
+
+    if (invitation.team.status === TeamStatus.DISSOLVED) {
+      throw new ConflictException({
+        code: 'TEAM_DISSOLVED',
+        message: 'The team has been dissolved.',
+      });
+    }
+
+    const { status: hStatus, startsAt, endsAt } = invitation.team.hackathon;
+    const effectiveStatus = this.deriveEffectiveStatus(
+      hStatus as HackathonStatus,
+      startsAt,
+      endsAt,
+      now
+    );
+    if (
+      effectiveStatus === HackathonStatus.COMPLETED ||
+      effectiveStatus === HackathonStatus.ARCHIVED
+    ) {
+      throw new ConflictException({
+        code: 'HACKATHON_LOCKED',
+        message: 'Cannot join team after hackathon is completed or archived.',
+      });
+    }
+
+    // Verify user registration for this hackathon
+    const reg = await this.prisma.participantRegistration.findUnique({
+      where: {
+        hackathonId_userId: {
+          hackathonId: invitation.team.hackathonId,
+          userId,
+        },
+      },
+    });
+
+    if (!reg || reg.status !== ParticipantRegistrationStatus.REGISTERED) {
+      throw new ForbiddenException({
+        code: 'NOT_REGISTERED',
+        message: 'You must be registered for this hackathon to join a team.',
+      });
+    }
+
+    // Execute acceptance in transaction
+    await this.prisma.$transaction(async (tx) => {
+      // Row lock participant registration to serialize concurrent acceptance
+      await tx.participantRegistration.update({
+        where: {
+          hackathonId_userId: {
+            hackathonId: invitation.team.hackathonId,
+            userId,
+          },
+        },
+        data: {
+          updatedAt: now,
+        },
+      });
+
+      // Check user is not already active on another team in this hackathon
+      const currentActiveTeam = await tx.teamMember.findFirst({
+        where: {
+          userId,
+          status: TeamMemberStatus.ACTIVE,
+          team: {
+            hackathonId: invitation.team.hackathonId,
+            status: TeamStatus.ACTIVE,
+          },
+        },
+      });
+
+      if (currentActiveTeam) {
+        throw new ConflictException({
+          code: 'ALREADY_ON_TEAM',
+          message: 'You are already an active member of another team in this hackathon.',
+        });
+      }
+
+      // Check current active members in team
+      const maxTeamSize = invitation.team.hackathon.configuration?.maxTeamSize ?? 4;
+      const activeMemberCount = await tx.teamMember.count({
+        where: {
+          teamId: invitation.teamId,
+          status: TeamMemberStatus.ACTIVE,
+        },
+      });
+
+      if (activeMemberCount >= maxTeamSize) {
+        throw new ConflictException({
+          code: 'TEAM_SIZE_LIMIT_REACHED',
+          message: `Team has reached its maximum size of ${maxTeamSize} members.`,
+        });
+      }
+
+      // 1. Update invitation status
+      await tx.teamInvitation.update({
+        where: { id: invitationId },
+        data: {
+          status: TeamInvitationStatus.ACCEPTED,
+          respondedAt: now,
+        },
+      });
+
+      // 2. Upsert / reactivate team member
+      const existingMember = await tx.teamMember.findUnique({
+        where: {
+          teamId_userId: {
+            teamId: invitation.teamId,
+            userId,
+          },
+        },
+      });
+
+      if (existingMember) {
+        await tx.teamMember.update({
+          where: { id: existingMember.id },
+          data: {
+            status: TeamMemberStatus.ACTIVE,
+            role: TeamMemberRole.MEMBER,
+            joinedAt: now,
+            leftAt: null,
+          },
+        });
+      } else {
+        await tx.teamMember.create({
+          data: {
+            teamId: invitation.teamId,
+            userId,
+            role: TeamMemberRole.MEMBER,
+            status: TeamMemberStatus.ACTIVE,
+            joinedAt: now,
+          },
+        });
+      }
+
+      // 3. Cancel other pending invitations for this user in this hackathon
+      const otherPending = await tx.teamInvitation.findMany({
+        where: {
+          inviteeUserId: userId,
+          status: TeamInvitationStatus.PENDING,
+          team: {
+            hackathonId: invitation.team.hackathonId,
+          },
+          id: { not: invitationId },
+        },
+        select: { id: true },
+      });
+
+      if (otherPending.length > 0) {
+        await tx.teamInvitation.updateMany({
+          where: {
+            id: { in: otherPending.map((p) => p.id) },
+          },
+          data: {
+            status: TeamInvitationStatus.CANCELLED,
+            respondedAt: now,
+          },
+        });
+      }
+
+      // 4. Audit log
+      await tx.auditLog.create({
+        data: {
+          actorId: userId,
+          actorEmail: userEmail,
+          action: 'team.member_joined',
+          targetEntity: 'Team',
+          targetId: invitation.teamId,
+          metadata: {
+            organizationId: invitation.team.hackathon.organizationId,
+            hackathonId: invitation.team.hackathonId,
+            invitationId,
+          },
+        },
+      });
+    });
+
+    return { success: true, teamId: invitation.teamId };
+  }
+
+  public async declineTeamInvitation(
+    invitationId: string,
+    userId: string,
+    userEmail: string,
+  ): Promise<{ success: true }> {
+    const invitation = await this.prisma.teamInvitation.findUnique({
+      where: { id: invitationId },
+      include: { team: { include: { hackathon: true } } },
+    });
+
+    if (!invitation) {
+      throw new NotFoundException({
+        code: 'INVITATION_NOT_FOUND',
+        message: 'Invitation not found.',
+      });
+    }
+
+    if (invitation.inviteeUserId !== userId) {
+      throw new ForbiddenException({
+        code: 'INVITATION_NOT_YOURS',
+        message: 'You are not the recipient of this invitation.',
+      });
+    }
+
+    if (invitation.status !== TeamInvitationStatus.PENDING) {
+      throw new ConflictException({
+        code: 'INVITATION_NOT_PENDING',
+        message: `Cannot decline an invitation with status '${invitation.status}'.`,
+      });
+    }
+
+    const now = new Date();
+
+    await this.prisma.$transaction([
+      this.prisma.teamInvitation.update({
+        where: { id: invitationId },
+        data: {
+          status: TeamInvitationStatus.DECLINED,
+          respondedAt: now,
+        },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          actorId: userId,
+          actorEmail: userEmail,
+          action: 'team.invitation_declined',
+          targetEntity: 'Team',
+          targetId: invitation.teamId,
+          metadata: {
+            organizationId: invitation.team.hackathon.organizationId,
+            hackathonId: invitation.team.hackathonId,
+            invitationId,
+          },
+        },
+      }),
+    ]);
+
+    return { success: true };
+  }
+
+  public async leaveTeam(
+    teamId: string,
+    userId: string,
+    userEmail: string,
+  ): Promise<{ success: true }> {
+    const membership = await this.prisma.teamMember.findFirst({
+      where: {
+        teamId,
+        userId,
+        status: TeamMemberStatus.ACTIVE,
+      },
+      include: {
+        team: {
+          include: { hackathon: true },
+        },
+      },
+    });
+
+    if (!membership) {
+      throw new NotFoundException({
+        code: 'NOT_TEAM_MEMBER',
+        message: 'You are not an active member of this team.',
+      });
+    }
+
+    if (membership.role === TeamMemberRole.CAPTAIN) {
+      throw new ConflictException({
+        code: 'CAPTAIN_CANNOT_LEAVE',
+        message: 'Team captains cannot leave the team directly. You must transfer captaincy first or dissolve the team.',
+      });
+    }
+
+    const now = new Date();
+
+    await this.prisma.$transaction([
+      this.prisma.teamMember.update({
+        where: { id: membership.id },
+        data: {
+          status: TeamMemberStatus.LEFT,
+          leftAt: now,
+        },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          actorId: userId,
+          actorEmail: userEmail,
+          action: 'team.member_left',
+          targetEntity: 'Team',
+          targetId: teamId,
+          metadata: {
+            organizationId: membership.team.hackathon.organizationId,
+            hackathonId: membership.team.hackathonId,
+          },
+        },
+      }),
+    ]);
+
+    return { success: true };
+  }
+
+  public async removeTeamMember(
+    teamId: string,
+    memberId: string,
+    userId: string,
+    userEmail: string,
+  ): Promise<{ success: true }> {
+    const team = await this.prisma.team.findUnique({
+      where: { id: teamId },
+      include: {
+        hackathon: true,
+        members: true,
+      },
+    });
+
+    if (!team || team.status === TeamStatus.DISSOLVED) {
+      throw new NotFoundException({
+        code: 'TEAM_NOT_FOUND',
+        message: 'Team not found.',
+      });
+    }
+
+    const isCaptain = team.members.some(
+      (m) => m.userId === userId && m.role === TeamMemberRole.CAPTAIN && m.status === TeamMemberStatus.ACTIVE,
+    );
+
+    if (!isCaptain) {
+      throw new ForbiddenException({
+        code: 'FORBIDDEN',
+        message: 'Only the team captain can remove team members.',
+      });
+    }
+
+    const targetMember = team.members.find((m) => m.id === memberId);
+    if (!targetMember) {
+      throw new NotFoundException({
+        code: 'TEAM_MEMBER_NOT_FOUND',
+        message: 'Team member not found.',
+      });
+    }
+
+    if (targetMember.userId === userId) {
+      throw new BadRequestException({
+        code: 'CANNOT_REMOVE_SELF',
+        message: 'Team captain cannot remove themselves. Transfer captaincy first or dissolve the team.',
+      });
+    }
+
+    if (targetMember.status !== TeamMemberStatus.ACTIVE) {
+      throw new ConflictException({
+        code: 'MEMBER_NOT_ACTIVE',
+        message: 'Target member is not active.',
+      });
+    }
+
+    const now = new Date();
+
+    await this.prisma.$transaction([
+      this.prisma.teamMember.update({
+        where: { id: memberId },
+        data: {
+          status: TeamMemberStatus.LEFT,
+          leftAt: now,
+        },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          actorId: userId,
+          actorEmail: userEmail,
+          action: 'team.member_removed',
+          targetEntity: 'Team',
+          targetId: teamId,
+          metadata: {
+            organizationId: team.hackathon.organizationId,
+            hackathonId: team.hackathonId,
+            removedUserId: targetMember.userId,
+          },
+        },
+      }),
+    ]);
+
+    return { success: true };
+  }
+
+  public async transferCaptaincy(
+    teamId: string,
+    userId: string,
+    userEmail: string,
+    dto: TransferCaptaincyDto,
+  ): Promise<{ success: true }> {
+    const team = await this.prisma.team.findUnique({
+      where: { id: teamId },
+      include: {
+        hackathon: true,
+        members: true,
+      },
+    });
+
+    if (!team || team.status === TeamStatus.DISSOLVED) {
+      throw new NotFoundException({
+        code: 'TEAM_NOT_FOUND',
+        message: 'Team not found.',
+      });
+    }
+
+    const currentCaptain = team.members.find(
+      (m) => m.userId === userId && m.role === TeamMemberRole.CAPTAIN && m.status === TeamMemberStatus.ACTIVE,
+    );
+
+    if (!currentCaptain) {
+      throw new ForbiddenException({
+        code: 'FORBIDDEN',
+        message: 'Only the current team captain can transfer captaincy.',
+      });
+    }
+
+    const targetMember = team.members.find((m) => m.id === dto.targetMemberId);
+    if (!targetMember) {
+      throw new NotFoundException({
+        code: 'TEAM_MEMBER_NOT_FOUND',
+        message: 'Target team member not found.',
+      });
+    }
+
+    if (targetMember.userId === userId) {
+      throw new BadRequestException({
+        code: 'ALREADY_CAPTAIN',
+        message: 'You are already the captain.',
+      });
+    }
+
+    if (targetMember.status !== TeamMemberStatus.ACTIVE) {
+      throw new ConflictException({
+        code: 'MEMBER_NOT_ACTIVE',
+        message: 'Target member is not active.',
+      });
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.teamMember.update({
+        where: { id: currentCaptain.id },
+        data: { role: TeamMemberRole.MEMBER },
+      }),
+      this.prisma.teamMember.update({
+        where: { id: targetMember.id },
+        data: { role: TeamMemberRole.CAPTAIN },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          actorId: userId,
+          actorEmail: userEmail,
+          action: 'team.captain_transferred',
+          targetEntity: 'Team',
+          targetId: teamId,
+          metadata: {
+            organizationId: team.hackathon.organizationId,
+            hackathonId: team.hackathonId,
+            newCaptainUserId: targetMember.userId,
+          },
+        },
+      }),
+    ]);
+
+    return { success: true };
+  }
 }
+
 
 

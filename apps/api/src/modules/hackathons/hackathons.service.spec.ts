@@ -99,6 +99,32 @@ describe('HackathonsService Unit Tests', () => {
         update: jest.fn(),
         delete: jest.fn(),
       },
+      team: {
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+      },
+      teamMember: {
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        updateMany: jest.fn(),
+        delete: jest.fn(),
+      },
+      teamInvitation: {
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        updateMany: jest.fn(),
+        delete: jest.fn(),
+      },
       $transaction: jest.fn().mockImplementation(async (arg) => {
         if (Array.isArray(arg)) {
           return Promise.all(arg);
@@ -1123,7 +1149,321 @@ describe('HackathonsService Unit Tests', () => {
       expect(prisma.$transaction).toHaveBeenCalled();
     });
   });
+
+  // ====================================================
+  // 12. TEAMS & TEAM FORMATION SERVICE (S2-05)
+  // ====================================================
+  describe('12. Teams & Team Formation Service (S2-05)', () => {
+    const mockCaptainUser = {
+      id: 'captain-user-1',
+      email: 'captain@almosthack.com',
+      name: 'Captain Alice',
+      college: 'MIT',
+      branch: 'Computer Science',
+      graduationYear: 2026,
+      skills: ['TypeScript', 'Python'],
+    };
+
+    const openHackathon = {
+      ...sampleHackathonRecord,
+      status: HackathonStatus.PUBLISHED,
+      visibility: HackathonVisibility.PUBLIC,
+      registrationStartsAt: new Date(Date.now() - 3600000),
+      registrationEndsAt: new Date(Date.now() + 3600000),
+      startsAt: new Date(Date.now() + 7200000),
+      endsAt: new Date(Date.now() + 86400000),
+      configuration: {
+        id: 'cfg-1',
+        hackathonId: sampleHackathonRecord.id,
+        participationMode: 'BOTH',
+        maxTeamSize: 4,
+        minTeamSize: 1,
+        eligibilityType: 'OPEN',
+        allowedBranches: [],
+        allowedColleges: [],
+        graduationYearFrom: null,
+        graduationYearTo: null,
+      },
+    };
+
+    const sampleRegistration = {
+      id: 'reg-uuid-1',
+      hackathonId: sampleHackathonRecord.id,
+      userId: mockCaptainUser.id,
+      trackId: null,
+      challengeId: null,
+      status: 'REGISTERED',
+      registeredAt: new Date(),
+      withdrawnAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const sampleTeam = {
+      id: 'team-uuid-1',
+      hackathonId: sampleHackathonRecord.id,
+      name: 'Cyber Innovators',
+      slug: 'cyber-innovators',
+      description: 'Building AI tools',
+      createdByUserId: mockCaptainUser.id,
+      status: 'ACTIVE',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      members: [
+        {
+          id: 'member-1',
+          teamId: 'team-uuid-1',
+          userId: mockCaptainUser.id,
+          role: 'CAPTAIN',
+          status: 'ACTIVE',
+          joinedAt: new Date(),
+          leftAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          user: mockCaptainUser,
+        },
+      ],
+      invitations: [],
+    };
+
+    it('should create a team with captain role atomically', async () => {
+      prisma.hackathon.findUnique.mockResolvedValue(openHackathon);
+      prisma.participantRegistration.findUnique.mockResolvedValue(sampleRegistration);
+      prisma.teamMember.findFirst.mockResolvedValue(null);
+      prisma.team.findUnique.mockResolvedValue(sampleTeam);
+      (prisma.$transaction as jest.Mock).mockImplementation(async (cb) => {
+        if (typeof cb === 'function') {
+          return cb({
+            participantRegistration: { update: jest.fn().mockResolvedValue({}) },
+            teamMember: { findFirst: jest.fn().mockResolvedValue(null) },
+            team: {
+              findUnique: jest.fn().mockResolvedValue(null),
+              create: jest.fn().mockResolvedValue(sampleTeam),
+            },
+            auditLog: { create: jest.fn().mockResolvedValue({}) },
+          });
+        }
+        return [sampleTeam, {}];
+      });
+
+      const res = await service.createTeam(
+        openHackathon.id,
+        mockCaptainUser.id,
+        mockCaptainUser.email,
+        {
+          name: 'Cyber Innovators',
+          slug: 'cyber-innovators',
+          description: 'Building AI tools',
+        }
+      );
+
+      expect(res.id).toBe(sampleTeam.id);
+      expect(res.name).toBe('Cyber Innovators');
+      expect(res.memberCount).toBe(1);
+      expect(prisma.$transaction).toHaveBeenCalled();
+    });
+
+    it('should reject team creation if user is not registered for hackathon', async () => {
+      prisma.hackathon.findUnique.mockResolvedValue(openHackathon);
+      prisma.participantRegistration.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.createTeam(
+          openHackathon.id,
+          mockCaptainUser.id,
+          mockCaptainUser.email,
+          { name: 'Team Alpha' }
+        )
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should reject team creation if user is already on an active team', async () => {
+      prisma.hackathon.findUnique.mockResolvedValue(openHackathon);
+      prisma.participantRegistration.findUnique.mockResolvedValue(sampleRegistration);
+      prisma.teamMember.findFirst.mockResolvedValue({ id: 'existing-mem', status: 'ACTIVE' });
+
+      await expect(
+        service.createTeam(
+          openHackathon.id,
+          mockCaptainUser.id,
+          mockCaptainUser.email,
+          { name: 'Team Alpha' }
+        )
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should reject team creation if slug already exists in hackathon', async () => {
+      prisma.hackathon.findUnique.mockResolvedValue(openHackathon);
+      prisma.participantRegistration.findUnique.mockResolvedValue(sampleRegistration);
+      prisma.teamMember.findFirst.mockResolvedValue(null);
+      prisma.team.findUnique.mockResolvedValue(sampleTeam);
+
+      await expect(
+        service.createTeam(
+          openHackathon.id,
+          mockCaptainUser.id,
+          mockCaptainUser.email,
+          { name: 'Cyber Innovators', slug: 'cyber-innovators' }
+        )
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should invite eligible registered participant to team', async () => {
+      const inviteeUser = { id: 'invitee-uuid', email: 'invitee@mit.edu', name: 'Invitee' };
+      const teamWithCaptain = {
+        ...sampleTeam,
+        hackathon: openHackathon,
+        members: [{ userId: mockCaptainUser.id, role: 'CAPTAIN', status: 'ACTIVE' }],
+      };
+      prisma.team.findUnique.mockResolvedValue(teamWithCaptain);
+      prisma.user.findUnique.mockResolvedValue(inviteeUser);
+      prisma.participantRegistration.findUnique.mockResolvedValue({ ...sampleRegistration, userId: inviteeUser.id });
+      prisma.teamMember.findFirst.mockResolvedValue(null);
+      prisma.teamInvitation.findFirst.mockResolvedValue(null);
+
+      const createdInv = {
+        id: 'inv-1',
+        teamId: sampleTeam.id,
+        inviteeUserId: inviteeUser.id,
+        invitedByUserId: mockCaptainUser.id,
+        status: 'PENDING',
+        expiresAt: new Date(Date.now() + 86400000),
+        respondedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        inviteeUser,
+        invitedByUser: mockCaptainUser,
+      };
+      (prisma.$transaction as jest.Mock).mockResolvedValue([createdInv, {}]);
+
+      const res = await service.inviteTeamMember(
+        sampleTeam.id,
+        mockCaptainUser.id,
+        mockCaptainUser.email,
+        { inviteeUserId: inviteeUser.id }
+      );
+
+      expect(res.id).toBe('inv-1');
+      expect(res.status).toBe('PENDING');
+      expect(prisma.$transaction).toHaveBeenCalled();
+    });
+
+    it('should allow invited participant to accept invitation', async () => {
+      const pendingInv = {
+        id: 'inv-1',
+        teamId: sampleTeam.id,
+        inviteeUserId: 'invitee-uuid',
+        invitedByUserId: mockCaptainUser.id,
+        status: 'PENDING',
+        expiresAt: new Date(Date.now() + 86400000),
+        team: {
+          ...sampleTeam,
+          hackathon: openHackathon,
+          members: [{ id: 'm1', status: 'ACTIVE' }],
+        },
+      };
+
+      prisma.teamInvitation.findUnique.mockResolvedValue(pendingInv);
+      prisma.participantRegistration.findUnique.mockResolvedValue({ ...sampleRegistration, userId: 'invitee-uuid' });
+      prisma.teamMember.findFirst.mockResolvedValue(null);
+      (prisma.$transaction as jest.Mock).mockImplementation(async (cb) => {
+        if (typeof cb === 'function') {
+          return cb({
+            participantRegistration: { update: jest.fn().mockResolvedValue({}) },
+            teamMember: {
+              findFirst: jest.fn().mockResolvedValue(null),
+              count: jest.fn().mockResolvedValue(1),
+              findUnique: jest.fn().mockResolvedValue(null),
+              create: jest.fn().mockResolvedValue({}),
+            },
+            teamInvitation: {
+              update: jest.fn().mockResolvedValue({}),
+              findMany: jest.fn().mockResolvedValue([]),
+              updateMany: jest.fn().mockResolvedValue({}),
+            },
+            auditLog: { create: jest.fn().mockResolvedValue({}) },
+          });
+        }
+        return [];
+      });
+
+      const res = await service.acceptTeamInvitation(
+        'inv-1',
+        'invitee-uuid',
+        'invitee@mit.edu'
+      );
+
+      expect(res.success).toBe(true);
+      expect(res.teamId).toBe(sampleTeam.id);
+    });
+
+    it('should reject invitation acceptance if invitee is already on another team', async () => {
+      const pendingInv = {
+        id: 'inv-1',
+        teamId: sampleTeam.id,
+        inviteeUserId: 'invitee-uuid',
+        status: 'PENDING',
+        expiresAt: new Date(Date.now() + 86400000),
+        team: {
+          ...sampleTeam,
+          hackathon: openHackathon,
+          members: [{ id: 'm1', status: 'ACTIVE' }],
+        },
+      };
+
+      prisma.teamInvitation.findUnique.mockResolvedValue(pendingInv);
+      prisma.participantRegistration.findUnique.mockResolvedValue({ ...sampleRegistration, userId: 'invitee-uuid' });
+      prisma.teamMember.findFirst.mockResolvedValue({ id: 'existing-other-mem' }); // already active
+
+      await expect(
+        service.acceptTeamInvitation('inv-1', 'invitee-uuid', 'invitee@mit.edu')
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should transfer captaincy to another active member', async () => {
+      const teamWithMembers = {
+        ...sampleTeam,
+        hackathon: openHackathon,
+        members: [
+          { id: 'm1', userId: mockCaptainUser.id, role: 'CAPTAIN', status: 'ACTIVE' },
+          { id: 'm2', userId: 'user-b', role: 'MEMBER', status: 'ACTIVE' },
+        ],
+      };
+      prisma.team.findUnique.mockResolvedValue(teamWithMembers);
+      (prisma.$transaction as jest.Mock).mockResolvedValue([{}, {}, {}]);
+
+      const res = await service.transferCaptaincy(
+        sampleTeam.id,
+        mockCaptainUser.id,
+        mockCaptainUser.email,
+        { targetMemberId: 'm2' }
+      );
+
+      expect(res.success).toBe(true);
+      expect(prisma.$transaction).toHaveBeenCalled();
+    });
+
+    it('should dissolve team and mark active members as left', async () => {
+      const teamWithCaptain = {
+        ...sampleTeam,
+        hackathon: openHackathon,
+        members: [{ id: 'm1', userId: mockCaptainUser.id, role: 'CAPTAIN', status: 'ACTIVE' }],
+      };
+      prisma.team.findUnique.mockResolvedValue(teamWithCaptain);
+      (prisma.$transaction as jest.Mock).mockResolvedValue([{}, {}, {}, {}]);
+
+      const res = await service.dissolveTeam(
+        sampleTeam.id,
+        mockCaptainUser.id,
+        mockCaptainUser.email
+      );
+
+      expect(res.success).toBe(true);
+      expect(prisma.$transaction).toHaveBeenCalled();
+    });
+  });
 });
+
 
 
 

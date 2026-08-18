@@ -314,3 +314,105 @@ export interface UpdateParticipantRegistrationInput {
   challengeId?: string | null;
 }
 
+// ==========================================
+// S2-05: TEAMS & TEAM FORMATION TYPES
+// ==========================================
+
+export enum TeamStatus {
+  ACTIVE = 'ACTIVE',
+  DISSOLVED = 'DISSOLVED',
+}
+
+export enum TeamMemberRole {
+  CAPTAIN = 'CAPTAIN',
+  MEMBER = 'MEMBER',
+}
+
+export enum TeamMemberStatus {
+  ACTIVE = 'ACTIVE',
+  LEFT = 'LEFT',
+}
+
+export enum TeamInvitationStatus {
+  PENDING = 'PENDING',
+  ACCEPTED = 'ACCEPTED',
+  DECLINED = 'DECLINED',
+  CANCELLED = 'CANCELLED',
+  EXPIRED = 'EXPIRED',
+}
+
+export interface TeamMemberProfile {
+  id: string;
+  name: string;
+  email?: string;
+  avatarUrl: string | null;
+  college: string | null;
+  branch: string | null;
+  skills: string[];
+}
+
+export interface TeamMemberEntity {
+  id: string;
+  teamId: string;
+  userId: string;
+  role: TeamMemberRole;
+  status: TeamMemberStatus;
+  joinedAt: string;
+  leftAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user?: TeamMemberProfile;
+}
+
+export interface TeamInvitationEntity {
+  id: string;
+  teamId: string;
+  inviteeUserId: string;
+  invitedByUserId: string;
+  status: TeamInvitationStatus;
+  expiresAt: string;
+  respondedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  team?: TeamEntity;
+  inviteeUser?: TeamMemberProfile;
+  invitedByUser?: TeamMemberProfile;
+}
+
+export interface TeamEntity {
+  id: string;
+  hackathonId: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  createdByUserId: string;
+  status: TeamStatus;
+  createdAt: string;
+  updatedAt: string;
+  members?: TeamMemberEntity[];
+  invitations?: TeamInvitationEntity[];
+  memberCount?: number;
+}
+
+export interface CreateTeamInput {
+  name: string;
+  slug?: string;
+  description?: string | null;
+}
+
+export interface UpdateTeamInput {
+  name?: string;
+  slug?: string;
+  description?: string | null;
+}
+
+export interface InviteTeamMemberInput {
+  inviteeUserId?: string;
+  inviteeEmail?: string;
+}
+
+export interface TransferCaptaincyInput {
+  targetMemberId: string;
+}
+
+

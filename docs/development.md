@@ -266,6 +266,85 @@ curl -X DELETE http://localhost:4000/api/v1/hackathons/<hackathon_id>/registrati
   -H "Cookie: almosthack_session=<session_token>"
 ```
 
+### 12. Teams & Team Formation API Testing
+
+```bash
+# Create a team (creator becomes Captain automatically)
+curl -X POST http://localhost:4000/api/v1/hackathons/<hackathon_id>/teams \
+  -H "Content-Type: application/json" \
+  -H "Cookie: almosthack_session=<session_token>" \
+  -d '{
+    "name": "Quantum Pioneers",
+    "slug": "quantum-pioneers",
+    "description": "Building next-gen AI verification models."
+  }'
+
+# Get current user's team in a hackathon
+curl -X GET http://localhost:4000/api/v1/hackathons/<hackathon_id>/teams/me \
+  -H "Cookie: almosthack_session=<session_token>"
+
+# Get current user's pending invitations
+curl -X GET http://localhost:4000/api/v1/hackathons/<hackathon_id>/invitations/me \
+  -H "Cookie: almosthack_session=<session_token>"
+
+# Get team details by ID
+curl -X GET http://localhost:4000/api/v1/teams/<team_id> \
+  -H "Cookie: almosthack_session=<session_token>"
+
+# Update team details (Captain only)
+curl -X PATCH http://localhost:4000/api/v1/teams/<team_id> \
+  -H "Content-Type: application/json" \
+  -H "Cookie: almosthack_session=<session_token>" \
+  -d '{
+    "name": "Quantum Pioneers AI",
+    "description": "Updated team vision"
+  }'
+
+# Invite registered participant by email (Captain only)
+curl -X POST http://localhost:4000/api/v1/teams/<team_id>/invitations \
+  -H "Content-Type: application/json" \
+  -H "Cookie: almosthack_session=<session_token>" \
+  -d '{
+    "inviteeEmail": "teammate@university.edu"
+  }'
+
+# List pending team invitations (Captain only)
+curl -X GET http://localhost:4000/api/v1/teams/<team_id>/invitations \
+  -H "Cookie: almosthack_session=<session_token>"
+
+# Cancel invitation (Captain only)
+curl -X DELETE http://localhost:4000/api/v1/teams/<team_id>/invitations/<invitation_id> \
+  -H "Cookie: almosthack_session=<session_token>"
+
+# Accept team invitation (Invitee)
+curl -X POST http://localhost:4000/api/v1/invitations/<invitation_id>/accept \
+  -H "Cookie: almosthack_session=<session_token>"
+
+# Decline team invitation (Invitee)
+curl -X POST http://localhost:4000/api/v1/invitations/<invitation_id>/decline \
+  -H "Cookie: almosthack_session=<session_token>"
+
+# Leave team (Member only)
+curl -X POST http://localhost:4000/api/v1/teams/<team_id>/leave \
+  -H "Cookie: almosthack_session=<session_token>"
+
+# Remove team member (Captain only)
+curl -X DELETE http://localhost:4000/api/v1/teams/<team_id>/members/<member_id> \
+  -H "Cookie: almosthack_session=<session_token>"
+
+# Transfer captaincy (Captain only)
+curl -X POST http://localhost:4000/api/v1/teams/<team_id>/captain/transfer \
+  -H "Content-Type: application/json" \
+  -H "Cookie: almosthack_session=<session_token>" \
+  -d '{
+    "targetMemberId": "<member_id>"
+  }'
+
+# Dissolve team (Captain only)
+curl -X DELETE http://localhost:4000/api/v1/teams/<team_id> \
+  -H "Cookie: almosthack_session=<session_token>"
+```
+
 ---
 
 ## Command Reference

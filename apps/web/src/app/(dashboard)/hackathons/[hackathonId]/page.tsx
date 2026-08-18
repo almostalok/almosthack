@@ -25,15 +25,28 @@ import {
   CheckCircle2,
   AlertCircle,
   Sparkles,
+  Users,
+  UserPlus,
+  Crown,
+  LogOut,
+  Trash2,
+  Mail,
+  Shield,
+  ArrowRightLeft,
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import {
   HackathonEntity,
   HackathonLifecycleResponse,
+  HackathonConfigurationEntity,
   HackathonTrackEntity,
   HackathonChallengeEntity,
   ParticipantRegistrationEntity,
   ParticipantRegistrationStatus,
+  TeamEntity,
+  TeamInvitationEntity,
+  TeamMemberRole,
+  TeamMemberStatus,
 } from '@almosthack/types';
 
 export default function HackathonDetailPage() {
@@ -47,6 +60,16 @@ export default function HackathonDetailPage() {
   const [selectedChallengeId, setSelectedChallengeId] = React.useState<string>('');
   const [formError, setFormError] = React.useState<string | null>(null);
 
+  // Team creation form state
+  const [teamName, setTeamName] = React.useState<string>('');
+  const [teamSlug, setTeamSlug] = React.useState<string>('');
+  const [teamDescription, setTeamDescription] = React.useState<string>('');
+  const [teamError, setTeamError] = React.useState<string | null>(null);
+
+  // Team invite form state
+  const [inviteeEmail, setInviteeEmail] = React.useState<string>('');
+  const [inviteError, setInviteError] = React.useState<string | null>(null);
+
   // Fetch hackathon details
   const {
     data: hackathon,
@@ -55,6 +78,13 @@ export default function HackathonDetailPage() {
   } = useQuery<HackathonEntity>({
     queryKey: ['hackathon', hackathonId],
     queryFn: () => apiClient.getHackathon(hackathonId),
+  });
+
+  // Fetch configuration
+  const { data: configuration } = useQuery<HackathonConfigurationEntity | null>({
+    queryKey: ['hackathon-configuration', hackathonId],
+    queryFn: () => apiClient.getHackathonConfiguration(hackathonId),
+    enabled: !!hackathonId,
   });
 
   // Fetch effective lifecycle status
@@ -72,6 +102,27 @@ export default function HackathonDetailPage() {
     queryKey: ['hackathon-registration', hackathonId],
     queryFn: () => apiClient.getHackathonRegistration(hackathonId),
     enabled: !!hackathonId,
+  });
+
+  // Fetch current user's team
+  const isRegistered = registration?.status === ParticipantRegistrationStatus.REGISTERED;
+  const {
+    data: myTeam,
+    isLoading: isLoadingMyTeam,
+  } = useQuery<TeamEntity | null>({
+    queryKey: ['my-team', hackathonId],
+    queryFn: () => apiClient.getMyTeam(hackathonId),
+    enabled: !!hackathonId && isRegistered,
+  });
+
+  // Fetch current user's pending invitations
+  const {
+    data: myInvitations = [],
+    isLoading: isLoadingInvitations,
+  } = useQuery<TeamInvitationEntity[]>({
+    queryKey: ['my-team-invitations', hackathonId],
+    queryFn: () => apiClient.getMyTeamInvitations(hackathonId),
+    enabled: !!hackathonId && isRegistered,
   });
 
   // Fetch active tracks
@@ -122,6 +173,8 @@ export default function HackathonDetailPage() {
     onSuccess: () => {
       setFormError(null);
       queryClient.invalidateQueries({ queryKey: ['hackathon-registration', hackathonId] });
+      queryClient.invalidateQueries({ queryKey: ['my-team', hackathonId] });
+      queryClient.invalidateQueries({ queryKey: ['my-team-invitations', hackathonId] });
     },
     onError: (err: any) => {
       setFormError(err?.message || 'Failed to register for hackathon');
@@ -147,9 +200,84 @@ export default function HackathonDetailPage() {
     onSuccess: () => {
       setFormError(null);
       queryClient.invalidateQueries({ queryKey: ['hackathon-registration', hackathonId] });
+      queryClient.invalidateQueries({ queryKey: ['my-team', hackathonId] });
+      queryClient.invalidateQueries({ queryKey: ['my-team-invitations', hackathonId] });
     },
     onError: (err: any) => {
       setFormError(err?.message || 'Failed to withdraw from hackathon');
+    },
+  });
+
+  // Team Mutations
+  const createTeamMutation = useMutation({
+    mutationFn: (payload: { name: string; slug?: string; description?: string }) =>
+      apiClient.createTeam(hackathonId, payload),
+    onSuccess: () => {
+      setTeamError(null);
+      setTeamName('');
+      setTeamSlug('');
+      setTeamDescription('');
+      queryClient.invalidateQueries({ queryKey: ['my-team', hackathonId] });
+    },
+    onError: (err: any) => {
+      setTeamError(err?.message || 'Failed to create team');
+    },
+  });
+
+  const inviteMemberMutation = useMutation({
+    mutationFn: (payload: { inviteeEmail?: string }) =>
+      apiClient.inviteTeamMember(myTeam!.id, payload),
+    onSuccess: () => {
+      setInviteError(null);
+      setInviteeEmail('');
+      queryClient.invalidateQueries({ queryKey: ['my-team', hackathonId] });
+    },
+    onError: (err: any) => {
+      setInviteError(err?.message || 'Failed to invite team member');
+    },
+  });
+
+  const acceptInviteMutation = useMutation({
+    mutationFn: (invitationId: string) => apiClient.acceptTeamInvitation(invitationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-team', hackathonId] });
+      queryClient.invalidateQueries({ queryKey: ['my-team-invitations', hackathonId] });
+    },
+  });
+
+  const declineInviteMutation = useMutation({
+    mutationFn: (invitationId: string) => apiClient.declineTeamInvitation(invitationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-team-invitations', hackathonId] });
+    },
+  });
+
+  const leaveTeamMutation = useMutation({
+    mutationFn: () => apiClient.leaveTeam(myTeam!.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-team', hackathonId] });
+    },
+  });
+
+  const removeMemberMutation = useMutation({
+    mutationFn: (memberId: string) => apiClient.removeTeamMember(myTeam!.id, memberId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-team', hackathonId] });
+    },
+  });
+
+  const transferCaptaincyMutation = useMutation({
+    mutationFn: (targetMemberId: string) =>
+      apiClient.transferTeamCaptaincy(myTeam!.id, { targetMemberId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-team', hackathonId] });
+    },
+  });
+
+  const dissolveTeamMutation = useMutation({
+    mutationFn: () => apiClient.dissolveTeam(myTeam!.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-team', hackathonId] });
     },
   });
 
@@ -180,271 +308,164 @@ export default function HackathonDetailPage() {
   const effectiveRegistrationStatus = lifecycle?.registrationStatus || 'NOT_OPEN';
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      {/* Top Breadcrumb & Controls */}
-      <div className="flex flex-col gap-2">
-        <Breadcrumbs
-          items={[
-            { label: 'Platform' },
-            { label: 'Hackathons', href: '/hackathons' },
-            { label: hackathon.name },
-          ]}
-        />
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            {hackathon.logoUrl && (
-              <img
-                src={hackathon.logoUrl}
-                alt={hackathon.name}
-                className="w-10 h-10 rounded-lg object-contain bg-zinc-950 p-1 border border-zinc-800"
-              />
-            )}
-            <div>
-              <h1 className="text-2xl font-bold font-heading text-zinc-100 tracking-tight">
-                {hackathon.name}
-              </h1>
-              <p className="text-xs text-zinc-400 font-mono mt-0.5">
-                Slug: <span className="text-emerald-400">{hackathon.slug}</span> | Timezone: {hackathon.timezone}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {hackathon.status === 'DRAFT' && (
-              <Button
-                variant="accent"
-                size="sm"
-                leftIcon={<Send className="w-4 h-4" />}
-                isLoading={publishMutation.isPending}
-                onClick={() => publishMutation.mutate()}
-              >
-                Publish Hackathon
-              </Button>
-            )}
-
-            {effectiveHackathonStatus === 'COMPLETED' && hackathon.status !== 'ARCHIVED' && (
-              <Button
-                variant="destructive"
-                size="sm"
-                leftIcon={<Archive className="w-4 h-4" />}
-                isLoading={archiveMutation.isPending}
-                onClick={() => archiveMutation.mutate()}
-              >
-                Archive Hackathon
-              </Button>
-            )}
-
-            <Link href={`/hackathons/${hackathonId}/tracks`}>
-              <Button variant="accent" size="sm" leftIcon={<Layers className="w-4 h-4" />}>
-                Tracks & Challenges
-              </Button>
-            </Link>
-
-            <Link href={`/hackathons/${hackathonId}/configuration`}>
-              <Button variant="secondary" size="sm" leftIcon={<Sliders className="w-4 h-4" />}>
-                Configuration
-              </Button>
-            </Link>
-
-            <Link href={`/hackathons/${hackathonId}/rules`}>
-              <Button variant="outline" size="sm" leftIcon={<FileText className="w-4 h-4" />}>
-                Rules
-              </Button>
-            </Link>
-
-            <Link href={`/hackathons/${hackathonId}/settings`}>
-              <Button variant="secondary" size="sm" leftIcon={<Settings className="w-4 h-4" />}>
-                Settings
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* DISTINCT LIFECYCLE & REGISTRATION STATUS DISPLAY */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Hackathon Event Lifecycle Box */}
-        <Card className="p-5 border-zinc-800 bg-zinc-900/80 space-y-2">
-          <span className="text-xs font-mono text-zinc-400 tracking-wider uppercase">
-            HACKATHON LIFECYCLE
-          </span>
-          <div className="flex items-center justify-between">
-            <span className="text-xl font-bold font-heading text-zinc-100">
-              {effectiveHackathonStatus}
-            </span>
-            {effectiveHackathonStatus === 'LIVE' && <Badge variant="success">LIVE</Badge>}
-            {effectiveHackathonStatus === 'PUBLISHED' && <Badge variant="accent">PUBLISHED</Badge>}
-            {effectiveHackathonStatus === 'DRAFT' && <Badge variant="warning">DRAFT</Badge>}
-            {effectiveHackathonStatus === 'COMPLETED' && <Badge variant="default">COMPLETED</Badge>}
-            {effectiveHackathonStatus === 'ARCHIVED' && <Badge variant="outline">ARCHIVED</Badge>}
-          </div>
-          <p className="text-[11px] font-mono text-zinc-500">
-            Authoritative macro state derived from schedule & lifecycle actions.
-          </p>
-        </Card>
-
-        {/* Registration Window Box */}
-        <Card className="p-5 border-zinc-800 bg-zinc-900/80 space-y-2">
-          <span className="text-xs font-mono text-zinc-400 tracking-wider uppercase">
-            REGISTRATION WINDOW
-          </span>
-          <div className="flex items-center justify-between">
-            <span className="text-xl font-bold font-heading text-zinc-100">
-              {effectiveRegistrationStatus}
-            </span>
-            {effectiveRegistrationStatus === 'OPEN' && <Badge variant="success">OPEN</Badge>}
-            {effectiveRegistrationStatus === 'CLOSED' && <Badge variant="default">CLOSED</Badge>}
-            {effectiveRegistrationStatus === 'NOT_OPEN' && <Badge variant="warning">NOT OPEN</Badge>}
-          </div>
-          <p className="text-[11px] font-mono text-zinc-500">
-            Independent state derived from registration start and end timestamps.
-          </p>
-        </Card>
-      </div>
-
-      {/* Core Hackathon Information */}
-      <Card className="p-6 bg-zinc-900/60 border-zinc-800 space-y-6">
-        <h2 className="text-lg font-bold text-zinc-100 font-heading border-b border-zinc-800 pb-3">
-          Event Core Schedule & Metadata
-        </h2>
-
-        {hackathon.description && (
-          <div>
-            <span className="text-xs font-mono text-zinc-400">Description</span>
-            <p className="text-sm text-zinc-300 font-mono mt-1 leading-relaxed">
-              {hackathon.description}
-            </p>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-          {/* Registration Timestamps */}
-          <div className="space-y-3 bg-zinc-950/60 p-4 rounded-lg border border-zinc-800">
-            <div className="flex items-center gap-2 text-xs font-bold font-mono text-zinc-200">
-              <Calendar className="w-4 h-4 text-emerald-400" />
-              Registration Window
-            </div>
-            <div className="space-y-1.5 text-xs font-mono text-zinc-400">
-              <div className="flex justify-between">
-                <span>Starts At:</span>
-                <span className="text-zinc-200">{new Date(hackathon.registrationStartsAt).toUTCString()}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Ends At:</span>
-                <span className="text-zinc-200">{new Date(hackathon.registrationEndsAt).toUTCString()}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Event Schedule Timestamps */}
-          <div className="space-y-3 bg-zinc-950/60 p-4 rounded-lg border border-zinc-800">
-            <div className="flex items-center gap-2 text-xs font-bold font-mono text-zinc-200">
-              <Clock className="w-4 h-4 text-emerald-400" />
-              Event Schedule
-            </div>
-            <div className="space-y-1.5 text-xs font-mono text-zinc-400">
-              <div className="flex justify-between">
-                <span>Starts At:</span>
-                <span className="text-zinc-200">{new Date(hackathon.startsAt).toUTCString()}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Ends At:</span>
-                <span className="text-zinc-200">{new Date(hackathon.endsAt).toUTCString()}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {hackathon.websiteUrl && (
-          <div className="pt-2 flex items-center gap-2 text-xs font-mono text-zinc-400">
-            <Globe className="w-4 h-4 text-zinc-500" />
-            <span>Website:</span>
-            <a
-              href={hackathon.websiteUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-emerald-400 hover:underline flex items-center gap-1"
+    <div className="space-y-6 max-w-6xl mx-auto pb-16">
+      {/* HEADER & BREADCRUMBS */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800 pb-5">
+        <div>
+          <Breadcrumbs
+            items={[
+              { label: 'Hackathons', href: '/hackathons' },
+              { label: hackathon.name, href: `/hackathons/${hackathon.id}` },
+            ]}
+          />
+          <div className="flex items-center gap-3 mt-2">
+            <h1 className="text-2xl font-bold text-zinc-100 font-heading tracking-tight">
+              {hackathon.name}
+            </h1>
+            <Badge
+              variant={
+                effectiveHackathonStatus === 'PUBLISHED'
+                  ? 'success'
+                  : effectiveHackathonStatus === 'DRAFT'
+                  ? 'default'
+                  : 'accent'
+              }
             >
-              {hackathon.websiteUrl} <ExternalLink className="w-3 h-3" />
-            </a>
+              {effectiveHackathonStatus}
+            </Badge>
           </div>
-        )}
-      </Card>
+        </div>
 
-      {/* S2-04: PARTICIPANT REGISTRATION CARD */}
-      <Card className="p-6 bg-gradient-to-br from-zinc-900/90 to-zinc-950 border-zinc-800 shadow-xl space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
+        <div className="flex items-center gap-2">
+          {effectiveHackathonStatus === 'DRAFT' && (
+            <Button
+              size="sm"
+              variant="accent"
+              isLoading={publishMutation.isPending}
+              onClick={() => publishMutation.mutate()}
+            >
+              Publish Hackathon
+            </Button>
+          )}
+
+          {effectiveHackathonStatus === 'COMPLETED' && (
+            <Button
+              size="sm"
+              variant="destructive"
+              isLoading={archiveMutation.isPending}
+              onClick={() => archiveMutation.mutate()}
+            >
+              Archive Hackathon
+            </Button>
+          )}
+
+          <Link href={`/hackathons/${hackathonId}/tracks`}>
+            <Button size="sm" variant="secondary">
+              Tracks & Challenges
+            </Button>
+          </Link>
+          <Link href={`/hackathons/${hackathonId}/configuration`}>
+            <Button size="sm" variant="outline">
+              Configuration
+            </Button>
+          </Link>
+          <Link href={`/hackathons/${hackathonId}/rules`}>
+            <Button size="sm" variant="outline">
+              Rules
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* METADATA BANNER */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="p-4 border-zinc-800/80 bg-zinc-950/40 space-y-1">
+          <div className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider">Registration</div>
+          <div className="text-sm font-mono font-bold text-zinc-200">{effectiveRegistrationStatus}</div>
+        </Card>
+        <Card className="p-4 border-zinc-800/80 bg-zinc-950/40 space-y-1">
+          <div className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider">Tracks</div>
+          <div className="text-sm font-mono font-bold text-zinc-200">{tracks.length} Tracks Configured</div>
+        </Card>
+        <Card className="p-4 border-zinc-800/80 bg-zinc-950/40 space-y-1">
+          <div className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider">Team Mode</div>
+          <div className="text-sm font-mono font-bold text-zinc-200">
+            {configuration?.participationMode || 'BOTH'}
+          </div>
+        </Card>
+        <Card className="p-4 border-zinc-800/80 bg-zinc-950/40 space-y-1">
+          <div className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider">Team Size</div>
+          <div className="text-sm font-mono font-bold text-zinc-200">
+            {configuration?.minTeamSize ?? 1} - {configuration?.maxTeamSize ?? 4} Members
+          </div>
+        </Card>
+      </div>
+
+      {/* PARTICIPANT REGISTRATION DOMAIN (S2-04) */}
+      <Card className="p-6 border-zinc-800/80 bg-zinc-950/40 space-y-5">
+        <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+            <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <UserCheck className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-zinc-100 font-heading">
-                Participant Registration
-              </h2>
+              <h2 className="text-lg font-bold font-heading text-zinc-100">Participant Registration</h2>
               <p className="text-xs font-mono text-zinc-400">
-                Server-authoritative enrollment, track selection, and withdrawal management.
+                Enrollment status and challenge selection for this hackathon
               </p>
             </div>
           </div>
-
-          <div className="flex items-center gap-2">
-            {isLoadingRegistration ? (
-              <Badge variant="outline">Checking status...</Badge>
-            ) : registration?.status === ParticipantRegistrationStatus.REGISTERED ? (
-              <Badge variant="success" className="px-3 py-1 text-xs">
-                <CheckCircle2 className="w-3.5 h-3.5 mr-1 inline" /> REGISTERED
-              </Badge>
-            ) : registration?.status === ParticipantRegistrationStatus.WITHDRAWN ? (
-              <Badge variant="warning" className="px-3 py-1 text-xs">
-                <UserX className="w-3.5 h-3.5 mr-1 inline" /> WITHDRAWN
-              </Badge>
-            ) : (
-              <Badge variant="outline" className="px-3 py-1 text-xs">
-                NOT REGISTERED
-              </Badge>
-            )}
-          </div>
+          {registration && (
+            <Badge
+              variant={
+                registration.status === ParticipantRegistrationStatus.REGISTERED
+                  ? 'success'
+                  : 'destructive'
+              }
+            >
+              {registration.status}
+            </Badge>
+          )}
         </div>
 
         {formError && (
-          <div className="p-3 bg-red-950/40 border border-red-800/60 rounded-lg text-xs font-mono text-red-300 flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-            <span>{formError}</span>
+          <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-xs font-mono text-red-400 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            {formError}
           </div>
         )}
 
         {registration?.status === ParticipantRegistrationStatus.REGISTERED ? (
           <div className="space-y-4">
-            <div className="p-4 bg-emerald-950/20 border border-emerald-800/40 rounded-xl space-y-2">
+            <div className="p-4 bg-emerald-950/20 border border-emerald-900/40 rounded-xl space-y-3">
               <div className="flex items-center gap-2 text-xs font-mono font-bold text-emerald-400">
-                <Sparkles className="w-4 h-4" /> You are registered for this hackathon
+                <CheckCircle2 className="w-4 h-4" />
+                You are registered for this hackathon
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono text-zinc-300 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                 <div>
-                  <span className="text-zinc-500 block">Registered At:</span>
-                  <span className="text-zinc-200">{new Date(registration.registeredAt).toLocaleString()}</span>
+                  <div className="text-[11px] font-mono text-zinc-500">Selected Track</div>
+                  <div className="text-xs font-mono text-zinc-200 font-semibold">
+                    {registration.track?.name || 'General / None'}
+                  </div>
                 </div>
                 <div>
-                  <span className="text-zinc-500 block">Selected Track:</span>
-                  <span className="text-zinc-200">{registration.track?.name || 'General / Unassigned'}</span>
-                </div>
-                <div>
-                  <span className="text-zinc-500 block">Selected Challenge:</span>
-                  <span className="text-zinc-200">{registration.challenge?.name || 'Unassigned'}</span>
+                  <div className="text-[11px] font-mono text-zinc-500">Selected Challenge</div>
+                  <div className="text-xs font-mono text-zinc-200 font-semibold">
+                    {registration.challenge?.name || 'None'}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Selection Update & Withdrawal Controls */}
             {effectiveHackathonStatus !== 'COMPLETED' && effectiveHackathonStatus !== 'ARCHIVED' && (
-              <div className="space-y-4 pt-2">
-                <h3 className="text-xs font-mono font-bold text-zinc-300 uppercase tracking-wider">
+              <div className="space-y-3 pt-2">
+                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400">
                   Update Track & Challenge Selection
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-mono text-zinc-400">Track</label>
+                    <label className="text-xs font-mono text-zinc-400">Track (Optional)</label>
                     <select
                       value={selectedTrackId}
                       onChange={(e) => {
@@ -453,7 +474,7 @@ export default function HackathonDetailPage() {
                       }}
                       className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono text-zinc-200 focus:outline-none focus:border-emerald-500"
                     >
-                      <option value="">No Track Selected</option>
+                      <option value="">General / No Track Selected</option>
                       {tracks.filter((t) => t.isActive).map((t) => (
                         <option key={t.id} value={t.id}>
                           {t.name}
@@ -463,11 +484,11 @@ export default function HackathonDetailPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-mono text-zinc-400">Challenge</label>
+                    <label className="text-xs font-mono text-zinc-400">Challenge (Optional)</label>
                     <select
                       value={selectedChallengeId}
                       onChange={(e) => setSelectedChallengeId(e.target.value)}
-                      disabled={!effectiveTrackId}
+                      disabled={!selectedTrackId}
                       className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono text-zinc-200 focus:outline-none focus:border-emerald-500 disabled:opacity-50"
                     >
                       <option value="">No Challenge Selected</option>
@@ -480,7 +501,7 @@ export default function HackathonDetailPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center gap-3 pt-2">
                   <Button
                     size="sm"
                     variant="secondary"
@@ -492,15 +513,14 @@ export default function HackathonDetailPage() {
                       })
                     }
                   >
-                    Save Selection Changes
+                    Save Selection
                   </Button>
-
                   <Button
                     size="sm"
                     variant="destructive"
                     isLoading={withdrawMutation.isPending}
                     onClick={() => {
-                      if (window.confirm('Are you sure you want to withdraw your registration from this hackathon?')) {
+                      if (window.confirm('Are you sure you want to withdraw your registration?')) {
                         withdrawMutation.mutate();
                       }
                     }}
@@ -512,9 +532,11 @@ export default function HackathonDetailPage() {
             )}
           </div>
         ) : (
-          /* NOT REGISTERED OR WITHDRAWN FORM */
           <div className="space-y-4">
-            {effectiveRegistrationStatus === 'OPEN' && effectiveHackathonStatus !== 'DRAFT' && effectiveHackathonStatus !== 'COMPLETED' && effectiveHackathonStatus !== 'ARCHIVED' ? (
+            {effectiveRegistrationStatus === 'OPEN' &&
+            effectiveHackathonStatus !== 'DRAFT' &&
+            effectiveHackathonStatus !== 'COMPLETED' &&
+            effectiveHackathonStatus !== 'ARCHIVED' ? (
               <div className="space-y-4">
                 <p className="text-xs font-mono text-zinc-400 leading-relaxed">
                   Registration is currently <span className="text-emerald-400 font-bold">OPEN</span>. Choose an optional track and challenge to participate.
@@ -571,7 +593,9 @@ export default function HackathonDetailPage() {
                       })
                     }
                   >
-                    {registration?.status === ParticipantRegistrationStatus.WITHDRAWN ? 'Re-register for Hackathon' : 'Register for Hackathon'}
+                    {registration?.status === ParticipantRegistrationStatus.WITHDRAWN
+                      ? 'Re-register for Hackathon'
+                      : 'Register for Hackathon'}
                   </Button>
                 </div>
               </div>
@@ -590,8 +614,327 @@ export default function HackathonDetailPage() {
         )}
       </Card>
 
-      {/* PLACEHOLDERS FOR FUTURE SPRINT DOMAINS */}
+      {/* TEAM FORMATION DOMAIN (S2-05) */}
+      <Card className="p-6 border-zinc-800/80 bg-zinc-950/40 space-y-5">
+        <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              <Users className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold font-heading text-zinc-100">Team Formation</h2>
+              <p className="text-xs font-mono text-zinc-400">
+                Create or manage your team, invite registered teammates, and coordinate membership
+              </p>
+            </div>
+          </div>
+          {myTeam && (
+            <Badge variant="accent">
+              {myTeam.memberCount ?? myTeam.members?.length ?? 1} / {configuration?.maxTeamSize ?? 4} Members
+            </Badge>
+          )}
+        </div>
 
+        {!isRegistered ? (
+          <div className="p-4 bg-zinc-950/60 border border-zinc-800 rounded-xl space-y-1.5 text-center sm:text-left">
+            <div className="flex items-center gap-2 text-xs font-mono font-bold text-zinc-400">
+              <Shield className="w-4 h-4 text-indigo-400" />
+              Registration Required
+            </div>
+            <p className="text-xs font-mono text-zinc-500 leading-relaxed">
+              You must register for this hackathon before creating or joining a team.
+            </p>
+          </div>
+        ) : myTeam ? (
+          /* USER HAS ACTIVE TEAM */
+          <div className="space-y-6">
+            {/* Team Header */}
+            <div className="p-4 bg-zinc-900/60 border border-zinc-800 rounded-xl space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h3 className="text-base font-bold font-heading text-zinc-100">{myTeam.name}</h3>
+                  <p className="text-xs font-mono text-zinc-400 mt-0.5">
+                    Slug: <span className="text-indigo-400">{myTeam.slug}</span>
+                    {myTeam.description && <span> • {myTeam.description}</span>}
+                  </p>
+                </div>
+                <Badge variant="success">Active Team</Badge>
+              </div>
+
+              {/* Team Size Progress */}
+              <div className="space-y-1.5 pt-2 border-t border-zinc-800/60">
+                <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
+                  <span>Team Size Progress</span>
+                  <span>
+                    {myTeam.memberCount ?? myTeam.members?.length ?? 1} of {configuration?.maxTeamSize ?? 4} (Min: {configuration?.minTeamSize ?? 1})
+                  </span>
+                </div>
+                <div className="w-full h-2 bg-zinc-950 rounded-full overflow-hidden border border-zinc-800">
+                  <div
+                    className="h-full bg-indigo-500 rounded-full transition-all"
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        ((myTeam.memberCount ?? myTeam.members?.length ?? 1) / (configuration?.maxTeamSize ?? 4)) * 100
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Team Members List */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400">
+                Team Members ({(myTeam.members || []).filter((m) => m.status === TeamMemberStatus.ACTIVE).length})
+              </h4>
+              <div className="grid grid-cols-1 gap-2">
+                {(myTeam.members || [])
+                  .filter((m) => m.status === TeamMemberStatus.ACTIVE)
+                  .map((member) => (
+                    <div
+                      key={member.id}
+                      className="p-3 bg-zinc-950 border border-zinc-800/80 rounded-lg flex items-center justify-between gap-4"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-mono font-bold text-zinc-300">
+                          {member.user?.name?.charAt(0) || member.user?.email?.charAt(0) || 'U'}
+                        </div>
+                        <div>
+                          <div className="text-xs font-mono font-bold text-zinc-200 flex items-center gap-2">
+                            {member.user?.name || member.user?.email || 'User'}
+                            {member.role === TeamMemberRole.CAPTAIN && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                <Crown className="w-3 h-3" /> Captain
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[11px] font-mono text-zinc-500">
+                            {member.user?.email} {member.user?.college && `• ${member.user.college}`}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Captain controls for other members */}
+                      {(myTeam.members || []).some((m) => m.role === TeamMemberRole.CAPTAIN) &&
+                        member.role !== TeamMemberRole.CAPTAIN && (
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs"
+                              onClick={() => transferCaptaincyMutation.mutate(member.id)}
+                            >
+                              <ArrowRightLeft className="w-3.5 h-3.5 mr-1" /> Make Captain
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              className="text-xs"
+                              onClick={() => removeMemberMutation.mutate(member.id)}
+                            >
+                              <Trash2 className="w-3.5 h-3.5 mr-1" /> Remove
+                            </Button>
+                          </div>
+                        )}
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            {/* Invite Teammates (Captain only or full team view) */}
+            {(myTeam.memberCount ?? myTeam.members?.length ?? 1) < (configuration?.maxTeamSize ?? 4) && (
+              <div className="p-4 bg-zinc-900/40 border border-zinc-800/80 rounded-xl space-y-3">
+                <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                  <UserPlus className="w-4 h-4 text-indigo-400" /> Invite Teammates
+                </h4>
+                {inviteError && (
+                  <div className="p-2 bg-red-500/10 border border-red-500/30 rounded text-xs font-mono text-red-400">
+                    {inviteError}
+                  </div>
+                )}
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    type="email"
+                    placeholder="teammate@university.edu"
+                    value={inviteeEmail}
+                    onChange={(e) => setInviteeEmail(e.target.value)}
+                    className="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono text-zinc-200 focus:outline-none focus:border-indigo-500"
+                  />
+                  <Button
+                    size="sm"
+                    variant="accent"
+                    isLoading={inviteMemberMutation.isPending}
+                    onClick={() => inviteMemberMutation.mutate({ inviteeEmail })}
+                  >
+                    Send Invitation
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Team Actions */}
+            <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-zinc-800">
+              <Button
+                size="sm"
+                variant="outline"
+                isLoading={leaveTeamMutation.isPending}
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to leave this team?')) {
+                    leaveTeamMutation.mutate();
+                  }
+                }}
+              >
+                <LogOut className="w-4 h-4 mr-1.5" /> Leave Team
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                isLoading={dissolveTeamMutation.isPending}
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      'Are you sure you want to dissolve this team? All memberships will be terminated.'
+                    )
+                  ) {
+                    dissolveTeamMutation.mutate();
+                  }
+                }}
+              >
+                <Trash2 className="w-4 h-4 mr-1.5" /> Dissolve Team
+              </Button>
+            </div>
+          </div>
+        ) : (
+          /* USER DOES NOT HAVE A TEAM YET */
+          <div className="space-y-6">
+            {/* Pending Invitations Section */}
+            {myInvitations.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+                  <Mail className="w-4 h-4" /> Pending Invitations ({myInvitations.length})
+                </h3>
+                <div className="grid grid-cols-1 gap-2">
+                  {myInvitations.map((inv) => (
+                    <div
+                      key={inv.id}
+                      className="p-3 bg-amber-950/10 border border-amber-500/20 rounded-lg flex items-center justify-between gap-4"
+                    >
+                      <div>
+                        <div className="text-xs font-mono font-bold text-zinc-200">
+                          {inv.team?.name}
+                        </div>
+                        <div className="text-[11px] font-mono text-zinc-500">
+                          Invited by {inv.invitedByUser?.name || inv.invitedByUser?.email}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="primary"
+                          isLoading={acceptInviteMutation.isPending}
+                          onClick={() => acceptInviteMutation.mutate(inv.id)}
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          isLoading={declineInviteMutation.isPending}
+                          onClick={() => declineInviteMutation.mutate(inv.id)}
+                        >
+                          Decline
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Create Team Form */}
+            {configuration?.participationMode !== 'INDIVIDUAL' ? (
+              <div className="space-y-4">
+                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400">
+                  Create a New Team
+                </h3>
+
+                {teamError && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-xs font-mono text-red-400 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    {teamError}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-mono text-zinc-400">Team Name *</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Quantum Pioneers"
+                      value={teamName}
+                      onChange={(e) => setTeamName(e.target.value)}
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono text-zinc-200 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-mono text-zinc-400">Slug (Optional)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. quantum-pioneers"
+                      value={teamSlug}
+                      onChange={(e) => setTeamSlug(e.target.value)}
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono text-zinc-200 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <label className="text-xs font-mono text-zinc-400">Description (Optional)</label>
+                    <textarea
+                      placeholder="Brief overview of what your team plans to build..."
+                      value={teamDescription}
+                      onChange={(e) => setTeamDescription(e.target.value)}
+                      rows={2}
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono text-zinc-200 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <Button
+                    size="md"
+                    variant="primary"
+                    disabled={!teamName.trim()}
+                    isLoading={createTeamMutation.isPending}
+                    onClick={() =>
+                      createTeamMutation.mutate({
+                        name: teamName.trim(),
+                        slug: teamSlug.trim() || undefined,
+                        description: teamDescription.trim() || undefined,
+                      })
+                    }
+                  >
+                    Create Team & Become Captain
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-4 bg-zinc-950/60 border border-zinc-800 rounded-xl space-y-1.5">
+                <div className="flex items-center gap-2 text-xs font-mono font-bold text-zinc-400">
+                  <AlertCircle className="w-4 h-4 text-amber-400" />
+                  Individual Participation Only
+                </div>
+                <p className="text-xs font-mono text-zinc-500 leading-relaxed">
+                  This hackathon is configured for individual participation only. Team formation is disabled.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </Card>
+
+      {/* PLACEHOLDERS FOR FUTURE SPRINT DOMAINS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
         <Card className="p-5 border-zinc-800/80 bg-zinc-950/40 space-y-2 opacity-60">
           <div className="flex items-center gap-2 text-zinc-400 text-xs font-mono font-bold">

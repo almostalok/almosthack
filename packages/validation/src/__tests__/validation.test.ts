@@ -15,6 +15,10 @@ import {
   reorderChallengesSchema,
   createParticipantRegistrationSchema,
   updateParticipantRegistrationSchema,
+  createTeamSchema,
+  updateTeamSchema,
+  inviteTeamMemberSchema,
+  transferCaptaincySchema,
 } from '../hackathon';
 
 describe('Shared Validation Schemas', () => {
@@ -293,7 +297,39 @@ describe('Shared Validation Schemas', () => {
       ).toBe(true);
     });
   });
+
+  describe('Team Formation Validation Schemas (S2-05)', () => {
+    const validUserId = '123e4567-e89b-12d3-a456-426614174003';
+    const validMemberId = '123e4567-e89b-12d3-a456-426614174004';
+
+    it('should validate valid team creation payload', () => {
+      expect(
+        createTeamSchema.safeParse({
+          name: 'Quantum Hackers',
+          slug: 'quantum-hackers',
+          description: 'Building quantum algorithms.',
+        }).success
+      ).toBe(true);
+    });
+
+    it('should reject team creation with short/long name or invalid slug', () => {
+      expect(createTeamSchema.safeParse({ name: 'A' }).success).toBe(false);
+      expect(createTeamSchema.safeParse({ name: 'Valid Team', slug: 'INVALID SLUG!' }).success).toBe(false);
+    });
+
+    it('should validate team invitation payload by userId or email', () => {
+      expect(inviteTeamMemberSchema.safeParse({ inviteeUserId: validUserId }).success).toBe(true);
+      expect(inviteTeamMemberSchema.safeParse({ inviteeEmail: 'student@example.com' }).success).toBe(true);
+      expect(inviteTeamMemberSchema.safeParse({}).success).toBe(false);
+    });
+
+    it('should validate transfer captaincy payload', () => {
+      expect(transferCaptaincySchema.safeParse({ targetMemberId: validMemberId }).success).toBe(true);
+      expect(transferCaptaincySchema.safeParse({ targetMemberId: 'invalid' }).success).toBe(false);
+    });
+  });
 });
+
 
 
 

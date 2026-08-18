@@ -379,4 +379,193 @@ describe('Hackathon Domain & Lifecycle E2E', () => {
         .expect(403);
     });
   });
+
+  describe('7. Hackathon Configuration Management (S2-02)', () => {
+    it('should retrieve auto-provisioned default configuration for Hackathon B', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/hackathons/${hackathonBId}/configuration`)
+        .set('Cookie', cookieUserB)
+        .expect(200);
+
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.hackathonId).toBe(hackathonBId);
+      expect(res.body.data.participationMode).toBe('BOTH');
+      expect(res.body.data.minTeamSize).toBe(1);
+      expect(res.body.data.maxTeamSize).toBe(4);
+      expect(res.body.data.eligibilityType).toBe('OPEN');
+      expect(res.body.data.aiUsagePolicy).toBe('ALLOWED');
+      expect(res.body.data.aiDisclosureRequired).toBe(false);
+      expect(res.body.data.preExistingCodePolicy).toBe('PROHIBITED');
+      expect(res.body.data.openSourcePolicy).toBe('ALLOWED_WITH_ATTRIBUTION');
+      expect(res.body.data.githubRequired).toBe(true);
+      expect(res.body.data.repositoryPolicy).toBe('PLATFORM_MANAGED');
+    });
+
+    it('should update Hackathon B configuration with full policy set in DRAFT state', async () => {
+      const res = await request(app.getHttpServer())
+        .put(`/api/v1/hackathons/${hackathonBId}/configuration`)
+        .set('Cookie', cookieUserB)
+        .send({
+          participationMode: 'TEAM',
+          minTeamSize: 2,
+          maxTeamSize: 6,
+          eligibilityType: 'STUDENTS_ONLY',
+          allowedBranches: [' CSE ', 'cse', 'ECE'],
+          allowedColleges: ['Stanford University', 'MIT'],
+          graduationYearFrom: 2024,
+          graduationYearTo: 2028,
+          aiUsagePolicy: 'RESTRICTED',
+          aiDisclosureRequired: true,
+          preExistingCodePolicy: 'ALLOWED_WITH_DISCLOSURE',
+          openSourcePolicy: 'RESTRICTED',
+          githubRequired: false,
+          repositoryPolicy: 'EXTERNAL_ALLOWED',
+        })
+        .expect(200);
+
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.participationMode).toBe('TEAM');
+      expect(res.body.data.minTeamSize).toBe(2);
+      expect(res.body.data.maxTeamSize).toBe(6);
+      expect(res.body.data.eligibilityType).toBe('STUDENTS_ONLY');
+      expect(res.body.data.allowedBranches).toEqual(['CSE', 'ECE']);
+      expect(res.body.data.allowedColleges).toEqual(['Stanford University', 'MIT']);
+      expect(res.body.data.graduationYearFrom).toBe(2024);
+      expect(res.body.data.graduationYearTo).toBe(2028);
+      expect(res.body.data.aiUsagePolicy).toBe('RESTRICTED');
+      expect(res.body.data.aiDisclosureRequired).toBe(true);
+      expect(res.body.data.preExistingCodePolicy).toBe('ALLOWED_WITH_DISCLOSURE');
+      expect(res.body.data.openSourcePolicy).toBe('RESTRICTED');
+      expect(res.body.data.githubRequired).toBe(false);
+      expect(res.body.data.repositoryPolicy).toBe('EXTERNAL_ALLOWED');
+    });
+
+    it('should normalize minTeamSize and maxTeamSize to null when INDIVIDUAL mode is selected', async () => {
+      const res = await request(app.getHttpServer())
+        .put(`/api/v1/hackathons/${hackathonBId}/configuration`)
+        .set('Cookie', cookieUserB)
+        .send({
+          participationMode: 'INDIVIDUAL',
+          minTeamSize: 3,
+          maxTeamSize: 5,
+        })
+        .expect(200);
+
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.participationMode).toBe('INDIVIDUAL');
+      expect(res.body.data.minTeamSize).toBeNull();
+      expect(res.body.data.maxTeamSize).toBeNull();
+    });
+
+    it('should reject invalid team size invariant (min > max)', async () => {
+      await request(app.getHttpServer())
+        .put(`/api/v1/hackathons/${hackathonBId}/configuration`)
+        .set('Cookie', cookieUserB)
+        .send({
+          participationMode: 'TEAM',
+          minTeamSize: 6,
+          maxTeamSize: 2,
+        })
+        .expect(400);
+    });
+
+    it('should reject invalid graduation year invariant (from > to)', async () => {
+      await request(app.getHttpServer())
+        .put(`/api/v1/hackathons/${hackathonBId}/configuration`)
+        .set('Cookie', cookieUserB)
+        .send({
+          graduationYearFrom: 2029,
+          graduationYearTo: 2024,
+        })
+        .expect(400);
+    });
+
+    it('should reject invalid enum values in configuration payload', async () => {
+      await request(app.getHttpServer())
+        .put(`/api/v1/hackathons/${hackathonBId}/configuration`)
+        .set('Cookie', cookieUserB)
+        .send({
+          aiUsagePolicy: 'INVALID_AI_POLICY',
+        })
+        .expect(400);
+    });
+
+    it('should block cross-organization configuration access (User A accessing Hackathon B)', async () => {
+      await request(app.getHttpServer())
+        .get(`/api/v1/hackathons/${hackathonBId}/configuration`)
+        .set('Cookie', cookieUserA)
+        .expect(403);
+
+      await request(app.getHttpServer())
+        .put(`/api/v1/hackathons/${hackathonBId}/configuration`)
+        .set('Cookie', cookieUserA)
+        .send({ participationMode: 'INDIVIDUAL' })
+        .expect(403);
+    });
+  });
+
+  describe('8. Hackathon Participant Rules Management (S2-02)', () => {
+    it('should retrieve rules summary for Hackathon B', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/hackathons/${hackathonBId}/rules`)
+        .set('Cookie', cookieUserB)
+        .expect(200);
+
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.hackathonId).toBe(hackathonBId);
+      expect(res.body.data.hackathonName).toBeDefined();
+      expect(res.body.data.participationMode).toBeDefined();
+    });
+
+    it('should update rules markdown in DRAFT state for Hackathon B', async () => {
+      const markdown = '# Official Hackathon Guidelines\n\n- All code must be written during the event.\n- Be respectful to other participants.';
+      const res = await request(app.getHttpServer())
+        .patch(`/api/v1/hackathons/${hackathonBId}/rules`)
+        .set('Cookie', cookieUserB)
+        .send({
+          rulesMarkdown: markdown,
+        })
+        .expect(200);
+
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.rulesMarkdown).toBe(markdown);
+    });
+
+    it('should reject rules markdown exceeding 100,000 characters', async () => {
+      const hugeMarkdown = 'A'.repeat(100001);
+      await request(app.getHttpServer())
+        .patch(`/api/v1/hackathons/${hackathonBId}/rules`)
+        .set('Cookie', cookieUserB)
+        .send({
+          rulesMarkdown: hugeMarkdown,
+        })
+        .expect(400);
+    });
+
+    it('should block cross-org rules mutation (User A modifying Hackathon B rules)', async () => {
+      await request(app.getHttpServer())
+        .patch(`/api/v1/hackathons/${hackathonBId}/rules`)
+        .set('Cookie', cookieUserA)
+        .send({
+          rulesMarkdown: 'Unauthorized rules edit',
+        })
+        .expect(403);
+    });
+
+    it('should reject unauthenticated anonymous access to rules', async () => {
+      await request(app.getHttpServer())
+        .get(`/api/v1/hackathons/${hackathonAId}/rules`)
+        .expect(401);
+    });
+
+    it('should allow authenticated User B to read rules for Hackathon A (which is PUBLISHED and PUBLIC)', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/api/v1/hackathons/${hackathonAId}/rules`)
+        .set('Cookie', cookieUserB)
+        .expect(200);
+
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.hackathonId).toBe(hackathonAId);
+    });
+  });
 });

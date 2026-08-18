@@ -98,6 +98,18 @@ The backend is designed as a modular monolith using NestJS. Rather than microser
   - `COMPLETED` & `ARCHIVED`: read-only operationally.
 - **Audit Trails**: All lifecycle actions emit structured `AuditLog` events (`hackathon.created`, `hackathon.updated`, `hackathon.published`, `hackathon.archived`).
 
+### 10. Hackathon Configuration & Rules Architecture (`S2-02`)
+- **1-to-1 Configuration Entity**: `HackathonConfiguration` entity linked strictly 1-to-1 with `Hackathon` via `hackathonId` with `onDelete: Cascade`. Auto-created on hackathon creation with default settings.
+- **Strongly Typed Policies**: Enums enforce `ParticipationMode` (`INDIVIDUAL`, `TEAM`, `BOTH`), `EligibilityType` (`OPEN`, `STUDENTS_ONLY`, `INVITE_ONLY`), `AIUsagePolicy` (`ALLOWED`, `RESTRICTED`, `PROHIBITED`), `PreExistingCodePolicy` (`PROHIBITED`, `ALLOWED`, `ALLOWED_WITH_DISCLOSURE`), `OpenSourcePolicy` (`ALLOWED`, `ALLOWED_WITH_ATTRIBUTION`, `RESTRICTED`, `PROHIBITED`), and `RepositoryPolicy` (`PLATFORM_MANAGED`, `EXTERNAL_ALLOWED`).
+- **Policy Invariants**:
+  - `INDIVIDUAL` participation mode normalizes `minTeamSize` and `maxTeamSize` to `null`.
+  - `TEAM`/`BOTH` modes enforce `1 <= minTeamSize <= maxTeamSize <= 100`.
+  - Academic eligibility supports array normalization (trimmed, deduplicated case-insensitively) and graduation year range validation (`graduationYearFrom <= graduationYearTo`).
+- **Lifecycle Locking**: Core policy fields and human-readable markdown rules become immutable/locked once the effective status reaches `LIVE`, `COMPLETED`, or `ARCHIVED` (`409 HACKATHON_CONFIGURATION_LOCKED`).
+- **Visibility & Rules Access**: Public published/live hackathon rules are publicly readable (`GET /hackathons/:id/rules`). Private or DRAFT hackathons require `HACKATHON_READ` authorization.
+- **Audit Trails**: Policy configuration updates and markdown rules modifications produce structured `AuditLog` records (`hackathon.configuration_updated`, `hackathon.rules_updated`).
+
+
 
 
 

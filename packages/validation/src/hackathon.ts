@@ -98,3 +98,390 @@ export const updateHackathonSchema = z
   });
 
 export type UpdateHackathonSchema = z.infer<typeof updateHackathonSchema>;
+
+export const normalizeStringArray = (arr: string[]): string[] => {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const item of arr) {
+    const trimmed = item.trim();
+    if (trimmed.length === 0) continue;
+    const lower = trimmed.toLowerCase();
+    if (!seen.has(lower)) {
+      seen.add(lower);
+      result.push(trimmed);
+    }
+  }
+  return result;
+};
+
+const stringArraySchema = (maxItemLen: number, label: string) =>
+  z
+    .array(
+      z
+        .string()
+        .trim()
+        .min(1, { message: `${label} entry cannot be empty` })
+        .max(maxItemLen, { message: `${label} entry cannot exceed ${maxItemLen} characters` })
+    )
+    .max(50, { message: `Cannot specify more than 50 ${label.toLowerCase()}s` })
+    .transform((val) => normalizeStringArray(val));
+
+export const updateHackathonConfigurationSchema = z
+  .object({
+    participationMode: z
+      .enum(['INDIVIDUAL', 'TEAM', 'BOTH'], {
+        errorMap: () => ({ message: 'Invalid participationMode value' }),
+      })
+      .optional(),
+    minTeamSize: z
+      .number()
+      .int()
+      .min(1, { message: 'minTeamSize must be at least 1' })
+      .max(100, { message: 'minTeamSize cannot exceed 100' })
+      .nullable()
+      .optional(),
+    maxTeamSize: z
+      .number()
+      .int()
+      .min(1, { message: 'maxTeamSize must be at least 1' })
+      .max(100, { message: 'maxTeamSize cannot exceed 100' })
+      .nullable()
+      .optional(),
+    eligibilityType: z
+      .enum(['OPEN', 'STUDENTS_ONLY', 'INVITE_ONLY'], {
+        errorMap: () => ({ message: 'Invalid eligibilityType value' }),
+      })
+      .optional(),
+    allowedBranches: stringArraySchema(100, 'Branch').optional(),
+    allowedColleges: stringArraySchema(150, 'College').optional(),
+    graduationYearFrom: z
+      .number()
+      .int()
+      .min(1900, { message: 'graduationYearFrom must be at or after 1900' })
+      .max(2200, { message: 'graduationYearFrom must be at or before 2200' })
+      .nullable()
+      .optional(),
+    graduationYearTo: z
+      .number()
+      .int()
+      .min(1900, { message: 'graduationYearTo must be at or after 1900' })
+      .max(2200, { message: 'graduationYearTo must be at or before 2200' })
+      .nullable()
+      .optional(),
+    aiUsagePolicy: z
+      .enum(['ALLOWED', 'RESTRICTED', 'PROHIBITED'], {
+        errorMap: () => ({ message: 'Invalid aiUsagePolicy value' }),
+      })
+      .optional(),
+    aiDisclosureRequired: z.boolean().optional(),
+    preExistingCodePolicy: z
+      .enum(['PROHIBITED', 'ALLOWED', 'ALLOWED_WITH_DISCLOSURE'], {
+        errorMap: () => ({ message: 'Invalid preExistingCodePolicy value' }),
+      })
+      .optional(),
+    openSourcePolicy: z
+      .enum(['ALLOWED', 'ALLOWED_WITH_ATTRIBUTION', 'RESTRICTED', 'PROHIBITED'], {
+        errorMap: () => ({ message: 'Invalid openSourcePolicy value' }),
+      })
+      .optional(),
+    githubRequired: z.boolean().optional(),
+    repositoryPolicy: z
+      .enum(['PLATFORM_MANAGED', 'EXTERNAL_ALLOWED'], {
+        errorMap: () => ({ message: 'Invalid repositoryPolicy value' }),
+      })
+      .optional(),
+  })
+  .refine(
+    (data) => {
+      if (
+        data.minTeamSize !== undefined &&
+        data.minTeamSize !== null &&
+        data.maxTeamSize !== undefined &&
+        data.maxTeamSize !== null
+      ) {
+        return data.minTeamSize <= data.maxTeamSize;
+      }
+      return true;
+    },
+    {
+      message: 'minTeamSize must be less than or equal to maxTeamSize',
+      path: ['maxTeamSize'],
+    }
+  )
+  .refine(
+    (data) => {
+      if (
+        data.graduationYearFrom !== undefined &&
+        data.graduationYearFrom !== null &&
+        data.graduationYearTo !== undefined &&
+        data.graduationYearTo !== null
+      ) {
+        return data.graduationYearFrom <= data.graduationYearTo;
+      }
+      return true;
+    },
+    {
+      message: 'graduationYearFrom must be less than or equal to graduationYearTo',
+      path: ['graduationYearTo'],
+    }
+  );
+
+export type UpdateHackathonConfigurationSchema = z.infer<
+  typeof updateHackathonConfigurationSchema
+>;
+
+export const updateHackathonRulesSchema = z.object({
+  rulesMarkdown: z
+    .string()
+    .max(100000, { message: 'rulesMarkdown cannot exceed 100,000 characters' })
+    .nullable()
+    .optional(),
+});
+
+export type UpdateHackathonRulesSchema = z.infer<
+  typeof updateHackathonRulesSchema
+>;
+
+export const trackSlugSchema = z
+  .string()
+  .trim()
+  .min(1, { message: 'Slug must be at least 1 character long' })
+  .max(100, { message: 'Slug cannot exceed 100 characters' })
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+    message: 'Slug must contain only lowercase alphanumeric characters and hyphens, and cannot start or end with a hyphen',
+  });
+
+export const createTrackSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, { message: 'Name must be at least 2 characters long' })
+    .max(150, { message: 'Name cannot exceed 150 characters' }),
+  slug: trackSlugSchema.optional(),
+  shortDescription: z
+    .string()
+    .trim()
+    .max(300, { message: 'Short description cannot exceed 300 characters' })
+    .nullable()
+    .optional(),
+  description: z
+    .string()
+    .trim()
+    .max(10000, { message: 'Description cannot exceed 10,000 characters' })
+    .nullable()
+    .optional(),
+  displayOrder: z
+    .number()
+    .int()
+    .min(0, { message: 'displayOrder must be at least 0' })
+    .max(10000, { message: 'displayOrder cannot exceed 10,000' })
+    .optional(),
+  isActive: z.boolean().optional(),
+});
+
+export type CreateTrackSchema = z.infer<typeof createTrackSchema>;
+
+export const updateTrackSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, { message: 'Name must be at least 2 characters long' })
+    .max(150, { message: 'Name cannot exceed 150 characters' })
+    .optional(),
+  slug: trackSlugSchema.optional(),
+  shortDescription: z
+    .string()
+    .trim()
+    .max(300, { message: 'Short description cannot exceed 300 characters' })
+    .nullable()
+    .optional(),
+  description: z
+    .string()
+    .trim()
+    .max(10000, { message: 'Description cannot exceed 10,000 characters' })
+    .nullable()
+    .optional(),
+  displayOrder: z
+    .number()
+    .int()
+    .min(0, { message: 'displayOrder must be at least 0' })
+    .max(10000, { message: 'displayOrder cannot exceed 10,000' })
+    .optional(),
+  isActive: z.boolean().optional(),
+});
+
+export type UpdateTrackSchema = z.infer<typeof updateTrackSchema>;
+
+export const reorderItemSchema = z.object({
+  id: z.string().uuid({ message: 'Item id must be a valid UUID' }),
+  displayOrder: z
+    .number()
+    .int()
+    .min(0, { message: 'displayOrder must be at least 0' })
+    .max(10000, { message: 'displayOrder cannot exceed 10,000' }),
+});
+
+export const reorderTracksSchema = z
+  .object({
+    items: z
+      .array(reorderItemSchema)
+      .min(1, { message: 'items array cannot be empty' })
+      .max(100, { message: 'Cannot reorder more than 100 tracks in a single batch' }),
+  })
+  .refine(
+    (data) => {
+      const ids = new Set(data.items.map((i) => i.id));
+      return ids.size === data.items.length;
+    },
+    {
+      message: 'Track IDs in reorder batch must be unique',
+      path: ['items'],
+    }
+  );
+
+export type ReorderTracksSchema = z.infer<typeof reorderTracksSchema>;
+
+export const challengeResourceSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(1, { message: 'Resource title cannot be empty' })
+    .max(150, { message: 'Resource title cannot exceed 150 characters' }),
+  url: safeUrlSchema,
+});
+
+export type ChallengeResourceSchema = z.infer<typeof challengeResourceSchema>;
+
+export const createChallengeSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, { message: 'Name must be at least 2 characters long' })
+    .max(150, { message: 'Name cannot exceed 150 characters' }),
+  slug: trackSlugSchema.optional(),
+  description: z
+    .string()
+    .trim()
+    .max(10000, { message: 'Description cannot exceed 10,000 characters' })
+    .nullable()
+    .optional(),
+  problemStatement: z
+    .string()
+    .trim()
+    .min(5, { message: 'Problem statement must be at least 5 characters long' })
+    .max(20000, { message: 'Problem statement cannot exceed 20,000 characters' }),
+  requirements: z
+    .string()
+    .trim()
+    .max(10000, { message: 'Requirements cannot exceed 10,000 characters' })
+    .nullable()
+    .optional(),
+  constraints: z
+    .string()
+    .trim()
+    .max(10000, { message: 'Constraints cannot exceed 10,000 characters' })
+    .nullable()
+    .optional(),
+  expectedOutcome: z
+    .string()
+    .trim()
+    .max(10000, { message: 'Expected outcome cannot exceed 10,000 characters' })
+    .nullable()
+    .optional(),
+  resources: z
+    .array(challengeResourceSchema)
+    .max(20, { message: 'Cannot attach more than 20 resources to a challenge' })
+    .optional(),
+  displayOrder: z
+    .number()
+    .int()
+    .min(0, { message: 'displayOrder must be at least 0' })
+    .max(10000, { message: 'displayOrder cannot exceed 10,000' })
+    .optional(),
+  status: z
+    .enum(['DRAFT', 'PUBLISHED', 'ARCHIVED'], {
+      errorMap: () => ({ message: 'Invalid challenge status' }),
+    })
+    .optional(),
+});
+
+export type CreateChallengeSchema = z.infer<typeof createChallengeSchema>;
+
+export const updateChallengeSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, { message: 'Name must be at least 2 characters long' })
+    .max(150, { message: 'Name cannot exceed 150 characters' })
+    .optional(),
+  slug: trackSlugSchema.optional(),
+  description: z
+    .string()
+    .trim()
+    .max(10000, { message: 'Description cannot exceed 10,000 characters' })
+    .nullable()
+    .optional(),
+  problemStatement: z
+    .string()
+    .trim()
+    .min(5, { message: 'Problem statement must be at least 5 characters long' })
+    .max(20000, { message: 'Problem statement cannot exceed 20,000 characters' })
+    .optional(),
+  requirements: z
+    .string()
+    .trim()
+    .max(10000, { message: 'Requirements cannot exceed 10,000 characters' })
+    .nullable()
+    .optional(),
+  constraints: z
+    .string()
+    .trim()
+    .max(10000, { message: 'Constraints cannot exceed 10,000 characters' })
+    .nullable()
+    .optional(),
+  expectedOutcome: z
+    .string()
+    .trim()
+    .max(10000, { message: 'Expected outcome cannot exceed 10,000 characters' })
+    .nullable()
+    .optional(),
+  resources: z
+    .array(challengeResourceSchema)
+    .max(20, { message: 'Cannot attach more than 20 resources to a challenge' })
+    .optional(),
+  displayOrder: z
+    .number()
+    .int()
+    .min(0, { message: 'displayOrder must be at least 0' })
+    .max(10000, { message: 'displayOrder cannot exceed 10,000' })
+    .optional(),
+  status: z
+    .enum(['DRAFT', 'PUBLISHED', 'ARCHIVED'], {
+      errorMap: () => ({ message: 'Invalid challenge status' }),
+    })
+    .optional(),
+});
+
+export type UpdateChallengeSchema = z.infer<typeof updateChallengeSchema>;
+
+export const reorderChallengesSchema = z
+  .object({
+    items: z
+      .array(reorderItemSchema)
+      .min(1, { message: 'items array cannot be empty' })
+      .max(200, { message: 'Cannot reorder more than 200 challenges in a single batch' }),
+  })
+  .refine(
+    (data) => {
+      const ids = new Set(data.items.map((i) => i.id));
+      return ids.size === data.items.length;
+    },
+    {
+      message: 'Challenge IDs in reorder batch must be unique',
+      path: ['items'],
+    }
+  );
+
+export type ReorderChallengesSchema = z.infer<typeof reorderChallengesSchema>;
+
+

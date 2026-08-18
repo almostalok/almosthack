@@ -263,6 +263,73 @@ export class ApiClient {
   public archiveHackathon<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
     return this.post<T>(`/hackathons/${hackathonId}/archive`, undefined, options);
   }
+
+  public getHackathonConfiguration<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/hackathons/${hackathonId}/configuration`, options);
+  }
+
+  public updateHackathonConfiguration<T = any>(hackathonId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.put<T>(`/hackathons/${hackathonId}/configuration`, body, options);
+  }
+
+  public getHackathonRules<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/hackathons/${hackathonId}/rules`, options);
+  }
+
+  public updateHackathonRules<T = any>(hackathonId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.patch<T>(`/hackathons/${hackathonId}/rules`, body, options);
+  }
+
+  // Hackathon Tracks Domain APIs
+  public getHackathonTracks<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/hackathons/${hackathonId}/tracks`, options);
+  }
+
+  public createHackathonTrack<T = any>(hackathonId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/hackathons/${hackathonId}/tracks`, body, options);
+  }
+
+  public getHackathonTrack<T = any>(hackathonId: string, trackId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/hackathons/${hackathonId}/tracks/${trackId}`, options);
+  }
+
+  public updateHackathonTrack<T = any>(hackathonId: string, trackId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.patch<T>(`/hackathons/${hackathonId}/tracks/${trackId}`, body, options);
+  }
+
+  public deleteHackathonTrack<T = any>(hackathonId: string, trackId: string, options?: RequestOptions): Promise<T> {
+    return this.delete<T>(`/hackathons/${hackathonId}/tracks/${trackId}`, options);
+  }
+
+  public reorderHackathonTracks<T = any>(hackathonId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.patch<T>(`/hackathons/${hackathonId}/tracks/reorder`, body, options);
+  }
+
+  // Hackathon Challenges Domain APIs
+  public getTrackChallenges<T = any>(trackId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/tracks/${trackId}/challenges`, options);
+  }
+
+  public createTrackChallenge<T = any>(trackId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/tracks/${trackId}/challenges`, body, options);
+  }
+
+  public getTrackChallenge<T = any>(trackId: string, challengeId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/tracks/${trackId}/challenges/${challengeId}`, options);
+  }
+
+  public updateTrackChallenge<T = any>(trackId: string, challengeId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.patch<T>(`/tracks/${trackId}/challenges/${challengeId}`, body, options);
+  }
+
+  public deleteTrackChallenge<T = any>(trackId: string, challengeId: string, options?: RequestOptions): Promise<T> {
+    return this.delete<T>(`/tracks/${trackId}/challenges/${challengeId}`, options);
+  }
+
+  public reorderTrackChallenges<T = any>(trackId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.patch<T>(`/tracks/${trackId}/challenges/reorder`, body, options);
+  }
 }
+
 
 

@@ -146,11 +146,127 @@ model Hackathon {
   updatedAt            DateTime            @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  configuration HackathonConfiguration?
+  tracks        HackathonTrack[]
 
   @@unique([organizationId, slug])
   @@index([organizationId])
   @@index([status])
   @@map("hackathons")
+}
+
+enum ParticipationMode {
+  INDIVIDUAL
+  TEAM
+  BOTH
+}
+
+enum EligibilityType {
+  OPEN
+  STUDENTS_ONLY
+  INVITE_ONLY
+}
+
+enum AIUsagePolicy {
+  ALLOWED
+  RESTRICTED
+  PROHIBITED
+}
+
+enum PreExistingCodePolicy {
+  PROHIBITED
+  ALLOWED
+  ALLOWED_WITH_DISCLOSURE
+}
+
+enum OpenSourcePolicy {
+  ALLOWED
+  ALLOWED_WITH_ATTRIBUTION
+  RESTRICTED
+  PROHIBITED
+}
+
+enum RepositoryPolicy {
+  PLATFORM_MANAGED
+  EXTERNAL_ALLOWED
+}
+
+model HackathonConfiguration {
+  id                    String                @id @default(uuid())
+  hackathonId           String                @unique
+  participationMode     ParticipationMode     @default(BOTH)
+  minTeamSize           Int?                  @default(1)
+  maxTeamSize           Int?                  @default(4)
+  eligibilityType       EligibilityType       @default(OPEN)
+  allowedBranches       String[]              @default([])
+  allowedColleges       String[]              @default([])
+  graduationYearFrom    Int?
+  graduationYearTo      Int?
+  aiUsagePolicy         AIUsagePolicy         @default(ALLOWED)
+  aiDisclosureRequired  Boolean               @default(false)
+  preExistingCodePolicy PreExistingCodePolicy @default(PROHIBITED)
+  openSourcePolicy      OpenSourcePolicy      @default(ALLOWED_WITH_ATTRIBUTION)
+  githubRequired        Boolean               @default(true)
+  repositoryPolicy      RepositoryPolicy      @default(PLATFORM_MANAGED)
+  rulesMarkdown         String?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  hackathon Hackathon @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+
+  @@map("hackathon_configurations")
+}
+
+model HackathonTrack {
+  id               String               @id @default(uuid())
+  hackathonId      String
+  name             String
+  slug             String
+  shortDescription String?
+  description      String?
+  displayOrder     Int                  @default(0)
+  isActive         Boolean              @default(true)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  hackathon        Hackathon            @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  challenges       HackathonChallenge[]
+
+  @@unique([hackathonId, slug])
+  @@index([hackathonId])
+  @@index([displayOrder])
+  @@map("hackathon_tracks")
+}
+
+enum ChallengeStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model HackathonChallenge {
+  id               String          @id @default(uuid())
+  trackId          String
+  name             String
+  slug             String
+  description      String?
+  problemStatement String
+  requirements     String?
+  constraints      String?
+  expectedOutcome  String?
+  resources        Json            @default("[]")
+  displayOrder     Int             @default(0)
+  status           ChallengeStatus @default(DRAFT)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  track            HackathonTrack  @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@unique([trackId, slug])
+  @@index([trackId])
+  @@index([status])
+  @@index([displayOrder])
+  @@map("hackathon_challenges")
 }
 
 

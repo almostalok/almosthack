@@ -65,6 +65,11 @@ describe('HackathonsService Unit Tests', () => {
         findMany: jest.fn(),
         update: jest.fn(),
       },
+      hackathonConfiguration: {
+        findUnique: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+      },
       auditLog: {
         create: jest.fn().mockResolvedValue({ id: 'audit-id' }),
       },
@@ -408,4 +413,249 @@ describe('HackathonsService Unit Tests', () => {
       ).rejects.toThrow(ForbiddenException);
     });
   });
+
+  describe('7. Hackathon Configuration Management', () => {
+    const mockConfigRecord = {
+      id: 'config-uuid-1',
+      hackathonId: sampleHackathonRecord.id,
+      participationMode: 'BOTH',
+      minTeamSize: 1,
+      maxTeamSize: 4,
+      eligibilityType: 'OPEN',
+      allowedBranches: ['CSE', 'ECE'],
+      allowedColleges: ['MIT', 'Stanford'],
+      graduationYearFrom: 2024,
+      graduationYearTo: 2028,
+      aiUsagePolicy: 'ALLOWED',
+      aiDisclosureRequired: false,
+      preExistingCodePolicy: 'PROHIBITED',
+      openSourcePolicy: 'ALLOWED_WITH_ATTRIBUTION',
+      githubRequired: true,
+      repositoryPolicy: 'PLATFORM_MANAGED',
+      rulesMarkdown: '# Default Rules',
+      createdAt: new Date('2026-08-16T12:00:00Z'),
+      updatedAt: new Date('2026-08-16T12:00:00Z'),
+    };
+
+    it('should retrieve hackathon configuration with defaults ensured', async () => {
+      prisma.hackathon.findUnique.mockResolvedValue(sampleHackathonRecord);
+      prisma.hackathonConfiguration.findUnique.mockResolvedValue(mockConfigRecord);
+
+      const config = await service.getHackathonConfiguration(
+        mockUserId,
+        mockUserRoles,
+        sampleHackathonRecord.id
+      );
+
+      expect(config.hackathonId).toBe(sampleHackathonRecord.id);
+      expect(config.participationMode).toBe('BOTH');
+      expect(config.minTeamSize).toBe(1);
+      expect(config.maxTeamSize).toBe(4);
+      expect(config.githubRequired).toBe(true);
+    });
+
+    it('should update configuration in DRAFT state', async () => {
+      prisma.hackathon.findUnique.mockResolvedValue(sampleHackathonRecord);
+      prisma.hackathonConfiguration.findUnique.mockResolvedValue(mockConfigRecord);
+      prisma.hackathonConfiguration.update.mockResolvedValue({
+        ...mockConfigRecord,
+        participationMode: 'TEAM',
+        minTeamSize: 2,
+        maxTeamSize: 5,
+        aiUsagePolicy: 'RESTRICTED',
+        aiDisclosureRequired: true,
+      });
+
+      const updated = await service.updateHackathonConfiguration(
+        mockUserId,
+        mockUserRoles,
+        mockUserEmail,
+        sampleHackathonRecord.id,
+        {
+          participationMode: 'TEAM' as any,
+          minTeamSize: 2,
+          maxTeamSize: 5,
+          aiUsagePolicy: 'RESTRICTED' as any,
+          aiDisclosureRequired: true,
+        }
+      );
+
+      expect(updated.participationMode).toBe('TEAM');
+      expect(updated.minTeamSize).toBe(2);
+      expect(updated.maxTeamSize).toBe(5);
+      expect(updated.aiUsagePolicy).toBe('RESTRICTED');
+      expect(updated.aiDisclosureRequired).toBe(true);
+    });
+
+    it('should normalize minTeamSize and maxTeamSize to null if INDIVIDUAL participationMode is selected', async () => {
+      prisma.hackathon.findUnique.mockResolvedValue(sampleHackathonRecord);
+      prisma.hackathonConfiguration.findUnique.mockResolvedValue(mockConfigRecord);
+      prisma.hackathonConfiguration.update.mockImplementation(({ data }) =>
+        Promise.resolve({ ...mockConfigRecord, ...data })
+      );
+
+      const updated = await service.updateHackathonConfiguration(
+        mockUserId,
+        mockUserRoles,
+        mockUserEmail,
+        sampleHackathonRecord.id,
+        {
+          participationMode: 'INDIVIDUAL' as any,
+          minTeamSize: 2,
+          maxTeamSize: 4,
+        }
+      );
+
+      expect(updated.participationMode).toBe('INDIVIDUAL');
+      expect(updated.minTeamSize).toBeNull();
+      expect(updated.maxTeamSize).toBeNull();
+    });
+
+    it('should reject invalid team size invariant (minTeamSize > maxTeamSize)', async () => {
+      prisma.hackathon.findUnique.mockResolvedValue(sampleHackathonRecord);
+      prisma.hackathonConfiguration.findUnique.mockResolvedValue(mockConfigRecord);
+
+      await expect(
+        service.updateHackathonConfiguration(
+          mockUserId,
+          mockUserRoles,
+          mockUserEmail,
+          sampleHackathonRecord.id,
+          {
+            minTeamSize: 5,
+            maxTeamSize: 3,
+          }
+        )
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should reject invalid graduation year invariant (from > to)', async () => {
+      prisma.hackathon.findUnique.mockResolvedValue(sampleHackathonRecord);
+      prisma.hackathonConfiguration.findUnique.mockResolvedValue(mockConfigRecord);
+
+      await expect(
+        service.updateHackathonConfiguration(
+          mockUserId,
+          mockUserRoles,
+          mockUserEmail,
+          sampleHackathonRecord.id,
+          {
+            graduationYearFrom: 2028,
+            graduationYearTo: 2024,
+          }
+        )
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should lock core policy modification when hackathon effective status is LIVE', async () => {
+      const liveHackathon = {
+        ...sampleHackathonRecord,
+        status: HackathonStatus.PUBLISHED,
+        startsAt: new Date('2026-08-01T00:00:00Z'),
+        endsAt: new Date('2026-08-30T00:00:00Z'),
+      };
+      prisma.hackathon.findUnique.mockResolvedValue(liveHackathon);
+
+      await expect(
+        service.updateHackathonConfiguration(
+          mockUserId,
+          mockUserRoles,
+          mockUserEmail,
+          liveHackathon.id,
+          {
+            participationMode: 'INDIVIDUAL' as any,
+          }
+        )
+      ).rejects.toThrow(ConflictException);
+    });
+  });
+
+  describe('8. Participant-Facing Rules Management', () => {
+    const mockConfigRecord = {
+      id: 'config-uuid-1',
+      hackathonId: sampleHackathonRecord.id,
+      participationMode: 'BOTH',
+      minTeamSize: 1,
+      maxTeamSize: 4,
+      eligibilityType: 'OPEN',
+      allowedBranches: [],
+      allowedColleges: [],
+      graduationYearFrom: null,
+      graduationYearTo: null,
+      aiUsagePolicy: 'ALLOWED',
+      aiDisclosureRequired: false,
+      preExistingCodePolicy: 'PROHIBITED',
+      openSourcePolicy: 'ALLOWED_WITH_ATTRIBUTION',
+      githubRequired: true,
+      repositoryPolicy: 'PLATFORM_MANAGED',
+      rulesMarkdown: '### Official Hackathon Rules\n1. Be respectful\n2. Original work only.',
+      createdAt: new Date('2026-08-16T12:00:00Z'),
+      updatedAt: new Date('2026-08-16T12:00:00Z'),
+    };
+
+    it('should return public rules for a published hackathon', async () => {
+      const publishedHackathon = {
+        ...sampleHackathonRecord,
+        status: HackathonStatus.PUBLISHED,
+        visibility: HackathonVisibility.PUBLIC,
+      };
+      prisma.hackathon.findUnique.mockResolvedValue(publishedHackathon);
+      prisma.hackathonConfiguration.findUnique.mockResolvedValue(mockConfigRecord);
+
+      const rules = await service.getHackathonRules(
+        undefined,
+        undefined,
+        publishedHackathon.id
+      );
+
+      expect(rules.hackathonId).toBe(publishedHackathon.id);
+      expect(rules.rulesMarkdown).toContain('Official Hackathon Rules');
+      expect(rules.participationMode).toBe('BOTH');
+    });
+
+    it('should update rules markdown in DRAFT state', async () => {
+      prisma.hackathon.findUnique.mockResolvedValue(sampleHackathonRecord);
+      prisma.hackathonConfiguration.findUnique.mockResolvedValue(mockConfigRecord);
+      prisma.hackathonConfiguration.update.mockResolvedValue({
+        ...mockConfigRecord,
+        rulesMarkdown: '# Updated Rules Markdown',
+      });
+
+      const updated = await service.updateHackathonRules(
+        mockUserId,
+        mockUserRoles,
+        mockUserEmail,
+        sampleHackathonRecord.id,
+        { rulesMarkdown: '# Updated Rules Markdown' }
+      );
+
+      expect(prisma.hackathonConfiguration.update).toHaveBeenCalledWith({
+        where: { hackathonId: sampleHackathonRecord.id },
+        data: { rulesMarkdown: '# Updated Rules Markdown' },
+      });
+      expect(prisma.auditLog.create).toHaveBeenCalled();
+      expect(updated).toBeDefined();
+    });
+
+    it('should reject rules update when effective status is COMPLETED or LIVE', async () => {
+      const completedHackathon = {
+        ...sampleHackathonRecord,
+        status: HackathonStatus.PUBLISHED,
+        startsAt: new Date('2026-07-01T00:00:00Z'),
+        endsAt: new Date('2026-07-05T00:00:00Z'),
+      };
+      prisma.hackathon.findUnique.mockResolvedValue(completedHackathon);
+
+      await expect(
+        service.updateHackathonRules(
+          mockUserId,
+          mockUserRoles,
+          mockUserEmail,
+          completedHackathon.id,
+          { rulesMarkdown: 'New rules' }
+        )
+      ).rejects.toThrow(ConflictException);
+    });
+  });
 });
+

@@ -154,6 +154,47 @@ curl -X POST http://localhost:4000/api/v1/hackathons/<hackathon_id>/archive \
   -H "Cookie: almosthack_session=<session_token>"
 ```
 
+### 9. Hackathon Configuration & Rules API Testing
+
+```bash
+# Get hackathon policy configuration
+curl -X GET http://localhost:4000/api/v1/hackathons/<hackathon_id>/configuration \
+  -H "Cookie: almosthack_session=<session_token>"
+
+# Update hackathon policy configuration
+curl -X PUT http://localhost:4000/api/v1/hackathons/<hackathon_id>/configuration \
+  -H "Content-Type: application/json" \
+  -H "Cookie: almosthack_session=<session_token>" \
+  -d '{
+    "participationMode": "TEAM",
+    "minTeamSize": 2,
+    "maxTeamSize": 4,
+    "eligibilityType": "STUDENTS_ONLY",
+    "allowedBranches": ["CSE", "ECE"],
+    "allowedColleges": ["MIT", "Stanford"],
+    "graduationYearFrom": 2024,
+    "graduationYearTo": 2028,
+    "aiUsagePolicy": "RESTRICTED",
+    "aiDisclosureRequired": true,
+    "preExistingCodePolicy": "PROHIBITED",
+    "openSourcePolicy": "ALLOWED_WITH_ATTRIBUTION",
+    "githubRequired": true,
+    "repositoryPolicy": "PLATFORM_MANAGED"
+  }'
+
+# Get participant-facing rules
+curl -X GET http://localhost:4000/api/v1/hackathons/<hackathon_id>/rules \
+  -H "Cookie: almosthack_session=<session_token>"
+
+# Update markdown rules document
+curl -X PATCH http://localhost:4000/api/v1/hackathons/<hackathon_id>/rules \
+  -H "Content-Type: application/json" \
+  -H "Cookie: almosthack_session=<session_token>" \
+  -d '{
+    "rulesMarkdown": "# Official Hackathon Rules\n\n1. All work must be completed during the event window.\n2. AI tool usage requires mandatory prompt log disclosure."
+  }'
+```
+
 ---
 
 ## Command Reference

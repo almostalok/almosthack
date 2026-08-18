@@ -18,8 +18,10 @@ import {
   Layers,
   Code,
   Award,
+  Sliders,
+  FileText,
 } from 'lucide-react';
-import { apiClient } from '../../../../lib/api-client';
+import { apiClient } from '@/lib/api-client';
 import { HackathonEntity, HackathonLifecycleResponse } from '@almosthack/types';
 
 export default function HackathonDetailPage() {
@@ -143,6 +145,24 @@ export default function HackathonDetailPage() {
                 Archive Hackathon
               </Button>
             )}
+
+            <Link href={`/hackathons/${hackathonId}/tracks`}>
+              <Button variant="accent" size="sm" leftIcon={<Layers className="w-4 h-4" />}>
+                Tracks & Challenges
+              </Button>
+            </Link>
+
+            <Link href={`/hackathons/${hackathonId}/configuration`}>
+              <Button variant="secondary" size="sm" leftIcon={<Sliders className="w-4 h-4" />}>
+                Configuration
+              </Button>
+            </Link>
+
+            <Link href={`/hackathons/${hackathonId}/rules`}>
+              <Button variant="outline" size="sm" leftIcon={<FileText className="w-4 h-4" />}>
+                Rules
+              </Button>
+            </Link>
 
             <Link href={`/hackathons/${hackathonId}/settings`}>
               <Button variant="secondary" size="sm" leftIcon={<Settings className="w-4 h-4" />}>

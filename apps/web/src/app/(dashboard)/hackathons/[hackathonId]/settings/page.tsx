@@ -7,7 +7,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Breadcrumbs, Button, Input, Card, Skeleton } from '@almosthack/ui';
 import { ArrowLeft, Save, Send, Archive, Globe, Lock } from 'lucide-react';
-import { apiClient } from '../../../../../lib/api-client';
+import { apiClient } from '@/lib/api-client';
 import { HackathonEntity, HackathonLifecycleResponse } from '@almosthack/types';
 
 const COMMON_TIMEZONES = [

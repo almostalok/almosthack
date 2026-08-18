@@ -109,6 +109,19 @@ The backend is designed as a modular monolith using NestJS. Rather than microser
 - **Visibility & Rules Access**: Public published/live hackathon rules are publicly readable (`GET /hackathons/:id/rules`). Private or DRAFT hackathons require `HACKATHON_READ` authorization.
 - **Audit Trails**: Policy configuration updates and markdown rules modifications produce structured `AuditLog` records (`hackathon.configuration_updated`, `hackathon.rules_updated`).
 
+### 11. Hackathon Tracks & Challenges Architecture (`S2-03`)
+- **Domain Hierarchy**: `Organization -> Hackathon -> Tracks -> Challenges`
+  - `HackathonTrack`: Belongs 1:N to `Hackathon` (`onDelete: Cascade`). Slugs scoped per hackathon (`@@unique([hackathonId, slug])`).
+  - `HackathonChallenge`: Belongs 1:N to `HackathonTrack` (`onDelete: Cascade`). Slugs scoped per track (`@@unique([trackId, slug])`).
+- **Challenge Content Model**: Explicit structured fields (`description`, `problemStatement`, `requirements`, `constraints`, `expectedOutcome`, `resources`).
+- **Resource Security**: `resources` JSON array validated for safe protocols (`http:`, `https:`), rejecting dangerous URL schemes (`javascript:`, `data:`, `file:`, `vbscript:`). Max 20 resources per challenge.
+- **Ordering & Reordering**: Deterministic integer `displayOrder` with batch transactional reordering APIs (`PATCH /hackathons/:id/tracks/reorder`, `PATCH /tracks/:id/challenges/reorder`).
+- **Challenge Lifecycle Status**: `DRAFT`, `PUBLISHED`, `ARCHIVED`. Subordinate to Hackathon lifecycle; draft challenges are hidden from public queries.
+- **LIVE Immutability**: All structural mutations (create, update, delete, reorder) for Tracks and Challenges are locked once Hackathon reaches `LIVE`, `COMPLETED`, or `ARCHIVED` (`409 HACKATHON_CONFIGURATION_LOCKED`).
+- **Multi-Tenant Isolation & Nested Scope**: Validates parent-child relationships and organization membership. Cross-tenant or mismatched parent accesses are rejected with `403 Forbidden` / `404 Not Found`.
+- **Audit Trails**: Track and Challenge CRUD/reorder mutations emit structured `AuditLog` records (`hackathon.track_created`, `hackathon.track_updated`, `hackathon.track_deleted`, `hackathon.tracks_reordered`, `hackathon.challenge_created`, `hackathon.challenge_updated`, `hackathon.challenge_deleted`, `hackathon.challenges_reordered`).
+
+
 
 
 

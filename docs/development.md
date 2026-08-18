@@ -195,6 +195,47 @@ curl -X PATCH http://localhost:4000/api/v1/hackathons/<hackathon_id>/rules \
   }'
 ```
 
+### 10. Hackathon Tracks & Challenges API Testing
+
+```bash
+# Create track
+curl -X POST http://localhost:4000/api/v1/hackathons/<hackathon_id>/tracks \
+  -H "Content-Type: application/json" \
+  -H "Cookie: almosthack_session=<session_token>" \
+  -d '{
+    "name": "AI & Autonomous Agents",
+    "shortDescription": "Develop LLM agents and multi-agent workflows",
+    "description": "Comprehensive track for building autonomous agentic applications."
+  }'
+
+# Create challenge within track
+curl -X POST http://localhost:4000/api/v1/tracks/<track_id>/challenges \
+  -H "Content-Type: application/json" \
+  -H "Cookie: almosthack_session=<session_token>" \
+  -d '{
+    "name": "Autonomous Code Reviewer",
+    "problemStatement": "Build an AI agent that automatically analyzes PR diffs and outputs structured review comments.",
+    "requirements": "Must support GitHub Action or CLI integration.",
+    "constraints": "Review cycle latency under 10 seconds.",
+    "expectedOutcome": "Deployable container image.",
+    "resources": [
+      { "title": "Evaluation Dataset", "url": "https://example.com/dataset.json" }
+    ],
+    "status": "PUBLISHED"
+  }'
+
+# Reorder tracks
+curl -X PATCH http://localhost:4000/api/v1/hackathons/<hackathon_id>/tracks/reorder \
+  -H "Content-Type: application/json" \
+  -H "Cookie: almosthack_session=<session_token>" \
+  -d '{
+    "items": [
+      { "id": "<track_id_2>", "displayOrder": 1 },
+      { "id": "<track_id_1>", "displayOrder": 2 }
+    ]
+  }'
+```
+
 ---
 
 ## Command Reference

@@ -1209,7 +1209,7 @@ export class HackathonsService {
         where: { hackathonId },
         _max: { displayOrder: true },
       });
-      displayOrder = (maxOrder._max.displayOrder ?? -1) + 1;
+      displayOrder = (maxOrder._max.displayOrder ?? 0) + 1;
     }
 
     const track = await this.prisma.hackathonTrack.create({
@@ -1648,7 +1648,7 @@ export class HackathonsService {
         where: { trackId },
         _max: { displayOrder: true },
       });
-      displayOrder = (maxOrder._max.displayOrder ?? -1) + 1;
+      displayOrder = (maxOrder._max.displayOrder ?? 0) + 1;
     }
 
     const challenge = await this.prisma.hackathonChallenge.create({

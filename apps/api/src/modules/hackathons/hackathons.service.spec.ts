@@ -70,6 +70,30 @@ describe('HackathonsService Unit Tests', () => {
         create: jest.fn(),
         update: jest.fn(),
       },
+      hackathonTrack: {
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        aggregate: jest.fn().mockResolvedValue({ _max: { displayOrder: 0 } }),
+      },
+      hackathonChallenge: {
+        findUnique: jest.fn(),
+        findFirst: jest.fn(),
+        findMany: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        aggregate: jest.fn().mockResolvedValue({ _max: { displayOrder: 0 } }),
+      },
+      $transaction: jest.fn().mockImplementation(async (arg) => {
+        if (Array.isArray(arg)) {
+          return Promise.all(arg);
+        }
+        return arg(prisma);
+      }),
       auditLog: {
         create: jest.fn().mockResolvedValue({ id: 'audit-id' }),
       },
@@ -657,5 +681,193 @@ describe('HackathonsService Unit Tests', () => {
       ).rejects.toThrow(ConflictException);
     });
   });
+
+  describe('9. Track Management (S2-03)', () => {
+    const sampleTrack = {
+      id: 'track-uuid-1',
+      hackathonId: sampleHackathonRecord.id,
+      name: 'AI Agents',
+      slug: 'ai-agents',
+      shortDescription: 'Build AI agents',
+      description: 'Full description of AI track',
+      displayOrder: 1,
+      isActive: true,
+      createdAt: new Date('2026-08-16T12:00:00Z'),
+      updatedAt: new Date('2026-08-16T12:00:00Z'),
+      _count: { challenges: 0 },
+    };
+
+    it('should create track with normalized slug and auto displayOrder', async () => {
+      prisma.hackathon.findUnique.mockResolvedValue(sampleHackathonRecord);
+      prisma.hackathonTrack.findUnique.mockResolvedValue(null);
+      prisma.hackathonTrack.aggregate.mockResolvedValue({ _max: { displayOrder: 2 } });
+      prisma.hackathonTrack.create.mockResolvedValue({
+        ...sampleTrack,
+        displayOrder: 3,
+      });
+
+      const res = await service.createHackathonTrack(
+        mockUserId,
+        mockUserRoles,
+        mockUserEmail,
+        sampleHackathonRecord.id,
+        { name: 'AI Agents' }
+      );
+
+      expect(res.name).toBe('AI Agents');
+      expect(res.slug).toBe('ai-agents');
+      expect(prisma.hackathonTrack.create).toHaveBeenCalled();
+      expect(prisma.auditLog.create).toHaveBeenCalled();
+    });
+
+    it('should reject track creation on slug conflict', async () => {
+      prisma.hackathon.findUnique.mockResolvedValue(sampleHackathonRecord);
+      prisma.hackathonTrack.findUnique.mockResolvedValue(sampleTrack);
+
+      await expect(
+        service.createHackathonTrack(
+          mockUserId,
+          mockUserRoles,
+          mockUserEmail,
+          sampleHackathonRecord.id,
+          { name: 'AI Agents' }
+        )
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should reject track creation when hackathon is LIVE or COMPLETED', async () => {
+      const liveHackathon = {
+        ...sampleHackathonRecord,
+        status: HackathonStatus.PUBLISHED,
+        startsAt: new Date('2026-08-01T00:00:00Z'),
+        endsAt: new Date('2026-08-30T00:00:00Z'),
+      };
+      prisma.hackathon.findUnique.mockResolvedValue(liveHackathon);
+
+      await expect(
+        service.createHackathonTrack(
+          mockUserId,
+          mockUserRoles,
+          mockUserEmail,
+          liveHackathon.id,
+          { name: 'New Track' }
+        )
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should reorder tracks atomically', async () => {
+      prisma.hackathon.findUnique.mockResolvedValue(sampleHackathonRecord);
+      prisma.hackathonTrack.findMany
+        .mockResolvedValueOnce([{ id: 'track-uuid-1' }, { id: 'track-uuid-2' }])
+        .mockResolvedValueOnce([
+          { ...sampleTrack, id: 'track-uuid-2', displayOrder: 1 },
+          { ...sampleTrack, id: 'track-uuid-1', displayOrder: 2 },
+        ]);
+
+      const res = await service.reorderHackathonTracks(
+        mockUserId,
+        mockUserRoles,
+        mockUserEmail,
+        sampleHackathonRecord.id,
+        {
+          items: [
+            { id: 'track-uuid-2', displayOrder: 1 },
+            { id: 'track-uuid-1', displayOrder: 2 },
+          ],
+        }
+      );
+
+      expect(prisma.$transaction).toHaveBeenCalled();
+      expect(prisma.auditLog.create).toHaveBeenCalled();
+      expect(res.length).toBe(2);
+    });
+  });
+
+  describe('10. Challenge Management (S2-03)', () => {
+    const sampleTrackWithHackathon = {
+      id: 'track-uuid-1',
+      hackathonId: sampleHackathonRecord.id,
+      name: 'AI Agents',
+      slug: 'ai-agents',
+      hackathon: sampleHackathonRecord,
+    };
+
+    const sampleChallenge = {
+      id: 'challenge-uuid-1',
+      trackId: 'track-uuid-1',
+      name: 'Autonomous PR Reviewer',
+      slug: 'autonomous-pr-reviewer',
+      description: 'Review PRs autonomously',
+      problemStatement: 'Design an AI system to review Git pull requests.',
+      requirements: 'Detailed feedback output',
+      constraints: '<5s latency',
+      expectedOutcome: 'A CLI tool',
+      resources: [{ title: 'Doc', url: 'https://example.com' }],
+      displayOrder: 1,
+      status: 'DRAFT',
+      createdAt: new Date('2026-08-16T12:00:00Z'),
+      updatedAt: new Date('2026-08-16T12:00:00Z'),
+    };
+
+    it('should create challenge with problem statement and audit log', async () => {
+      prisma.hackathonTrack.findUnique.mockResolvedValue(sampleTrackWithHackathon);
+      prisma.hackathonChallenge.findUnique.mockResolvedValue(null);
+      prisma.hackathonChallenge.create.mockResolvedValue(sampleChallenge);
+
+      const res = await service.createTrackChallenge(
+        mockUserId,
+        mockUserRoles,
+        mockUserEmail,
+        sampleTrackWithHackathon.id,
+        {
+          name: 'Autonomous PR Reviewer',
+          problemStatement: 'Design an AI system to review Git pull requests.',
+        }
+      );
+
+      expect(res.name).toBe('Autonomous PR Reviewer');
+      expect(prisma.hackathonChallenge.create).toHaveBeenCalled();
+      expect(prisma.auditLog.create).toHaveBeenCalled();
+    });
+
+    it('should reject challenge creation on slug conflict inside track', async () => {
+      prisma.hackathonTrack.findUnique.mockResolvedValue(sampleTrackWithHackathon);
+      prisma.hackathonChallenge.findUnique.mockResolvedValue(sampleChallenge);
+
+      await expect(
+        service.createTrackChallenge(
+          mockUserId,
+          mockUserRoles,
+          mockUserEmail,
+          sampleTrackWithHackathon.id,
+          {
+            name: 'Autonomous PR Reviewer',
+            problemStatement: 'Design an AI system to review Git pull requests.',
+          }
+        )
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should delete challenge and log audit', async () => {
+      prisma.hackathonTrack.findUnique.mockResolvedValue(sampleTrackWithHackathon);
+      prisma.hackathonChallenge.findFirst.mockResolvedValue(sampleChallenge);
+      prisma.hackathonChallenge.delete.mockResolvedValue(sampleChallenge);
+
+      const res = await service.deleteTrackChallenge(
+        mockUserId,
+        mockUserRoles,
+        mockUserEmail,
+        sampleTrackWithHackathon.id,
+        sampleChallenge.id
+      );
+
+      expect(res.success).toBe(true);
+      expect(prisma.hackathonChallenge.delete).toHaveBeenCalledWith({
+        where: { id: sampleChallenge.id },
+      });
+      expect(prisma.auditLog.create).toHaveBeenCalled();
+    });
+  });
 });
+
 

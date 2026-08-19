@@ -6,4 +6,6 @@ export * from './api';
 export * from './organization';
 export * from './hackathon';
 export * from './github';
+export * from './submission';
+
 

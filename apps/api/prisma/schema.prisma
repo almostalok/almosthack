@@ -46,6 +46,9 @@ model User {
   sentTeamInvitations     TeamInvitation[] @relation("TeamInviter")
   githubAccount           GitHubAccount?
   oauthStates             OAuthState[]
+  judgeAssignments        JudgeAssignment[] @relation("JudgeUser")
+  assignedJudges          JudgeAssignment[] @relation("JudgeAssigner")
+  judgeEvaluations        JudgeEvaluation[]
 
   @@map("users")
 }
@@ -157,6 +160,9 @@ model Hackathon {
   tracks        HackathonTrack[]
   registrations ParticipantRegistration[]
   teams         Team[]
+  submissions   Submission[]
+  judgingCriteria JudgingCriterion[]
+  judgeAssignments JudgeAssignment[]
 
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -241,6 +247,7 @@ model HackathonTrack {
   hackathon        Hackathon            @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
   challenges       HackathonChallenge[]
   registrations    ParticipantRegistration[]
+  submissions      Submission[]
 
   @@unique([hackathonId, slug])
   @@index([hackathonId])
@@ -272,6 +279,7 @@ model HackathonChallenge {
 
   track            HackathonTrack  @relation(fields: [trackId], references: [id], onDelete: Cascade)
   registrations    ParticipantRegistration[]
+  submissions      Submission[]
 
   @@unique([trackId, slug])
   @@index([trackId])
@@ -348,6 +356,7 @@ model Team {
   members         TeamMember[]
   invitations     TeamInvitation[]
   repositories    TeamRepository[]
+  submissions     Submission[]
 
   @@unique([hackathonId, slug])
   @@index([hackathonId])
@@ -518,10 +527,161 @@ model TeamRepository {
   disconnectedAt       DateTime?
 
   team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  submissions Submission[]
 
   @@unique([teamId, provider])
   @@index([teamId])
   @@index([providerRepositoryId])
   @@map("team_repositories")
 }
+
+// ==========================================
+// S3: SUBMISSIONS & JUDGING DOMAIN MODELS
+// ==========================================
+
+enum SubmissionStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  FINALIZED
+  WITHDRAWN
+}
+
+enum JudgeAssignmentStatus {
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  REVOKED
+}
+
+enum EvaluationStatus {
+  DRAFT
+  SUBMITTED
+}
+
+model Submission {
+  id                 String           @id @default(uuid())
+  hackathonId        String
+  teamId             String
+  trackId            String?
+  challengeId        String?
+  repositoryId       String?
+  title              String
+  description        String?
+  demoUrl            String?
+  documentationUrl   String?
+  commitSha          String?
+  snapshotBranch     String?
+  snapshotCapturedAt DateTime?
+  status             SubmissionStatus @default(DRAFT)
+  submittedAt        DateTime?
+  finalizedAt        DateTime?
+  withdrawnAt        DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  hackathon   Hackathon           @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  team        Team                @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  track       HackathonTrack?     @relation(fields: [trackId], references: [id], onDelete: SetNull)
+  challenge   HackathonChallenge? @relation(fields: [challengeId], references: [id], onDelete: SetNull)
+  repository  TeamRepository?     @relation(fields: [repositoryId], references: [id], onDelete: SetNull)
+
+  assignments JudgeAssignment[]
+  evaluations JudgeEvaluation[]
+
+  @@unique([hackathonId, teamId])
+  @@index([hackathonId])
+  @@index([teamId])
+  @@index([trackId])
+  @@index([challengeId])
+  @@index([status])
+  @@map("submissions")
+}
+
+model JudgingCriterion {
+  id           String   @id @default(uuid())
+  hackathonId  String
+  name         String
+  description  String?
+  weight       Float    @default(1.0)
+  maxScore     Float    @default(10.0)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  hackathon Hackathon         @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  scores    EvaluationScore[]
+
+  @@index([hackathonId])
+  @@index([displayOrder])
+  @@map("judging_criteria")
+}
+
+model JudgeAssignment {
+  id              String                @id @default(uuid())
+  hackathonId     String
+  submissionId    String
+  judgeUserId     String
+  assignedByUserId String
+  status          JudgeAssignmentStatus @default(ASSIGNED)
+  assignedAt      DateTime              @default(now())
+  completedAt     DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  hackathon  Hackathon        @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  submission Submission       @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  judgeUser  User             @relation("JudgeUser", fields: [judgeUserId], references: [id], onDelete: Cascade)
+  assignedBy User             @relation("JudgeAssigner", fields: [assignedByUserId], references: [id], onDelete: Cascade)
+  evaluation JudgeEvaluation?
+
+  @@unique([submissionId, judgeUserId])
+  @@index([hackathonId])
+  @@index([judgeUserId])
+  @@index([submissionId])
+  @@index([status])
+  @@map("judge_assignments")
+}
+
+model JudgeEvaluation {
+  id              String           @id @default(uuid())
+  assignmentId    String           @unique
+  submissionId    String
+  judgeUserId     String
+  status          EvaluationStatus @default(DRAFT)
+  generalFeedback String?
+  totalScore      Float?
+  submittedAt     DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  assignment JudgeAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  submission Submission      @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  judgeUser  User            @relation(fields: [judgeUserId], references: [id], onDelete: Cascade)
+  scores     EvaluationScore[]
+
+  @@index([submissionId])
+  @@index([judgeUserId])
+  @@index([status])
+  @@map("judge_evaluations")
+}
+
+model EvaluationScore {
+  id           String   @id @default(uuid())
+  evaluationId String
+  criterionId  String
+  score        Float
+  comment      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  evaluation JudgeEvaluation  @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  criterion  JudgingCriterion @relation(fields: [criterionId], references: [id], onDelete: Cascade)
+
+  @@unique([evaluationId, criterionId])
+  @@index([evaluationId])
+  @@index([criterionId])
+  @@map("evaluation_scores")
+}
+
 

@@ -608,5 +608,63 @@ export const connectRepositorySchema = z.object({
 
 export type ConnectRepositorySchema = z.infer<typeof connectRepositorySchema>;
 
+// ==========================================
+// S3: SUBMISSIONS & JUDGING SCHEMAS
+// ==========================================
+
+export const createSubmissionSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(3, { message: 'Submission title must be at least 3 characters' })
+    .max(150, { message: 'Submission title cannot exceed 150 characters' }),
+  description: z.string().trim().max(5000, { message: 'Description cannot exceed 5000 characters' }).optional().nullable(),
+  trackId: z.string().uuid({ message: 'trackId must be a valid UUID' }).optional().nullable(),
+  challengeId: z.string().uuid({ message: 'challengeId must be a valid UUID' }).optional().nullable(),
+  repositoryId: z.string().uuid({ message: 'repositoryId must be a valid UUID' }).optional().nullable(),
+  demoUrl: z.string().url({ message: 'demoUrl must be a valid URL' }).optional().nullable().or(z.literal('')),
+  documentationUrl: z.string().url({ message: 'documentationUrl must be a valid URL' }).optional().nullable().or(z.literal('')),
+});
+
+export type CreateSubmissionSchema = z.infer<typeof createSubmissionSchema>;
+
+export const updateSubmissionSchema = createSubmissionSchema.partial();
+export type UpdateSubmissionSchema = z.infer<typeof updateSubmissionSchema>;
+
+export const createJudgingCriterionSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, { message: 'Criterion name must be at least 2 characters' })
+    .max(100, { message: 'Criterion name cannot exceed 100 characters' }),
+  description: z.string().trim().max(1000).optional().nullable(),
+  weight: z.number().min(0.1).max(10.0).optional().default(1.0),
+  maxScore: z.number().min(1.0).max(100.0).optional().default(10.0),
+  displayOrder: z.number().int().min(0).optional().default(0),
+});
+
+export type CreateJudgingCriterionSchema = z.infer<typeof createJudgingCriterionSchema>;
+
+export const assignJudgeSchema = z.object({
+  judgeUserId: z.string().uuid({ message: 'judgeUserId must be a valid UUID' }),
+  submissionId: z.string().uuid({ message: 'submissionId must be a valid UUID' }),
+});
+
+export type AssignJudgeSchema = z.infer<typeof assignJudgeSchema>;
+
+export const evaluationScoreInputSchema = z.object({
+  criterionId: z.string().uuid({ message: 'criterionId must be a valid UUID' }),
+  score: z.number().min(0, { message: 'Score cannot be negative' }),
+  comment: z.string().trim().max(1000).optional().nullable(),
+});
+
+export const submitEvaluationSchema = z.object({
+  generalFeedback: z.string().trim().max(3000).optional().nullable(),
+  scores: z.array(evaluationScoreInputSchema).min(1, { message: 'At least one criterion score is required' }),
+});
+
+export type SubmitEvaluationSchema = z.infer<typeof submitEvaluationSchema>;
+
+
 
 

@@ -289,5 +289,67 @@ export interface TeamRepositoryDisconnectedPayload {
   disconnectedAt: string;
 }
 
+// ==========================================
+// S3: SUBMISSIONS & JUDGING EVENTS
+// ==========================================
+
+export interface SubmissionCreatedPayload {
+  submissionId: string;
+  hackathonId: string;
+  teamId: string;
+  title: string;
+  createdAt: string;
+}
+
+export interface SubmissionUpdatedPayload {
+  submissionId: string;
+  hackathonId: string;
+  teamId: string;
+  updatedFields: string[];
+  updatedAt: string;
+}
+
+export interface SubmissionFinalizedPayload {
+  submissionId: string;
+  hackathonId: string;
+  teamId: string;
+  commitSha: string | null;
+  finalizedAt: string;
+}
+
+export interface SubmissionWithdrawnPayload {
+  submissionId: string;
+  hackathonId: string;
+  teamId: string;
+  withdrawnAt: string;
+}
+
+export interface JudgeAssignedPayload {
+  assignmentId: string;
+  hackathonId: string;
+  submissionId: string;
+  judgeUserId: string;
+  assignedByUserId: string;
+  assignedAt: string;
+}
+
+export interface JudgeAssignmentRevokedPayload {
+  assignmentId: string;
+  hackathonId: string;
+  submissionId: string;
+  judgeUserId: string;
+  revokedAt: string;
+}
+
+export interface EvaluationSubmittedPayload {
+  evaluationId: string;
+  assignmentId: string;
+  submissionId: string;
+  judgeUserId: string;
+  totalScore: number;
+  submittedAt: string;
+}
+
+
 
 

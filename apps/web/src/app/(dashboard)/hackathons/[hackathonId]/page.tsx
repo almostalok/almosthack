@@ -1080,14 +1080,31 @@ export default function HackathonDetailPage() {
           </p>
         </Card>
 
-        <Card className="p-5 border-zinc-800/80 bg-zinc-950/40 space-y-2 opacity-60">
-          <div className="flex items-center gap-2 text-zinc-400 text-xs font-mono font-bold">
-            <Award className="w-4 h-4 text-zinc-500" />
-            Judging & Leaderboards
+        <Card className="p-5 border-zinc-800/80 bg-zinc-950/80 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-indigo-400 text-xs font-mono font-bold">
+              <Award className="w-4 h-4 text-amber-400" />
+              Submissions & Judging
+            </div>
+            <Badge variant="outline" className="text-emerald-400 border-emerald-500/30">
+              Active
+            </Badge>
           </div>
-          <p className="text-[11px] font-mono text-zinc-500">
-            Auditable scorelines & judging panel belong to future sprints.
+          <p className="text-[11px] font-mono text-zinc-400">
+            Submit team project, review verified commit SHA snapshots, and access organizer judging panel.
           </p>
+          <div className="pt-2 flex items-center gap-2">
+            <Link href={`/hackathons/${hackathonId}/submissions`}>
+              <Button size="sm" variant="accent">
+                Manage Submissions
+              </Button>
+            </Link>
+            <Link href="/judging">
+              <Button size="sm" variant="outline">
+                Judge Portal
+              </Button>
+            </Link>
+          </div>
         </Card>
       </div>
     </div>

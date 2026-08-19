@@ -438,7 +438,71 @@ export class ApiClient {
   public disconnectTeamRepository<T = any>(teamId: string, options?: RequestOptions): Promise<T> {
     return this.delete<T>(`/teams/${teamId}/repository`, options);
   }
+
+  // ==========================================
+  // S3: Submissions & Judging APIs
+  // ==========================================
+  public createOrUpdateSubmissionDraft<T = any>(teamId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/teams/${teamId}/submissions`, body, options);
+  }
+
+  public getTeamSubmission<T = any>(teamId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/teams/${teamId}/submission`, options);
+  }
+
+  public getSubmissionDetail<T = any>(submissionId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/submissions/${submissionId}`, options);
+  }
+
+  public getHackathonSubmissions<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/hackathons/${hackathonId}/submissions`, options);
+  }
+
+  public finalizeSubmission<T = any>(submissionId: string, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/submissions/${submissionId}/finalize`, {}, options);
+  }
+
+  public withdrawSubmission<T = any>(submissionId: string, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/submissions/${submissionId}/withdraw`, {}, options);
+  }
+
+  public getJudgingCriteria<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/hackathons/${hackathonId}/judging-criteria`, options);
+  }
+
+  public createJudgingCriterion<T = any>(hackathonId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/hackathons/${hackathonId}/judging-criteria`, body, options);
+  }
+
+  public deleteJudgingCriterion<T = any>(hackathonId: string, criterionId: string, options?: RequestOptions): Promise<T> {
+    return this.delete<T>(`/hackathons/${hackathonId}/judging-criteria/${criterionId}`, options);
+  }
+
+  public assignJudge<T = any>(submissionId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/submissions/${submissionId}/judges`, body, options);
+  }
+
+  public revokeJudgeAssignment<T = any>(submissionId: string, judgeUserId: string, options?: RequestOptions): Promise<T> {
+    return this.delete<T>(`/submissions/${submissionId}/judges/${judgeUserId}`, options);
+  }
+
+  public getJudgeAssignments<T = any>(options?: RequestOptions): Promise<T> {
+    return this.get<T>('/judge-assignments', options);
+  }
+
+  public getJudgeAssignmentDetail<T = any>(assignmentId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/judge-assignments/${assignmentId}`, options);
+  }
+
+  public saveEvaluationDraft<T = any>(assignmentId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/judge-assignments/${assignmentId}/evaluation`, body, options);
+  }
+
+  public submitEvaluation<T = any>(assignmentId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/judge-assignments/${assignmentId}/evaluation/submit`, body, options);
+  }
 }
+
 
 
 

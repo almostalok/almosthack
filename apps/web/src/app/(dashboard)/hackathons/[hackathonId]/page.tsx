@@ -33,6 +33,8 @@ import {
   Mail,
   Shield,
   ArrowRightLeft,
+  GitBranch,
+  Github,
 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import {
@@ -47,6 +49,8 @@ import {
   TeamInvitationEntity,
   TeamMemberRole,
   TeamMemberStatus,
+  GitHubConnectionStatus,
+  TeamRepositoryEntity,
 } from '@almosthack/types';
 
 export default function HackathonDetailPage() {
@@ -280,6 +284,43 @@ export default function HackathonDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['my-team', hackathonId] });
     },
   });
+
+  // ==========================================
+  // S2-06: GitHub Integration & Repository Hooks
+  // ==========================================
+
+  const { data: githubStatus } = useQuery<GitHubConnectionStatus>({
+    queryKey: ['github-status'],
+    queryFn: () => apiClient.getGitHubConnectionStatus(),
+  });
+
+  const { data: teamRepo } = useQuery<TeamRepositoryEntity | null>({
+    queryKey: ['team-repository', myTeam?.id],
+    queryFn: () => apiClient.getTeamRepository(myTeam!.id),
+    enabled: !!myTeam?.id,
+  });
+
+  const connectGitHubMutation = useMutation({
+    mutationFn: () => apiClient.startGitHubConnect(myTeam?.id),
+    onSuccess: (res: any) => {
+      if (res.url) window.location.href = res.url;
+    },
+  });
+
+  const provisionRepoMutation = useMutation({
+    mutationFn: () => apiClient.provisionTeamRepository(myTeam!.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['team-repository', myTeam?.id] });
+    },
+  });
+
+  const disconnectRepoMutation = useMutation({
+    mutationFn: () => apiClient.disconnectTeamRepository(myTeam!.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['team-repository', myTeam?.id] });
+    },
+  });
+
 
   if (isLoadingHackathon) {
     return (
@@ -772,6 +813,89 @@ export default function HackathonDetailPage() {
                 </div>
               </div>
             )}
+
+            {/* S2-06: GitHub Integration & Team Repository Card */}
+            <div className="p-4 bg-zinc-900/40 border border-zinc-800/80 rounded-xl space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                  <Github className="w-4 h-4 text-emerald-400" /> GitHub Repository
+                </h4>
+                {githubStatus?.isConnected ? (
+                  <Badge variant="outline" className="text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
+                    <CheckCircle2 className="w-3 h-3 mr-1" /> Linked: @{githubStatus.githubUsername}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-zinc-500 border-zinc-800">
+                    Disconnected
+                  </Badge>
+                )}
+              </div>
+
+              {teamRepo && teamRepo.status === 'CONNECTED' ? (
+                <div className="p-3 bg-zinc-950/60 border border-zinc-800/80 rounded-lg space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <GitBranch className="w-4 h-4 text-indigo-400" />
+                      <a
+                        href={teamRepo.repositoryUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs font-mono font-bold text-indigo-300 hover:underline flex items-center gap-1"
+                      >
+                        {teamRepo.repositoryFullName} <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                    <Badge variant="outline" className="text-xs text-zinc-400">
+                      Branch: {teamRepo.defaultBranch}
+                    </Badge>
+                  </div>
+                  {myTeam.members?.some((m) => m.userId === registration?.userId && m.role === TeamMemberRole.CAPTAIN) && (
+                    <div className="pt-1 flex justify-end">
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="text-xs"
+                        isLoading={disconnectRepoMutation.isPending}
+                        onClick={() => disconnectRepoMutation.mutate()}
+                      >
+                        Disconnect Repo
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 bg-zinc-950/40 border border-zinc-800/60 rounded-lg">
+                  <div className="text-xs font-mono text-zinc-400">
+                    {githubStatus?.isConnected
+                      ? 'No repository provisioned for this team yet.'
+                      : 'Connect your GitHub account to provision or attach a repository.'}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {!githubStatus?.isConnected ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        isLoading={connectGitHubMutation.isPending}
+                        onClick={() => connectGitHubMutation.mutate()}
+                      >
+                        <Github className="w-3.5 h-3.5 mr-1.5" /> Connect GitHub
+                      </Button>
+                    ) : (
+                      myTeam.members?.some((m) => m.userId === registration?.userId && m.role === TeamMemberRole.CAPTAIN) && (
+                        <Button
+                          size="sm"
+                          variant="accent"
+                          isLoading={provisionRepoMutation.isPending}
+                          onClick={() => provisionRepoMutation.mutate()}
+                        >
+                          <GitBranch className="w-3.5 h-3.5 mr-1.5" /> Provision Repository
+                        </Button>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Team Actions */}
             <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-zinc-800">

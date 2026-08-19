@@ -574,4 +574,39 @@ export const transferCaptaincySchema = z.object({
 
 export type TransferCaptaincySchema = z.infer<typeof transferCaptaincySchema>;
 
+// ==========================================
+// S2-06: GITHUB INTEGRATION & REPOSITORY SCHEMAS
+// ==========================================
+
+export const provisionRepositorySchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, { message: 'Repository name must be at least 2 characters' })
+    .max(100, { message: 'Repository name cannot exceed 100 characters' })
+    .regex(/^[a-zA-Z0-9_.-]+$/, {
+      message: 'Repository name can only contain alphanumeric characters, underscores, hyphens, and periods',
+    })
+    .optional(),
+  isPrivate: z.boolean().optional().default(false),
+});
+
+export type ProvisionRepositorySchema = z.infer<typeof provisionRepositorySchema>;
+
+export const connectRepositorySchema = z.object({
+  owner: z
+    .string()
+    .trim()
+    .min(1, { message: 'Repository owner is required' })
+    .max(100, { message: 'Repository owner cannot exceed 100 characters' }),
+  repo: z
+    .string()
+    .trim()
+    .min(1, { message: 'Repository name is required' })
+    .max(100, { message: 'Repository name cannot exceed 100 characters' }),
+});
+
+export type ConnectRepositorySchema = z.infer<typeof connectRepositorySchema>;
+
+
 

@@ -5,4 +5,5 @@ export * from './audit';
 export * from './api';
 export * from './organization';
 export * from './hackathon';
+export * from './github';
 

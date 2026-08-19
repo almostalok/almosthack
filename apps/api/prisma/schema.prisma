@@ -44,6 +44,8 @@ model User {
   teamMembers    TeamMember[]
   receivedTeamInvitations TeamInvitation[] @relation("TeamInvitee")
   sentTeamInvitations     TeamInvitation[] @relation("TeamInviter")
+  githubAccount           GitHubAccount?
+  oauthStates             OAuthState[]
 
   @@map("users")
 }
@@ -345,6 +347,7 @@ model Team {
   createdByUser   User         @relation("TeamCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
   members         TeamMember[]
   invitations     TeamInvitation[]
+  repositories    TeamRepository[]
 
   @@unique([hackathonId, slug])
   @@index([hackathonId])
@@ -450,3 +453,75 @@ model Notification {
   @@index([userId, isRead])
   @@map("notifications")
 }
+
+// ==========================================
+// S2-06: GITHUB INTEGRATION & REPOSITORIES
+// ==========================================
+
+enum RepositoryStatus {
+  CONNECTED
+  DISCONNECTED
+  ERROR
+}
+
+model GitHubAccount {
+  id                   String    @id @default(uuid())
+  userId               String    @unique
+  githubUserId         String    @unique
+  githubUsername       String
+  githubAvatarUrl      String?
+  accessTokenEncrypted String
+  scopes               String[]  @default([])
+  connectedAt          DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  revokedAt            DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([githubUserId])
+  @@map("github_accounts")
+}
+
+model OAuthState {
+  id          String    @id @default(uuid())
+  state       String    @unique
+  userId      String
+  teamId      String?
+  redirectUri String?
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([state])
+  @@index([userId])
+  @@map("oauth_states")
+}
+
+model TeamRepository {
+  id                   String           @id @default(uuid())
+  teamId               String
+  provider             String           @default("GITHUB")
+  providerRepositoryId String
+  ownerLogin           String
+  repositoryName       String
+  repositoryFullName   String
+  repositoryUrl        String
+  defaultBranch        String           @default("main")
+  isPrivate            Boolean          @default(false)
+  status               RepositoryStatus @default(CONNECTED)
+  connectedAt          DateTime         @default(now())
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  disconnectedAt       DateTime?
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, provider])
+  @@index([teamId])
+  @@index([providerRepositoryId])
+  @@map("team_repositories")
+}
+

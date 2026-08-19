@@ -247,4 +247,47 @@ export interface TeamDissolvedPayload {
   dissolvedAt: string;
 }
 
+// ==========================================
+// S2-06: GITHUB INTEGRATION & REPOSITORY EVENTS
+// ==========================================
+
+export interface GitHubAccountConnectedPayload {
+  userId: string;
+  githubUserId: string;
+  githubUsername: string;
+  connectedAt: string;
+}
+
+export interface GitHubAccountDisconnectedPayload {
+  userId: string;
+  githubUserId: string;
+  disconnectedAt: string;
+}
+
+export interface TeamRepositoryCreatedPayload {
+  teamId: string;
+  repositoryId: string;
+  repositoryFullName: string;
+  repositoryUrl: string;
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface TeamRepositoryConnectedPayload {
+  teamId: string;
+  repositoryId: string;
+  repositoryFullName: string;
+  repositoryUrl: string;
+  connectedBy: string;
+  connectedAt: string;
+}
+
+export interface TeamRepositoryDisconnectedPayload {
+  teamId: string;
+  repositoryId: string;
+  disconnectedBy: string;
+  disconnectedAt: string;
+}
+
+
 

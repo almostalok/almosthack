@@ -407,7 +407,39 @@ export class ApiClient {
   public transferTeamCaptaincy<T = any>(teamId: string, body: unknown, options?: RequestOptions): Promise<T> {
     return this.post<T>(`/teams/${teamId}/captain/transfer`, body, options);
   }
+
+  // ==========================================
+  // S2-06: GitHub Integration & Repository APIs
+  // ==========================================
+  public getGitHubConnectionStatus<T = any>(options?: RequestOptions): Promise<T> {
+    return this.get<T>('/github/status', options);
+  }
+
+  public startGitHubConnect<T = any>(teamId?: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>('/github/connect', { ...options, params: { ...options?.params, teamId } });
+  }
+
+  public disconnectGitHub<T = any>(options?: RequestOptions): Promise<T> {
+    return this.delete<T>('/github/connection', options);
+  }
+
+  public getTeamRepository<T = any>(teamId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/teams/${teamId}/repository`, options);
+  }
+
+  public provisionTeamRepository<T = any>(teamId: string, body?: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/teams/${teamId}/repository/provision`, body || {}, options);
+  }
+
+  public connectTeamRepository<T = any>(teamId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/teams/${teamId}/repository/connect`, body, options);
+  }
+
+  public disconnectTeamRepository<T = any>(teamId: string, options?: RequestOptions): Promise<T> {
+    return this.delete<T>(`/teams/${teamId}/repository`, options);
+  }
 }
+
 
 
 

@@ -1106,6 +1106,28 @@ export default function HackathonDetailPage() {
             </Link>
           </div>
         </Card>
+
+        <Card className="p-5 border-zinc-800/80 bg-zinc-950/80 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-emerald-400 text-xs font-mono font-bold">
+              <Shield className="w-4 h-4 text-emerald-400" />
+              Integrity & Forensics
+            </div>
+            <Badge variant="outline" className="text-emerald-400 border-emerald-500/30">
+              Active
+            </Badge>
+          </div>
+          <p className="text-[11px] font-mono text-zinc-400">
+            Run automated code similarity checks, inspect structural overlap evidence, and review findings.
+          </p>
+          <div className="pt-2 flex items-center gap-2">
+            <Link href={`/hackathons/${hackathonId}/integrity`}>
+              <Button size="sm" variant="accent">
+                Integrity Portal
+              </Button>
+            </Link>
+          </div>
+        </Card>
       </div>
     </div>
   );

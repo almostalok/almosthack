@@ -49,6 +49,7 @@ model User {
   judgeAssignments        JudgeAssignment[] @relation("JudgeUser")
   assignedJudges          JudgeAssignment[] @relation("JudgeAssigner")
   judgeEvaluations        JudgeEvaluation[]
+  integrityReviews        IntegrityReview[]
 
   @@map("users")
 }
@@ -163,6 +164,7 @@ model Hackathon {
   submissions   Submission[]
   judgingCriteria JudgingCriterion[]
   judgeAssignments JudgeAssignment[]
+  integrityAnalyses IntegrityAnalysis[]
 
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -528,6 +530,7 @@ model TeamRepository {
 
   team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
   submissions Submission[]
+  integrityAnalyses IntegrityAnalysis[]
 
   @@unique([teamId, provider])
   @@index([teamId])
@@ -588,6 +591,9 @@ model Submission {
 
   assignments JudgeAssignment[]
   evaluations JudgeEvaluation[]
+  integrityAnalyses IntegrityAnalysis[]
+  sourceFindings IntegrityFinding[] @relation("SourceSubmission")
+  targetFindings IntegrityFinding[] @relation("TargetSubmission")
 
   @@unique([hackathonId, teamId])
   @@index([hackathonId])
@@ -683,5 +689,134 @@ model EvaluationScore {
   @@index([criterionId])
   @@map("evaluation_scores")
 }
+
+// ==========================================
+// S4: INTEGRITY, PLAGIARISM & FORENSICS
+// ==========================================
+
+enum IntegrityAnalysisStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum IntegrityFindingType {
+  CODE_SIMILARITY
+  FILE_OVERLAP
+  STRUCTURAL_SIMILARITY
+  SUSPICIOUS_COPY_PATTERN
+}
+
+enum IntegrityFindingStatus {
+  OPEN
+  UNDER_REVIEW
+  CONFIRMED
+  DISMISSED
+}
+
+enum IntegritySeverity {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model IntegrityAnalysis {
+  id                   String                  @id @default(uuid())
+  hackathonId          String
+  submissionId         String
+  repositoryId         String?
+  commitSha            String
+  status               IntegrityAnalysisStatus @default(QUEUED)
+  engineVersion        String                  @default("1.0.0")
+  configurationVersion Int                     @default(1)
+  summary              Json?
+  failureReason        String?
+  startedAt            DateTime?
+  completedAt          DateTime?
+  failedAt             DateTime?
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+
+  hackathon  Hackathon         @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  submission Submission        @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  repository TeamRepository?   @relation(fields: [repositoryId], references: [id], onDelete: SetNull)
+  findings   IntegrityFinding[]
+
+  @@index([hackathonId])
+  @@index([submissionId])
+  @@index([status])
+  @@map("integrity_analyses")
+}
+
+model IntegrityFinding {
+  id                     String                 @id @default(uuid())
+  analysisId             String
+  submissionId           String
+  comparisonSubmissionId String
+  type                   IntegrityFindingType
+  severity               IntegritySeverity
+  confidence             Float
+  similarity             Float
+  status                 IntegrityFindingStatus @default(OPEN)
+  summary                String
+  metadata               Json?
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+
+  analysis             IntegrityAnalysis  @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  submission           Submission         @relation("SourceSubmission", fields: [submissionId], references: [id], onDelete: Cascade)
+  comparisonSubmission Submission         @relation("TargetSubmission", fields: [comparisonSubmissionId], references: [id], onDelete: Cascade)
+  evidence             IntegrityEvidence[]
+  reviews              IntegrityReview[]
+
+  @@index([analysisId])
+  @@index([submissionId])
+  @@index([comparisonSubmissionId])
+  @@index([status])
+  @@index([severity])
+  @@map("integrity_findings")
+}
+
+model IntegrityEvidence {
+  id                 String   @id @default(uuid())
+  findingId          String
+  sourcePath         String
+  targetPath         String
+  sourceStart        Int
+  sourceEnd          Int
+  targetStart        Int
+  targetEnd          Int
+  matchedFragmentHash String?
+  similarityMetric   Float?
+  sourceSnippet      String?
+  targetSnippet      String?
+  createdAt          DateTime @default(now())
+
+  finding IntegrityFinding @relation(fields: [findingId], references: [id], onDelete: Cascade)
+
+  @@index([findingId])
+  @@map("integrity_evidence")
+}
+
+model IntegrityReview {
+  id         String                 @id @default(uuid())
+  findingId  String
+  reviewerId String
+  fromStatus IntegrityFindingStatus
+  toStatus   IntegrityFindingStatus
+  reason     String
+  notes      String?
+  createdAt  DateTime               @default(now())
+
+  finding  IntegrityFinding @relation(fields: [findingId], references: [id], onDelete: Cascade)
+  reviewer User             @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  @@index([findingId])
+  @@index([reviewerId])
+  @@map("integrity_reviews")
+}
+
 
 

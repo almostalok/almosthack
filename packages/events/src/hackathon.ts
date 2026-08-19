@@ -350,6 +350,61 @@ export interface EvaluationSubmittedPayload {
   submittedAt: string;
 }
 
+// ==========================================
+// S4: INTEGRITY & FORENSICS EVENTS
+// ==========================================
+
+export interface IntegrityAnalysisStartedPayload {
+  analysisId: string;
+  hackathonId: string;
+  submissionId: string;
+  commitSha: string;
+  startedAt: string;
+}
+
+export interface IntegrityAnalysisCompletedPayload {
+  analysisId: string;
+  hackathonId: string;
+  submissionId: string;
+  findingsCount: number;
+  completedAt: string;
+}
+
+export interface IntegrityAnalysisFailedPayload {
+  analysisId: string;
+  hackathonId: string;
+  submissionId: string;
+  reason: string;
+  failedAt: string;
+}
+
+export interface IntegrityFindingCreatedPayload {
+  findingId: string;
+  analysisId: string;
+  submissionId: string;
+  comparisonSubmissionId: string;
+  type: string;
+  severity: string;
+  confidence: number;
+  similarity: number;
+  createdAt: string;
+}
+
+export interface IntegrityFindingConfirmedPayload {
+  findingId: string;
+  reviewerId: string;
+  reason: string;
+  confirmedAt: string;
+}
+
+export interface IntegrityFindingDismissedPayload {
+  findingId: string;
+  reviewerId: string;
+  reason: string;
+  dismissedAt: string;
+}
+
+
 
 
 

@@ -501,7 +501,43 @@ export class ApiClient {
   public submitEvaluation<T = any>(assignmentId: string, body: unknown, options?: RequestOptions): Promise<T> {
     return this.post<T>(`/judge-assignments/${assignmentId}/evaluation/submit`, body, options);
   }
+
+  // ==========================================
+  // S4: Integrity & Forensics APIs
+  // ==========================================
+  public startIntegrityAnalysis<T = any>(submissionId: string, body?: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/submissions/${submissionId}/integrity/analyze`, body || {}, options);
+  }
+
+  public getSubmissionIntegrityAnalyses<T = any>(submissionId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/submissions/${submissionId}/integrity`, options);
+  }
+
+  public getHackathonIntegrityAnalyses<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/hackathons/${hackathonId}/integrity/analyses`, options);
+  }
+
+  public getHackathonIntegrityFindings<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/hackathons/${hackathonId}/integrity/findings`, options);
+  }
+
+  public getIntegrityFindingDetail<T = any>(findingId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/integrity/findings/${findingId}`, options);
+  }
+
+  public reviewIntegrityFinding<T = any>(findingId: string, body?: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/integrity/findings/${findingId}/review`, body || {}, options);
+  }
+
+  public confirmIntegrityFinding<T = any>(findingId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/integrity/findings/${findingId}/confirm`, body, options);
+  }
+
+  public dismissIntegrityFinding<T = any>(findingId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/integrity/findings/${findingId}/dismiss`, body, options);
+  }
 }
+
 
 
 

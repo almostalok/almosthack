@@ -7,5 +7,7 @@ export * from './organization';
 export * from './hackathon';
 export * from './github';
 export * from './submission';
+export * from './integrity';
+
 
 

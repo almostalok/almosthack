@@ -665,6 +665,46 @@ export const submitEvaluationSchema = z.object({
 
 export type SubmitEvaluationSchema = z.infer<typeof submitEvaluationSchema>;
 
+// ==========================================
+// S4: INTEGRITY & PLAGIARISM SCHEMAS
+// ==========================================
+
+export const startIntegrityAnalysisSchema = z.object({
+  similarityThreshold: z.number().min(0.1).max(1.0).optional().default(0.45),
+  minimumComparedLines: z.number().int().min(1).max(100).optional().default(5),
+});
+
+export type StartIntegrityAnalysisSchema = z.infer<typeof startIntegrityAnalysisSchema>;
+
+export const reviewFindingSchema = z.object({
+  notes: z.string().trim().max(2000).optional().nullable(),
+});
+
+export type ReviewFindingSchema = z.infer<typeof reviewFindingSchema>;
+
+export const confirmFindingSchema = z.object({
+  reason: z
+    .string()
+    .trim()
+    .min(5, { message: 'Confirmation reason must be at least 5 characters' })
+    .max(2000, { message: 'Reason cannot exceed 2000 characters' }),
+  notes: z.string().trim().max(2000).optional().nullable(),
+});
+
+export type ConfirmFindingSchema = z.infer<typeof confirmFindingSchema>;
+
+export const dismissFindingSchema = z.object({
+  reason: z
+    .string()
+    .trim()
+    .min(5, { message: 'Dismissal reason (explanation of false-positive) must be at least 5 characters' })
+    .max(2000, { message: 'Reason cannot exceed 2000 characters' }),
+  notes: z.string().trim().max(2000).optional().nullable(),
+});
+
+export type DismissFindingSchema = z.infer<typeof dismissFindingSchema>;
+
+
 
 
 

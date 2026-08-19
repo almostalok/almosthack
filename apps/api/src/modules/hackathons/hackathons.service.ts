@@ -3470,6 +3470,12 @@ export class HackathonsService {
 
     // Execute acceptance in transaction
     await this.prisma.$transaction(async (tx) => {
+      // Row lock team to serialize concurrent invitation acceptances for the same team
+      await tx.team.update({
+        where: { id: invitation.teamId },
+        data: { updatedAt: now },
+      });
+
       // Row lock participant registration to serialize concurrent acceptance
       await tx.participantRegistration.update({
         where: {

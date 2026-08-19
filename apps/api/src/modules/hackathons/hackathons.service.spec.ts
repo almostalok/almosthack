@@ -1369,6 +1369,7 @@ describe('HackathonsService Unit Tests', () => {
       (prisma.$transaction as jest.Mock).mockImplementation(async (cb) => {
         if (typeof cb === 'function') {
           return cb({
+            team: { update: jest.fn().mockResolvedValue({}) },
             participantRegistration: { update: jest.fn().mockResolvedValue({}) },
             teamMember: {
               findFirst: jest.fn().mockResolvedValue(null),

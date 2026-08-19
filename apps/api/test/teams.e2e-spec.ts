@@ -544,5 +544,167 @@ describe('Team Formation & Membership Domain E2E (S2-05)', () => {
       expect(statuses).toContain(201);
       expect(statuses).toContain(409);
     });
+
+    it('should handle concurrent final-slot acceptance safely without team size overflow', async () => {
+      // Clean up previous active teams to free Alice
+      await prisma.team.deleteMany({ where: { hackathonId } });
+      await prisma.teamMember.deleteMany({ where: { team: { hackathonId } } });
+
+      // Setup: Create a new team with Captain Alice (maxTeamSize = 2, so 1 open slot)
+      const teamRes = await request(app.getHttpServer())
+        .post(`/api/v1/hackathons/${hackathonId}/teams`)
+        .set('Cookie', captainCookie)
+        .send({ name: 'Concurrency Slot Team', slug: 'concurrency-slot-team' })
+        .expect(201);
+
+      const raceTeamId = teamRes.body.data.id;
+
+      // Captain Alice invites both Bob and Charlie
+      const invB = await request(app.getHttpServer())
+        .post(`/api/v1/teams/${raceTeamId}/invitations`)
+        .set('Cookie', captainCookie)
+        .send({ inviteeUserId: memberBUserId })
+        .expect(201);
+
+      const invC = await request(app.getHttpServer())
+        .post(`/api/v1/teams/${raceTeamId}/invitations`)
+        .set('Cookie', captainCookie)
+        .send({ inviteeUserId: memberCUserId })
+        .expect(201);
+
+      // Bob and Charlie accept simultaneously
+      const results = await Promise.all([
+        request(app.getHttpServer())
+          .post(`/api/v1/invitations/${invB.body.data.id}/accept`)
+          .set('Cookie', memberBCookie),
+        request(app.getHttpServer())
+          .post(`/api/v1/invitations/${invC.body.data.id}/accept`)
+          .set('Cookie', memberCCookie),
+      ]);
+
+      const statuses = results.map((r) => r.status);
+      expect(statuses).toContain(200);
+      expect(statuses).toContain(409);
+
+      // Verify team size strictly <= 2 in DB
+      const finalTeam = await prisma.team.findUnique({
+        where: { id: raceTeamId },
+        include: { members: { where: { status: 'ACTIVE' } } },
+      });
+      expect(finalTeam?.members.length).toBeLessThanOrEqual(2);
+    });
+
+    it('should handle concurrent cross-team acceptance for same user safely', async () => {
+      // Clean up previous team to free Bob
+      await prisma.team.deleteMany({ where: { hackathonId } });
+      await prisma.teamMember.deleteMany({ where: { team: { hackathonId } } });
+
+      // Alice creates Team Alpha
+      const teamA = await request(app.getHttpServer())
+        .post(`/api/v1/hackathons/${hackathonId}/teams`)
+        .set('Cookie', captainCookie)
+        .send({ name: 'Alpha Team', slug: 'alpha-team' })
+        .expect(201);
+
+      // Charlie creates Team Beta
+      const teamB = await request(app.getHttpServer())
+        .post(`/api/v1/hackathons/${hackathonId}/teams`)
+        .set('Cookie', memberCCookie)
+        .send({ name: 'Beta Team', slug: 'beta-team' })
+        .expect(201);
+
+      // Both invite Bob
+      const invAlpha = await request(app.getHttpServer())
+        .post(`/api/v1/teams/${teamA.body.data.id}/invitations`)
+        .set('Cookie', captainCookie)
+        .send({ inviteeUserId: memberBUserId })
+        .expect(201);
+
+      const invBeta = await request(app.getHttpServer())
+        .post(`/api/v1/teams/${teamB.body.data.id}/invitations`)
+        .set('Cookie', memberCCookie)
+        .send({ inviteeUserId: memberBUserId })
+        .expect(201);
+
+      // Bob accepts both invitations simultaneously
+      const results = await Promise.all([
+        request(app.getHttpServer())
+          .post(`/api/v1/invitations/${invAlpha.body.data.id}/accept`)
+          .set('Cookie', memberBCookie),
+        request(app.getHttpServer())
+          .post(`/api/v1/invitations/${invBeta.body.data.id}/accept`)
+          .set('Cookie', memberBCookie),
+      ]);
+
+      const statuses = results.map((r) => r.status);
+      expect(statuses).toContain(200);
+      expect(statuses).toContain(409);
+
+      // Verify Bob has at most 1 active team membership
+      const activeMemberships = await prisma.teamMember.count({
+        where: {
+          userId: memberBUserId,
+          status: 'ACTIVE',
+          team: { hackathonId, status: 'ACTIVE' },
+        },
+      });
+      expect(activeMemberships).toBe(1);
+    });
+  });
+
+  // ====================================================
+  // 7. MASS ASSIGNMENT, IDOR & AUDIT LOGGING
+  // ====================================================
+  describe('7. Mass Assignment, IDOR & Audit Logging', () => {
+    it('should reject non-whitelisted protected fields in team update payload with 400 Bad Request', async () => {
+      const myTeam = await request(app.getHttpServer())
+        .get(`/api/v1/hackathons/${hackathonId}/teams/me`)
+        .set('Cookie', captainCookie)
+        .expect(200);
+
+      const teamId = myTeam.body.data.id;
+
+      // Attempt mass assignment injection with non-whitelisted fields
+      await request(app.getHttpServer())
+        .patch(`/api/v1/teams/${teamId}`)
+        .set('Cookie', captainCookie)
+        .send({
+          name: 'Renamed Alpha Team',
+          status: 'DISSOLVED',
+          createdByUserId: memberBUserId,
+          hackathonId: otherHackathonId,
+        })
+        .expect(400);
+
+      // Verify protected fields were NOT modified
+      const updatedTeam = await prisma.team.findUnique({ where: { id: teamId } });
+      expect(updatedTeam?.name).not.toBe('Renamed Alpha Team');
+      expect(updatedTeam?.status).toBe('ACTIVE');
+      expect(updatedTeam?.createdByUserId).toBe(captainUserId);
+      expect(updatedTeam?.hackathonId).toBe(hackathonId);
+    });
+
+    it('should verify audit log entries were persisted for critical actions', async () => {
+      const logs = await prisma.auditLog.findMany({
+        where: {
+          action: {
+            in: [
+              'team.created',
+              'team.updated',
+              'team.member_joined',
+              'team.invitation_created',
+            ],
+          },
+        },
+      });
+
+      expect(logs.length).toBeGreaterThan(0);
+      for (const log of logs) {
+        expect(log.actorId).toBeDefined();
+        expect(log.actorEmail).toBeDefined();
+        expect(log.targetEntity).toBe('Team');
+      }
+    });
   });
 });
+

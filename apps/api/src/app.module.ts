@@ -21,6 +21,7 @@ import { IntegrityModule } from './modules/integrity/integrity.module';
 import { AppealsModule } from './modules/appeals/appeals.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AuditModule } from './modules/audit/audit.module';
+import { ResultsModule } from './modules/results/results.module';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 
 @Module({
@@ -45,6 +46,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     SubmissionsModule,
     JudgingModule,
     IntegrityModule,
+    ResultsModule,
     AppealsModule,
     NotificationsModule,
     AuditModule,

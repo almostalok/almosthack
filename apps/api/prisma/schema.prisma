@@ -50,6 +50,8 @@ model User {
   assignedJudges          JudgeAssignment[] @relation("JudgeAssigner")
   judgeEvaluations        JudgeEvaluation[]
   integrityReviews        IntegrityReview[]
+  approvedResultSets      ResultSet[]       @relation("ResultSetApprover")
+  publishedResultSets     ResultSet[]       @relation("ResultSetPublisher")
 
   @@map("users")
 }
@@ -165,6 +167,7 @@ model Hackathon {
   judgingCriteria JudgingCriterion[]
   judgeAssignments JudgeAssignment[]
   integrityAnalyses IntegrityAnalysis[]
+  resultSets      ResultSet[]
 
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -250,6 +253,7 @@ model HackathonTrack {
   challenges       HackathonChallenge[]
   registrations    ParticipantRegistration[]
   submissions      Submission[]
+  resultEntries    ResultEntry[]
 
   @@unique([hackathonId, slug])
   @@index([hackathonId])
@@ -359,6 +363,7 @@ model Team {
   invitations     TeamInvitation[]
   repositories    TeamRepository[]
   submissions     Submission[]
+  resultEntries   ResultEntry[]
 
   @@unique([hackathonId, slug])
   @@index([hackathonId])
@@ -594,6 +599,7 @@ model Submission {
   integrityAnalyses IntegrityAnalysis[]
   sourceFindings IntegrityFinding[] @relation("SourceSubmission")
   targetFindings IntegrityFinding[] @relation("TargetSubmission")
+  resultEntries  ResultEntry[]
 
   @@unique([hackathonId, teamId])
   @@index([hackathonId])
@@ -817,6 +823,85 @@ model IntegrityReview {
   @@index([reviewerId])
   @@map("integrity_reviews")
 }
+
+// ==========================================
+// S5: RESULTS, RANKING & COMPLETION
+// ==========================================
+
+enum ResultSetStatus {
+  CALCULATED
+  UNDER_REVIEW
+  APPROVED
+  PUBLISHED
+  SUPERSEDED
+}
+
+enum ResultEligibilityStatus {
+  ELIGIBLE
+  INELIGIBLE
+  PENDING_REVIEW
+}
+
+model ResultSet {
+  id                   String           @id @default(uuid())
+  hackathonId          String
+  status               ResultSetStatus  @default(CALCULATED)
+  calculationVersion   Int              @default(1)
+  scoringConfigVersion Int              @default(1)
+  tieBreakRule         String           @default("WEIGHTED_CRITERIA_THEN_CONSENSUS")
+  inputFingerprint     String
+  calculatedAt         DateTime         @default(now())
+  approvedAt           DateTime?
+  publishedAt          DateTime?
+  approvedByUserId     String?
+  publishedByUserId    String?
+  metadata             Json?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+
+  hackathon            Hackathon        @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  approvedByUser       User?            @relation("ResultSetApprover", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  publishedByUser      User?            @relation("ResultSetPublisher", fields: [publishedByUserId], references: [id], onDelete: SetNull)
+  entries              ResultEntry[]
+
+  @@index([hackathonId])
+  @@index([hackathonId, status])
+  @@index([status])
+  @@index([inputFingerprint])
+  @@map("result_sets")
+}
+
+model ResultEntry {
+  id                String                  @id @default(uuid())
+  resultSetId       String
+  teamId            String
+  submissionId      String
+  trackId           String?
+  score             Float
+  rank              Int
+  eligibilityStatus ResultEligibilityStatus @default(ELIGIBLE)
+  eligibilityReason String?
+  isWinner          Boolean                 @default(false)
+  awardTitle        String?
+  judgeCount        Int                     @default(0)
+  scoreBreakdown    Json?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+
+  resultSet         ResultSet               @relation(fields: [resultSetId], references: [id], onDelete: Cascade)
+  team              Team                    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  submission        Submission              @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  track             HackathonTrack?         @relation(fields: [trackId], references: [id], onDelete: SetNull)
+
+  @@unique([resultSetId, teamId])
+  @@index([resultSetId])
+  @@index([resultSetId, rank])
+  @@index([teamId])
+  @@index([submissionId])
+  @@index([trackId])
+  @@map("result_entries")
+}
+
 
 
 

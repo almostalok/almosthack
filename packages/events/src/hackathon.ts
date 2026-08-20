@@ -404,7 +404,36 @@ export interface IntegrityFindingDismissedPayload {
   dismissedAt: string;
 }
 
+// ==========================================
+// S5: RESULTS & COMPLETION EVENTS
+// ==========================================
 
+export interface ResultSetCalculatedPayload {
+  resultSetId: string;
+  hackathonId: string;
+  calculationVersion: number;
+  totalEntries: number;
+  inputFingerprint: string;
+  calculatedAt: string;
+}
 
+export interface ResultSetApprovedPayload {
+  resultSetId: string;
+  hackathonId: string;
+  approvedByUserId: string;
+  approvedAt: string;
+}
 
+export interface ResultSetPublishedPayload {
+  resultSetId: string;
+  hackathonId: string;
+  publishedByUserId: string;
+  publishedAt: string;
+}
 
+export interface ResultSetSupersededPayload {
+  resultSetId: string;
+  hackathonId: string;
+  supersededByResultSetId: string;
+  supersededAt: string;
+}

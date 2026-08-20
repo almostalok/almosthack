@@ -73,6 +73,12 @@ export const Permission = {
   JUDGING_CALIBRATE: 'judging:calibrate',
   JUDGING_VIEW_RESULTS: 'judging:view_results',
 
+  // Results & Leaderboard (S5)
+  RESULTS_CALCULATE: 'results:calculate',
+  RESULTS_APPROVE: 'results:approve',
+  RESULTS_PUBLISH: 'results:publish',
+  RESULTS_VIEW: 'results:view',
+
   // Mentorship
   MENTOR_CLAIM_TICKET: 'mentor:claim_ticket',
   MENTOR_VIEW_REQUESTS: 'mentor:view_requests',
@@ -124,6 +130,10 @@ export const ORGANIZATION_ROLE_PERMISSIONS: Record<OrganizationRole, PermissionA
     Permission.HACKATHON_UPDATE,
     Permission.HACKATHON_PUBLISH,
     Permission.HACKATHON_ARCHIVE,
+    Permission.RESULTS_CALCULATE,
+    Permission.RESULTS_APPROVE,
+    Permission.RESULTS_PUBLISH,
+    Permission.RESULTS_VIEW,
   ],
   [OrganizationRole.ADMIN]: [
     Permission.ORGANIZATION_READ,
@@ -138,12 +148,17 @@ export const ORGANIZATION_ROLE_PERMISSIONS: Record<OrganizationRole, PermissionA
     Permission.HACKATHON_UPDATE,
     Permission.HACKATHON_PUBLISH,
     Permission.HACKATHON_ARCHIVE,
+    Permission.RESULTS_CALCULATE,
+    Permission.RESULTS_APPROVE,
+    Permission.RESULTS_PUBLISH,
+    Permission.RESULTS_VIEW,
   ],
   [OrganizationRole.MEMBER]: [
     Permission.ORGANIZATION_READ,
     Permission.ORGANIZATION_MEMBER_READ,
     Permission.HACKATHON_READ,
     Permission.HACKATHON_VIEW,
+    Permission.RESULTS_VIEW,
   ],
 };
 
@@ -175,6 +190,10 @@ export const ROLE_PERMISSIONS: Record<RoleName, PermissionAction[]> = {
     Permission.JUDGING_SUBMIT_SCORE,
     Permission.JUDGING_CALIBRATE,
     Permission.JUDGING_VIEW_RESULTS,
+    Permission.RESULTS_CALCULATE,
+    Permission.RESULTS_APPROVE,
+    Permission.RESULTS_PUBLISH,
+    Permission.RESULTS_VIEW,
     Permission.MENTOR_CLAIM_TICKET,
     Permission.MENTOR_VIEW_REQUESTS,
     Permission.SPONSOR_VIEW_ANALYTICS,
@@ -195,6 +214,10 @@ export const ROLE_PERMISSIONS: Record<RoleName, PermissionAction[]> = {
     Permission.JUDGING_ASSIGN,
     Permission.JUDGING_CALIBRATE,
     Permission.JUDGING_VIEW_RESULTS,
+    Permission.RESULTS_CALCULATE,
+    Permission.RESULTS_APPROVE,
+    Permission.RESULTS_PUBLISH,
+    Permission.RESULTS_VIEW,
     Permission.SPONSOR_VIEW_ANALYTICS,
     Permission.SPONSOR_MANAGE_PRIZES,
   ],

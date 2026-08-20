@@ -536,7 +536,45 @@ export class ApiClient {
   public dismissIntegrityFinding<T = any>(findingId: string, body: unknown, options?: RequestOptions): Promise<T> {
     return this.post<T>(`/integrity/findings/${findingId}/dismiss`, body, options);
   }
+
+  // ==========================================
+  // S5: Results, Ranking & Leaderboard APIs
+  // ==========================================
+  public calculateResults<T = any>(hackathonId: string, body?: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/hackathons/${hackathonId}/results/calculate`, body || {}, options);
+  }
+
+  public getResults<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/hackathons/${hackathonId}/results`, options);
+  }
+
+  public getResultHistory<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/hackathons/${hackathonId}/results/history`, options);
+  }
+
+  public approveResults<T = any>(hackathonId: string, body?: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/hackathons/${hackathonId}/results/approve`, body || {}, options);
+  }
+
+  public publishResults<T = any>(hackathonId: string, body?: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/hackathons/${hackathonId}/results/publish`, body || {}, options);
+  }
+
+  public getLeaderboard<T = any>(
+    hackathonId: string,
+    params?: { trackId?: string; limit?: number; offset?: number },
+    options?: RequestOptions
+  ): Promise<T> {
+    return this.get<T>(`/hackathons/${hackathonId}/leaderboard`, {
+      ...options,
+      params: {
+        ...options?.params,
+        ...params,
+      },
+    });
+  }
 }
+
 
 
 

@@ -405,6 +405,26 @@ export default function HackathonDetailPage() {
               Tracks & Challenges
             </Button>
           </Link>
+          <Link href={`/hackathons/${hackathonId}/judging`}>
+            <Button size="sm" variant="outline">
+              Judging
+            </Button>
+          </Link>
+          <Link href={`/hackathons/${hackathonId}/integrity`}>
+            <Button size="sm" variant="outline">
+              Integrity
+            </Button>
+          </Link>
+          <Link href={`/hackathons/${hackathonId}/results`}>
+            <Button size="sm" variant="outline" className="text-amber-400 border-amber-500/30">
+              Results & Ranking
+            </Button>
+          </Link>
+          <Link href={`/hackathons/${hackathonId}/leaderboard`}>
+            <Button size="sm" variant="outline" className="text-cyan-400 border-cyan-500/30">
+              Leaderboard
+            </Button>
+          </Link>
           <Link href={`/hackathons/${hackathonId}/configuration`}>
             <Button size="sm" variant="outline">
               Configuration

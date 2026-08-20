@@ -38,6 +38,7 @@ The backend is designed as a modular monolith using NestJS. Rather than microser
 - `submissions/`: Project submissions, code links, & metadata
 - `judging/`: Double-blind calibrated judging, scoring, & consensus
 - `integrity/`: Code integrity checking & plagiarism detection boundary
+- `results/`: Deterministic score aggregation, competition ranking, approval workflow, & public leaderboard
 - `appeals/`: Score dispute resolution and audit trail review
 - `notifications/`: User alert delivery & event broadcasts
 - `audit/`: Immutable audit logging & verification streams

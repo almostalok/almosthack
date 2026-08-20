@@ -12,6 +12,8 @@
     "type-check": "turbo run type-check",
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
+    "audit:security": "node scripts/security-audit.js",
+    "smoke-test": "node scripts/smoke-test.js",
     "clean": "turbo run clean && rimraf node_modules"
   },
   "devDependencies": {

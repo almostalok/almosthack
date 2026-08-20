@@ -8,6 +8,7 @@ import { RedisModule } from './infrastructure/redis/redis.module';
 import { QueueModule } from './infrastructure/queue/queue.module';
 import { InfrastructureTestModule } from './modules/infrastructure-test/infrastructure-test.module';
 import { HealthModule } from './modules/health/health.module';
+import { MetricsModule } from './modules/metrics/metrics.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
@@ -37,6 +38,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     QueueModule,
     InfrastructureTestModule,
     HealthModule,
+    MetricsModule,
     AuthModule,
     UsersModule,
     OrganizationsModule,

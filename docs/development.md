@@ -345,6 +345,42 @@ curl -X DELETE http://localhost:4000/api/v1/teams/<team_id> \
   -H "Cookie: almosthack_session=<session_token>"
 ```
 
+### 16. Observability, Health & Telemetry API Testing (S7)
+
+```bash
+# Liveness probe (Process health, no DB/Redis dependency)
+curl -i -X GET http://localhost:4000/health/live
+
+# Readiness probe (Checks PostgreSQL and Redis)
+curl -i -X GET http://localhost:4000/health/ready
+
+# Operational metrics summary (JSON)
+curl -i -X GET http://localhost:4000/metrics
+
+# Prometheus text format metrics
+curl -i -X GET http://localhost:4000/metrics/prometheus
+
+# Distributed Request ID Tracing
+curl -i -X GET http://localhost:4000/health/live \
+### 17. Release Engineering, Containerization & Deployment Testing (S8)
+
+```bash
+# Build safe build and version metadata probe
+curl -i -X GET http://localhost:4000/health/version
+
+# Execute automated security & release engineering audit
+pnpm audit:security
+
+# Execute post-deployment smoke test suite
+API_URL=http://localhost:4000 pnpm smoke-test
+
+# Start full multi-container stack with Docker Compose
+docker compose up --build -d
+
+# Check Prisma migration status against active database
+pnpm --filter @almosthack/api exec prisma migrate status
+```
+
 ---
 
 ## Command Reference
@@ -357,6 +393,8 @@ curl -X DELETE http://localhost:4000/api/v1/teams/<team_id> \
 | `pnpm type-check` | Execute TypeScript compiler checks across all workspaces |
 | `pnpm test` | Execute unit and integration tests across all workspaces |
 | `pnpm --filter @almosthack/api test:e2e` | Run API E2E tests |
+| `pnpm audit:security` | Run secret hygiene and migration integrity audit |
+| `pnpm smoke-test` | Run automated non-destructive deployment smoke tests |
 | `pnpm clean` | Clean build artifacts (`dist/`, `.next/`, `.turbo/`) |
 
 

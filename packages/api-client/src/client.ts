@@ -28,7 +28,7 @@ export class ApiClient {
     if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
       return crypto.randomUUID();
     }
-    return `req_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    return `req_${Date.now()}_${performance.now().toString(36).replace('.', '')}`;
   }
 
   private buildUrl(path: string, params?: RequestOptions['params']): string {

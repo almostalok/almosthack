@@ -4,17 +4,17 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: almosthack-postgres
-    restart: always
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: almosthack
-      POSTGRES_PASSWORD: almosthack_secret_password
-      POSTGRES_DB: almosthack_db
+      POSTGRES_USER: ${POSTGRES_USER:-almosthack}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-almosthack_secret_password}
+      POSTGRES_DB: ${POSTGRES_DB:-almosthack_db}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U almosthack -d almosthack_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-almosthack} -d ${POSTGRES_DB:-almosthack_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -22,9 +22,9 @@ services:
   redis:
     image: redis:7-alpine
     container_name: almosthack-redis
-    restart: always
+    restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -32,6 +32,71 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: almosthack-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://almosthack:almosthack_secret_password@postgres:5432/almosthack_db?schema=public}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${API_PORT:-4000}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      JWT_SECRET: ${JWT_SECRET:-dev_insecure_jwt_secret_must_be_changed_in_prod}
+      SESSION_SECRET: ${SESSION_SECRET:-dev_insecure_session_secret_must_be_changed_in_prod}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "${API_PORT:-4000}:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+    container_name: almosthack-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${WEB_PORT:-3000}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    container_name: almosthack-worker
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://almosthack:almosthack_secret_password@postgres:5432/almosthack_db?schema=public}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      NODE_ENV: ${NODE_ENV:-development}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   postgres_data:

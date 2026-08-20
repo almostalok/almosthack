@@ -158,14 +158,43 @@ The backend is designed as a modular monolith using NestJS. Rather than microser
 - **Domain Hierarchy**: `Hackathon -> Announcement -> User (Author)` & `User -> Notification` & `User -> NotificationPreference`
 - **In-App Notification Engine**:
   - `Notification`: Stores in-app alerts with `deliveryStatus: DELIVERED`, `readAt`, and `idempotencyKey` `@unique`.
-  - Server-authoritative unread count: strictly computed on the backend (`where: { userId, readAt: null }`).
-  - Preference filtering: automatically honors user opt-ins (`inAppAnnouncements`, `inAppReminders`, `inAppTeamUpdates`, `inAppResults`).
-- **Announcement Management**:
-  - `Announcement`: Organizers create, edit (draft), schedule, and publish event-wide or track-scoped broadcasts (`status: DRAFT | SCHEDULED | PUBLISHED | CANCELLED`).
-  - Strict Tenant Scoping: Organizers can only manage announcements for their own organization's hackathons. Participants only view `PUBLISHED` announcements.
-  - Recipient Resolution: Dynamically resolves distinct user IDs across registered participants, active team members, organizers, or assigned judges based on `recipientScope`.
-  - Notification Fanout: Publishing an announcement fans out individual in-app notification records with deterministic idempotency keys (`announcement_${announcementId}_${recipientUserId}`).
-- **Scheduled Milestones & Reminders**:
   - Scheduler processes due scheduled announcements without mutating upstream hackathon state.
   - Milestone checks dispatch registration closing and submission deadline alerts with daily idempotency keys.
 - **Audit Trails**: Emits structured `AuditLog` records (`announcement.created`, `announcement.updated`, `announcement.scheduled`, `announcement.cancelled`, `announcement.published`).
+
+### 18. Observability, Reliability & Production Hardening Architecture (`S7`)
+- **Liveness & Readiness Separation**:
+  - `GET /health/live` & `GET /health/liveness`: Pure process check without external database or Redis queries.
+  - `GET /health/ready` & `GET /health/readiness`: Verifies PostgreSQL and Redis connectivity. Returns 200 when ready, 503 when dependencies fail.
+- **Request Tracing & Distributed Correlation**:
+  - `X-Request-ID` assigned via middleware (`crypto.randomUUID()` or sanitized client header), propagated in response headers, logs, and error envelopes.
+- **Structured JSON Logging & Sensitive Data Redaction**:
+  - Emits machine-parseable JSON lines with standardized schema (`timestamp`, `level`, `service`, `environment`, `requestId`, `context`, `message`, `metadata`, `durationMs`).
+  - Deep recursive redaction of credentials, tokens, secrets, cookies, and keys (`[REDACTED]`).
+- **Bounded Metric Telemetry**:
+  - Metric route normalizer collapses dynamic parameters to `:id` to eliminate label cardinality explosion.
+  - Endpoints `GET /metrics` (JSON) and `GET /metrics/prometheus` (OpenMetrics/Prometheus text format).
+- **Abuse Prevention & Rate Limiting**:
+  - Sliding-window in-memory guard with automated interval sweep for expired IPs.
+  - Rate limit headers (`X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, `Retry-After`) and 429 status code.
+- **Fail-Fast Configuration & Bounded Graceful Shutdown**:
+  - Startup validation blocks forbidden production configurations (wildcard CORS, short secrets).
+  - 10-second bounded graceful shutdown intercepts `SIGTERM`/`SIGINT`.
+
+### 19. Production Deployment, CI/CD & Release Engineering Architecture (`S8`)
+- **Multi-Stage Container Architecture**:
+  - API, Web, and Worker Dockerfiles implement multi-stage pinned Node.js 20 builds.
+  - Runtime execution runs under non-root users (`node` UID 1000, `nextjs` UID 1001) with pruned runtime dependencies.
+  - Containers embed liveness and readiness health checks.
+- **Database Migration Automation & Integrity**:
+  - Production deployments strictly execute `prisma migrate deploy`.
+  - Prohibits destructive commands (`prisma db push`, `prisma migrate reset`) in staging and production.
+  - Automated status verification detects schema drift prior to artifact release.
+- **Automated CI/CD Quality Matrix**:
+  - GitHub Actions matrix running type-checking, linting, unit tests (191 tests), monorepo builds, service-backed E2E tests (263 tests), and security audits.
+  - Immutable commit SHA tagging for container images and deployments.
+  - Concurrency group locks prevent race conditions during automated deployments.
+- **Safe Build Metadata**:
+  - `GET /health/version` securely surfaces version, Git commit SHA, environment, and build timestamp without exposing connection strings or secret tokens.
+- **Automated Post-Deployment Smoke Testing**:
+  - `scripts/smoke-test.js` non-destructively verifies end-to-end flows (health probes, metrics, auth, organizations, hackathons, rules, and notifications) post-release.

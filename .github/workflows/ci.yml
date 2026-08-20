@@ -1,35 +1,93 @@
-name: almosthack CI Matrix
+name: AlmostHack CI Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
 
 jobs:
-  verify:
-    name: Build & Lint Matrix
+  validate:
+    name: Build, Test & Security Matrix
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: almosthack
+          POSTGRES_PASSWORD: almosthack_test_password
+          POSTGRES_DB: almosthack_test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: "postgresql://almosthack:almosthack_test_password@localhost:5432/almosthack_test_db?schema=public"
+      REDIS_URL: "redis://localhost:6379"
+      NODE_ENV: "test"
+      JWT_SECRET: "ci_pipeline_test_jwt_secret_min16chars"
+      SESSION_SECRET: "ci_pipeline_test_session_secret_min16chars"
+
     steps:
-      - name: Checkout Code
+      - name: 1. Checkout Code
         uses: actions/checkout@v4
 
-      - name: Install pnpm
+      - name: 2. Install pnpm
         uses: pnpm/action-setup@v3
         with:
           version: 9.4.0
 
-      - name: Setup Node.js
+      - name: 3. Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
 
-      - name: Install Dependencies
+      - name: 4. Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Type Check
+      - name: 5. Generate Prisma Client
+        run: pnpm --filter @almosthack/api exec prisma generate
+
+      - name: 6. Run Type Checking
         run: pnpm run type-check
 
-      - name: Run Build
+      - name: 7. Run ESLint
+        run: pnpm run lint
+
+      - name: 8. Run Unit Tests
+        run: pnpm run test
+
+      - name: 9. Run Production Build
         run: pnpm run build
+
+      - name: 10. Apply Database Migrations (migrate deploy)
+        run: pnpm --filter @almosthack/api exec prisma migrate deploy
+
+      - name: 11. Run E2E Test Suites
+        run: pnpm --filter @almosthack/api test:e2e
+
+      - name: 12. Security & Release Engineering Audit
+        run: node scripts/security-audit.js

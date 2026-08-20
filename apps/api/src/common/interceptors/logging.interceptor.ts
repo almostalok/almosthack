@@ -3,15 +3,24 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  Logger,
+  Optional,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Request, Response } from 'express';
+import { StructuredLoggerService } from '../logger/structured-logger.service';
+import { MetricsService } from '../../modules/metrics/metrics.service';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  private readonly logger = new Logger('HTTP');
+  private readonly logger: StructuredLoggerService;
+
+  constructor(
+    @Optional() private readonly structuredLogger?: StructuredLoggerService,
+    @Optional() private readonly metricsService?: MetricsService
+  ) {
+    this.logger = structuredLogger || new StructuredLoggerService('HTTP');
+  }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     if (context.getType() !== 'http') {
@@ -32,36 +41,69 @@ export class LoggingInterceptor implements NestInterceptor {
           const duration = Date.now() - startTime;
           const statusCode = res.statusCode;
 
-          const logPayload = {
-            timestamp: new Date().toISOString(),
-            level: 'info',
-            requestId,
-            method,
-            path,
-            statusCode,
-            duration: `${duration}ms`,
-            context: 'HTTP',
-          };
+          // Track metric
+          if (this.metricsService) {
+            this.metricsService.recordHttpRequest(method, path, statusCode, duration);
+          }
 
-          this.logger.log(JSON.stringify(logPayload));
+          this.logger.info(
+            `${method} ${path} ${statusCode} +${duration}ms`,
+            'HTTP',
+            {
+              requestId,
+              method,
+              path,
+              statusCode,
+              durationMs: duration,
+            }
+          );
         },
         error: (error) => {
           const duration = Date.now() - startTime;
           const statusCode = error.status || error.statusCode || 500;
 
-          const logPayload = {
-            timestamp: new Date().toISOString(),
-            level: 'error',
-            requestId,
-            method,
-            path,
-            statusCode,
-            duration: `${duration}ms`,
-            error: error.message || 'Internal Server Error',
-            context: 'HTTP',
-          };
+          // Track metric
+          if (this.metricsService) {
+            this.metricsService.recordHttpRequest(method, path, statusCode, duration);
+            this.metricsService.recordHttpError(method, path, error.name || 'Error');
 
-          this.logger.error(JSON.stringify(logPayload), error.stack);
+            if (statusCode === 401) {
+              this.metricsService.recordAuthFailure('HTTP_UNAUTHORIZED');
+            } else if (statusCode === 403) {
+              this.metricsService.recordAuthorizationFailure(path);
+            }
+          }
+
+          this.logger.error(
+            `${method} ${path} ${statusCode} +${duration}ms - ${error.message || 'Error'}`,
+            error.stack,
+            'HTTP',
+            {
+              requestId,
+              method,
+              path,
+              statusCode,
+              durationMs: duration,
+              error: error.message,
+            }
+          );
+
+          // Security events
+          if (statusCode === 401) {
+            this.logger.logSecurityEvent('AUTH_TOKEN_REJECTED', {
+              requestId,
+              ip: req.socket?.remoteAddress,
+              resource: `${method} ${path}`,
+              reason: error.message,
+            });
+          } else if (statusCode === 403) {
+            this.logger.logSecurityEvent('AUTHORIZATION_DENIED', {
+              requestId,
+              ip: req.socket?.remoteAddress,
+              resource: `${method} ${path}`,
+              reason: error.message,
+            });
+          }
         },
       })
     );

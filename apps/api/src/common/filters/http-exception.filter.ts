@@ -4,9 +4,11 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
-  Logger,
+  Optional,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { StructuredLoggerService } from '../logger/structured-logger.service';
+import { MetricsService } from '../../modules/metrics/metrics.service';
 
 export interface StandardErrorResponse {
   success: false;
@@ -20,15 +22,28 @@ export interface StandardErrorResponse {
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger(HttpExceptionFilter.name);
+  private readonly logger: StructuredLoggerService;
+
+  constructor(
+    @Optional() private readonly structuredLogger?: StructuredLoggerService,
+    @Optional() private readonly metricsService?: MetricsService
+  ) {
+    this.logger = structuredLogger || new StructuredLoggerService(HttpExceptionFilter.name);
+  }
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const requestId = (request as any).requestId || 'N/A';
+    const requestId = (request as any).requestId || (request.headers?.['x-request-id'] as string) || 'N/A';
     const nodeEnv = process.env.NODE_ENV || 'development';
+    const isProd = nodeEnv === 'production';
+
+    // Ensure X-Request-ID response header is set
+    if (requestId !== 'N/A' && !response.getHeader('x-request-id')) {
+      response.setHeader('X-Request-ID', requestId);
+    }
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let code = 'INTERNAL_SERVER_ERROR';
@@ -55,6 +70,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
       if (typeof resPayload === 'string') {
         message = resPayload;
+        code = this.getErrorCodeFromStatus(status);
       } else if (typeof resPayload === 'object' && resPayload !== null) {
         const payloadObj = resPayload as Record<string, any>;
 
@@ -73,6 +89,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         }
       } else {
         message = (exception as any).message;
+        code = this.getErrorCodeFromStatus(status);
       }
     } else if (this.isPrismaError(exception)) {
       const prismaErr = exception as any;
@@ -87,7 +104,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       } else {
         status = HttpStatus.BAD_REQUEST;
         code = 'DATABASE_ERROR';
-        message = 'Database operation failed';
+        message = isProd ? 'Database operation failed' : (prismaErr.message || 'Database operation failed');
       }
     } else if (exception instanceof Error) {
       if (exception.name === 'ZodError' || (exception as any).constructor?.name === 'ZodError') {
@@ -97,22 +114,42 @@ export class HttpExceptionFilter implements ExceptionFilter {
         message = Array.isArray(issues) ? issues.map((i: any) => i.message).join('; ') : exception.message;
         details = issues;
       } else {
-        message = exception.message || 'An unexpected error occurred';
+        message = isProd && status === HttpStatus.INTERNAL_SERVER_ERROR
+          ? 'An unexpected internal error occurred'
+          : exception.message || 'An unexpected error occurred';
+        code = this.getErrorCodeFromStatus(status);
       }
     }
 
-    // Log complete internal error details with requestId
+    // Record metric for errors
+    if (this.metricsService) {
+      this.metricsService.recordHttpError(request.method, request.url, code);
+      if (status === HttpStatus.UNAUTHORIZED) {
+        this.metricsService.recordAuthFailure('HTTP_UNAUTHORIZED');
+      } else if (status === HttpStatus.FORBIDDEN) {
+        this.metricsService.recordAuthorizationFailure(request.url);
+      }
+    }
+
+    // Log structured internal error
     this.logger.error(
       `[${requestId}] ${request.method} ${request.url} - Status: ${status} - Error: ${
         exception instanceof Error ? exception.message : JSON.stringify(exception)
       }`,
-      exception instanceof Error ? exception.stack : undefined
+      exception instanceof Error ? exception.stack : undefined,
+      'HttpExceptionFilter',
+      {
+        requestId,
+        method: request.method,
+        path: request.url,
+        statusCode: status,
+        errorCode: code,
+      }
     );
 
-    // Suppress sensitive internal details in production
-    const isProd = nodeEnv === 'production';
+    // Suppress sensitive internal details in production for 500s
     const safeMessage = isProd && status === HttpStatus.INTERNAL_SERVER_ERROR
-      ? 'An unexpected error occurred'
+      ? 'An unexpected internal error occurred'
       : message;
 
     const errorBody: StandardErrorResponse = {
@@ -144,6 +181,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
         return 'UNPROCESSABLE_ENTITY';
       case HttpStatus.TOO_MANY_REQUESTS:
         return 'TOO_MANY_REQUESTS';
+      case HttpStatus.SERVICE_UNAVAILABLE:
+        return 'SERVICE_UNAVAILABLE';
       default:
         return 'INTERNAL_SERVER_ERROR';
     }

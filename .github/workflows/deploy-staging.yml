@@ -1,0 +1,68 @@
+name: Staging Deployment Pipeline
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+concurrency:
+  group: staging_environment
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging Environment
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: 1. Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 2. Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9.4.0
+
+      - name: 3. Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: 4. Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 5. Pre-deployment Migration Status Check
+        run: pnpm --filter @almosthack/api exec prisma migrate status
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+
+      - name: 6. Apply Staging Database Migrations (migrate deploy)
+        run: pnpm --filter @almosthack/api exec prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+
+      - name: 7. Build Staging Docker Images (Immutable Commit Tag)
+        run: |
+          docker build -t almosthack-api:${{ github.sha }} -f apps/api/Dockerfile .
+          docker build -t almosthack-web:${{ github.sha }} -f apps/web/Dockerfile \
+            --build-arg NEXT_PUBLIC_API_URL=${{ secrets.STAGING_API_URL }} \
+            --build-arg NEXT_PUBLIC_APP_URL=${{ secrets.STAGING_WEB_URL }} .
+          docker build -t almosthack-worker:${{ github.sha }} -f apps/worker/Dockerfile .
+
+      - name: 8. Verify Staging Health & Version Metadata
+        run: |
+          node scripts/health-check.js /health/live
+          node scripts/health-check.js /health/ready
+          node scripts/health-check.js /health/version
+        env:
+          API_URL: ${{ secrets.STAGING_API_URL }}
+
+      - name: 9. Run Staging Automated Smoke Tests
+        run: node scripts/smoke-test.js
+        env:
+          API_URL: ${{ secrets.STAGING_API_URL }}

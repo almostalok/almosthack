@@ -5,6 +5,9 @@ export interface AppConfig {
   port: number;
   corsOrigin: string;
   apiPrefix: string;
+  logLevel: string;
+  rateLimitMax: number;
+  rateLimitWindowMs: number;
 }
 
 export default (): AppConfig => ({
@@ -14,5 +17,7 @@ export default (): AppConfig => ({
   port: parseInt(process.env.PORT || '4000', 10),
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   apiPrefix: process.env.API_PREFIX || 'api/v1',
+  logLevel: process.env.LOG_LEVEL || 'info',
+  rateLimitMax: parseInt(process.env.RATE_LIMIT_MAX || '60', 10),
+  rateLimitWindowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '60000', 10),
 });
-

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { SidebarNav, TopHeader, CommandPalette } from '@almosthack/ui';
 import { useKeyboardShortcuts, useThemeStore } from '@almosthack/hooks';
 import { useAuth } from '../../providers/auth-provider';
+import { NotificationBell } from '../../components/notifications/NotificationBell';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -54,6 +55,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
           />
           <div className="flex items-center space-x-4">
+            <NotificationBell />
             <div className="text-right">
               <div className="text-xs font-mono font-semibold text-zinc-200">{user.name}</div>
               <div className="text-[10px] font-mono text-zinc-400">{user.email}</div>

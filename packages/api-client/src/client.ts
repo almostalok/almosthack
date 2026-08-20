@@ -573,6 +573,80 @@ export class ApiClient {
       },
     });
   }
+
+  // ==========================================
+  // S6: Notifications & Announcements APIs
+  // ==========================================
+  public getNotifications<T = any>(
+    params?: { page?: number; limit?: number; unreadOnly?: boolean; type?: string; hackathonId?: string },
+    options?: RequestOptions
+  ): Promise<T> {
+    return this.get<T>('/notifications', {
+      ...options,
+      params: {
+        ...options?.params,
+        ...params,
+      },
+    });
+  }
+
+  public getUnreadNotificationCount<T = any>(options?: RequestOptions): Promise<T> {
+    return this.get<T>('/notifications/unread-count', options);
+  }
+
+  public markNotificationRead<T = any>(notificationId: string, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/notifications/${notificationId}/read`, {}, options);
+  }
+
+  public markAllNotificationsRead<T = any>(options?: RequestOptions): Promise<T> {
+    return this.post<T>('/notifications/read-all', {}, options);
+  }
+
+  public getNotificationPreferences<T = any>(options?: RequestOptions): Promise<T> {
+    return this.get<T>('/notifications/preferences', options);
+  }
+
+  public updateNotificationPreferences<T = any>(body: unknown, options?: RequestOptions): Promise<T> {
+    return this.patch<T>('/notifications/preferences', body, options);
+  }
+
+  public createAnnouncement<T = any>(hackathonId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/hackathons/${hackathonId}/announcements`, body, options);
+  }
+
+  public getAnnouncements<T = any>(
+    hackathonId: string,
+    params?: { status?: string; targetTrackId?: string },
+    options?: RequestOptions
+  ): Promise<T> {
+    return this.get<T>(`/hackathons/${hackathonId}/announcements`, {
+      ...options,
+      params: {
+        ...options?.params,
+        ...params,
+      },
+    });
+  }
+
+  public getAnnouncement<T = any>(hackathonId: string, announcementId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/hackathons/${hackathonId}/announcements/${announcementId}`, options);
+  }
+
+  public updateAnnouncement<T = any>(hackathonId: string, announcementId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.patch<T>(`/hackathons/${hackathonId}/announcements/${announcementId}`, body, options);
+  }
+
+  public scheduleAnnouncement<T = any>(hackathonId: string, announcementId: string, body: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/hackathons/${hackathonId}/announcements/${announcementId}/schedule`, body, options);
+  }
+
+  public publishAnnouncement<T = any>(hackathonId: string, announcementId: string, body?: unknown, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/hackathons/${hackathonId}/announcements/${announcementId}/publish`, body || {}, options);
+  }
+
+  public cancelAnnouncement<T = any>(hackathonId: string, announcementId: string, options?: RequestOptions): Promise<T> {
+    return this.post<T>(`/hackathons/${hackathonId}/announcements/${announcementId}/cancel`, {}, options);
+  }
 }
 
 

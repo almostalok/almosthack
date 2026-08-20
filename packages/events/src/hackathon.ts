@@ -437,3 +437,50 @@ export interface ResultSetSupersededPayload {
   supersededByResultSetId: string;
   supersededAt: string;
 }
+
+// ==========================================
+// S6: EVENT OPERATIONS & NOTIFICATIONS EVENTS
+// ==========================================
+
+export interface AnnouncementCreatedPayload {
+  announcementId: string;
+  hackathonId: string;
+  organizationId: string;
+  authorId: string;
+  title: string;
+  recipientScope: string;
+  targetTrackId?: string | null;
+  createdAt: string;
+}
+
+export interface AnnouncementScheduledPayload {
+  announcementId: string;
+  hackathonId: string;
+  scheduledAt: string;
+}
+
+export interface AnnouncementPublishedPayload {
+  announcementId: string;
+  hackathonId: string;
+  organizationId: string;
+  authorId: string;
+  recipientScope: string;
+  recipientCount: number;
+  publishedAt: string;
+}
+
+export interface AnnouncementCancelledPayload {
+  announcementId: string;
+  hackathonId: string;
+  cancelledAt: string;
+}
+
+export interface NotificationCreatedPayload {
+  notificationId: string;
+  userId: string;
+  hackathonId?: string | null;
+  organizationId?: string | null;
+  type: string;
+  title: string;
+  createdAt: string;
+}

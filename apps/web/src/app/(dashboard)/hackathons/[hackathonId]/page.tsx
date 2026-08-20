@@ -400,6 +400,11 @@ export default function HackathonDetailPage() {
             </Button>
           )}
 
+          <Link href={`/hackathons/${hackathonId}/announcements`}>
+            <Button size="sm" variant="outline" className="text-blue-400 border-blue-500/30">
+              Announcements
+            </Button>
+          </Link>
           <Link href={`/hackathons/${hackathonId}/tracks`}>
             <Button size="sm" variant="secondary">
               Tracks & Challenges

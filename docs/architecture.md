@@ -153,3 +153,19 @@ The backend is designed as a modular monolith using NestJS. Rather than microser
   - Accepting an invitation automatically cancels all other pending invitations for that user across the hackathon.
   - Interactive transactions guarantee race-condition-safe execution for parallel team creation and acceptance.
 - **Audit Trails**: Team events emit structured `AuditLog` records (`team.created`, `team.updated`, `team.dissolved`, `team.invitation_created`, `team.invitation_cancelled`, `team.invitation_declined`, `team.member_joined`, `team.member_left`, `team.member_removed`, `team.captain_transferred`).
+
+### 17. Event Operations, Communications & Notifications Architecture (`S6`)
+- **Domain Hierarchy**: `Hackathon -> Announcement -> User (Author)` & `User -> Notification` & `User -> NotificationPreference`
+- **In-App Notification Engine**:
+  - `Notification`: Stores in-app alerts with `deliveryStatus: DELIVERED`, `readAt`, and `idempotencyKey` `@unique`.
+  - Server-authoritative unread count: strictly computed on the backend (`where: { userId, readAt: null }`).
+  - Preference filtering: automatically honors user opt-ins (`inAppAnnouncements`, `inAppReminders`, `inAppTeamUpdates`, `inAppResults`).
+- **Announcement Management**:
+  - `Announcement`: Organizers create, edit (draft), schedule, and publish event-wide or track-scoped broadcasts (`status: DRAFT | SCHEDULED | PUBLISHED | CANCELLED`).
+  - Strict Tenant Scoping: Organizers can only manage announcements for their own organization's hackathons. Participants only view `PUBLISHED` announcements.
+  - Recipient Resolution: Dynamically resolves distinct user IDs across registered participants, active team members, organizers, or assigned judges based on `recipientScope`.
+  - Notification Fanout: Publishing an announcement fans out individual in-app notification records with deterministic idempotency keys (`announcement_${announcementId}_${recipientUserId}`).
+- **Scheduled Milestones & Reminders**:
+  - Scheduler processes due scheduled announcements without mutating upstream hackathon state.
+  - Milestone checks dispatch registration closing and submission deadline alerts with daily idempotency keys.
+- **Audit Trails**: Emits structured `AuditLog` records (`announcement.created`, `announcement.updated`, `announcement.scheduled`, `announcement.cancelled`, `announcement.published`).

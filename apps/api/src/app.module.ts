@@ -20,6 +20,7 @@ import { JudgingModule } from './modules/judging/judging.module';
 import { IntegrityModule } from './modules/integrity/integrity.module';
 import { AppealsModule } from './modules/appeals/appeals.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { AnnouncementsModule } from './modules/announcements/announcements.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { ResultsModule } from './modules/results/results.module';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
@@ -49,6 +50,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     ResultsModule,
     AppealsModule,
     NotificationsModule,
+    AnnouncementsModule,
     AuditModule,
   ],
 })

@@ -52,6 +52,8 @@ model User {
   integrityReviews        IntegrityReview[]
   approvedResultSets      ResultSet[]       @relation("ResultSetApprover")
   publishedResultSets     ResultSet[]       @relation("ResultSetPublisher")
+  authoredAnnouncements   Announcement[]    @relation("AnnouncementAuthor")
+  notificationPreference  NotificationPreference?
 
   @@map("users")
 }
@@ -118,8 +120,10 @@ model Organization {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  members    OrganizationMember[]
-  hackathons Hackathon[]
+  members       OrganizationMember[]
+  hackathons    Hackathon[]
+  announcements Announcement[]
+  notifications Notification[]
 
   @@map("organizations")
 }
@@ -168,6 +172,8 @@ model Hackathon {
   judgeAssignments JudgeAssignment[]
   integrityAnalyses IntegrityAnalysis[]
   resultSets      ResultSet[]
+  announcements   Announcement[]
+  notifications   Notification[]
 
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -254,6 +260,7 @@ model HackathonTrack {
   registrations    ParticipantRegistration[]
   submissions      Submission[]
   resultEntries    ResultEntry[]
+  announcements    Announcement[]
 
   @@unique([hackathonId, slug])
   @@index([hackathonId])
@@ -455,20 +462,6 @@ model AuditLog {
   @@map("audit_logs")
 }
 
-model Notification {
-  id        String   @id @default(uuid())
-  userId    String
-  title     String
-  message   String
-  isRead    Boolean  @default(false)
-  linkUrl   String?
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, isRead])
-  @@map("notifications")
-}
 
 // ==========================================
 // S2-06: GITHUB INTEGRATION & REPOSITORIES
@@ -901,6 +894,122 @@ model ResultEntry {
   @@index([trackId])
   @@map("result_entries")
 }
+
+// ==========================================
+// S6: EVENT OPERATIONS, COMMUNICATIONS & NOTIFICATIONS
+// ==========================================
+
+enum NotificationType {
+  HACKATHON_PUBLISHED
+  REGISTRATION_OPEN
+  REGISTRATION_CLOSING
+  SUBMISSION_DEADLINE
+  JUDGING_STARTED
+  JUDGING_COMPLETED
+  RESULTS_PUBLISHED
+  ANNOUNCEMENT
+  TEAM_UPDATE
+  SYSTEM_ALERT
+}
+
+enum NotificationDeliveryStatus {
+  PENDING
+  DELIVERED
+  FAILED
+}
+
+enum AnnouncementStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  CANCELLED
+}
+
+enum AnnouncementRecipientScope {
+  ALL_PARTICIPANTS
+  ALL_TEAMS
+  ALL_ORGANIZERS
+  ALL_JUDGES
+  TRACK
+}
+
+model Notification {
+  id             String                     @id @default(uuid())
+  userId         String
+  organizationId String?
+  hackathonId    String?
+  type           NotificationType
+  title          String
+  body           String
+  metadata       Json?
+  deliveryStatus NotificationDeliveryStatus @default(DELIVERED)
+  idempotencyKey String?                    @unique
+  readAt         DateTime?
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hackathon    Hackathon?    @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, readAt])
+  @@index([hackathonId])
+  @@index([organizationId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([idempotencyKey])
+  @@map("notifications")
+}
+
+model Announcement {
+  id             String                     @id @default(uuid())
+  hackathonId    String
+  organizationId String
+  authorId       String
+  title          String
+  body           String
+  status         AnnouncementStatus         @default(DRAFT)
+  recipientScope AnnouncementRecipientScope @default(ALL_PARTICIPANTS)
+  targetTrackId  String?
+  scheduledAt    DateTime?
+  publishedAt    DateTime?
+  cancelledAt    DateTime?
+  version        Int                        @default(1)
+  metadata       Json?
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+
+  hackathon    Hackathon       @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  author       User            @relation("AnnouncementAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  targetTrack  HackathonTrack? @relation(fields: [targetTrackId], references: [id], onDelete: SetNull)
+
+  @@index([hackathonId])
+  @@index([hackathonId, status])
+  @@index([organizationId])
+  @@index([authorId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([createdAt])
+  @@map("announcements")
+}
+
+model NotificationPreference {
+  id                 String   @id @default(uuid())
+  userId             String   @unique
+  inAppAnnouncements Boolean  @default(true)
+  inAppReminders     Boolean  @default(true)
+  inAppTeamUpdates   Boolean  @default(true)
+  inAppResults       Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}
+
 
 
 

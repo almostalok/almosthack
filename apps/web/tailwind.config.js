@@ -16,37 +16,74 @@ module.exports = {
     },
     extend: {
       colors: {
-        border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
-        ring: 'hsl(var(--ring))',
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
+        // Brand Tokens
+        'ah-green': '#355C45',
+        'ah-green-dark': '#274535',
+        'ah-green-light': '#E2EBDD',
+
+        // Surface Tokens
+        'ah-cream': '#F7F4EA',
+        'ah-paper': '#FFFDF8',
+        'ah-subtle': '#F0ECE1',
+
+        // Typography & Lines
+        'ah-ink': '#171914',
+        'ah-muted': '#6D7068',
+        'ah-line': '#DCDDD3',
+        'ah-line-dark': '#274535',
+
+        // Pastel Accents
+        'ah-yellow': '#E9E5A8',
+        'ah-peach': '#F3C9B2',
+        'ah-lavender': '#DCD5E8',
+        'ah-mint': '#C9DDD0',
+
+        // Compatible semantic bindings
+        border: '#DCDDD3',
+        input: '#DCDDD3',
+        ring: '#355C45',
+        background: '#F7F4EA',
+        foreground: '#171914',
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
+          DEFAULT: '#355C45',
+          foreground: '#FFFDF8',
         },
         secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
+          DEFAULT: '#E2EBDD',
+          foreground: '#274535',
         },
         muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
+          DEFAULT: '#F7F4EA',
+          foreground: '#6D7068',
         },
         accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
+          DEFAULT: '#355C45',
+          foreground: '#FFFDF8',
         },
         card: {
-          DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))',
+          DEFAULT: '#FFFDF8',
+          foreground: '#171914',
         },
       },
+      borderRadius: {
+        sm: '8px',
+        md: '14px',
+        lg: '20px',
+      },
+      boxShadow: {
+        '2xs': '0 1px 2px 0 rgba(23, 25, 20, 0.03)',
+        xs: '0 1px 3px 0 rgba(23, 25, 20, 0.04)',
+        sm: '0 2px 6px 0 rgba(23, 25, 20, 0.05)',
+        elevated: '0 8px 20px -4px rgba(23, 25, 20, 0.08), 0 4px 8px -2px rgba(23, 25, 20, 0.04)',
+        modal: '0 20px 40px -8px rgba(23, 25, 20, 0.12), 0 8px 16px -4px rgba(23, 25, 20, 0.06)',
+      },
       fontFamily: {
-        heading: ['Geist', 'Space Grotesk', 'sans-serif'],
-        body: ['Geist', 'Inter', 'sans-serif'],
-        code: ['JetBrains Mono', 'monospace'],
-        mono: ['JetBrains Mono', 'monospace'],
+        display: ['var(--font-baloo)', 'Baloo 2', 'cursive', 'sans-serif'],
+        heading: ['var(--font-baloo)', 'Baloo 2', 'cursive', 'sans-serif'],
+        body: ['var(--font-dm-sans)', 'DM Sans', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-dm-sans)', 'DM Sans', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-ibm-plex-mono)', 'IBM Plex Mono', 'monospace'],
+        code: ['var(--font-ibm-plex-mono)', 'IBM Plex Mono', 'monospace'],
       },
     },
   },

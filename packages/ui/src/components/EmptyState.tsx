@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '@almosthack/utils';
-import { Terminal } from 'lucide-react';
 import { Button } from './Button';
+import { Scribble } from './Scribble';
 
 export interface EmptyStateProps {
   title: string;
@@ -9,26 +9,40 @@ export interface EmptyStateProps {
   icon?: React.ReactNode;
   actionLabel?: string;
   onAction?: () => void;
+  scribbleVariant?: 'sparkle' | 'circle' | 'asterisk' | 'highlight';
   className?: string;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
   title,
   description,
-  icon = <Terminal className="w-8 h-8 text-zinc-500" />,
+  icon,
   actionLabel,
   onAction,
+  scribbleVariant = 'sparkle',
   className,
 }) => {
   return (
-    <div className={cn('flex flex-col items-center justify-center p-10 border border-dashed border-zinc-800 rounded-lg text-center bg-zinc-950/30', className)}>
-      <div className="p-3 bg-zinc-900 border border-zinc-800 rounded-full mb-4">
-        {icon}
+    <div
+      className={cn(
+        'relative flex flex-col items-center justify-center p-12 border border-dashed border-[#DCDDD3] rounded-[16px] text-center bg-[#FFFDF8] shadow-xs overflow-hidden',
+        className
+      )}
+    >
+      {/* Subtle decorative background scribble */}
+      <div className="absolute top-4 right-6 opacity-30 pointer-events-none">
+        <Scribble variant={scribbleVariant} />
       </div>
-      <h3 className="text-base font-semibold text-zinc-200 font-heading mb-1">{title}</h3>
-      <p className="text-xs text-zinc-400 max-w-sm mb-6 font-sans">{description}</p>
+
+      <div className="p-4 bg-[#F7F4EA] border border-[#DCDDD3] rounded-full mb-4 text-[#355C45] flex items-center justify-center shadow-xs">
+        {icon || <Scribble variant="asterisk" className="w-8 h-8 text-[#355C45]" />}
+      </div>
+
+      <h3 className="text-xl font-bold text-[#171914] font-heading mb-1.5">{title}</h3>
+      <p className="text-sm text-[#6D7068] max-w-md mb-6 font-body leading-relaxed">{description}</p>
+
       {actionLabel && onAction && (
-        <Button variant="outline" size="sm" onClick={onAction}>
+        <Button variant="primary" size="md" onClick={onAction}>
           {actionLabel}
         </Button>
       )}

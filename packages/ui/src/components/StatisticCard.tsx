@@ -18,17 +18,21 @@ export const StatisticCard: React.FC<StatisticCardProps> = ({
   className,
 }) => {
   return (
-    <Card className={cn('flex flex-col gap-1 border-l-2 border-l-emerald-500', className)}>
+    <Card variant="editorial" className={cn('flex flex-col gap-2 text-left', className)}>
       <div className="flex items-center justify-between">
-        <span className="text-xs font-mono uppercase text-zinc-400">{label}</span>
+        <span className="text-xs font-mono font-semibold uppercase text-[#6D7068] tracking-wider">
+          {label}
+        </span>
         {badgeText && (
-          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
+          <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-[5px] bg-[#E2EBDD] text-[#274535] border border-[#B8CEB0]">
             {badgeText}
           </span>
         )}
       </div>
-      <div className="text-3xl font-extrabold font-heading text-zinc-50">{stat}</div>
-      {description && <p className="text-xs text-zinc-400 mt-1 font-sans">{description}</p>}
+      <div className="text-3xl sm:text-4xl font-extrabold font-heading text-[#171914] tracking-tight">
+        {stat}
+      </div>
+      {description && <p className="text-xs text-[#6D7068] font-body">{description}</p>}
     </Card>
   );
 };

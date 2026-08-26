@@ -4,44 +4,53 @@ import { cn } from '@almosthack/utils';
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  hint?: string;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, leftIcon, rightIcon, type = 'text', ...props }, ref) => {
+  ({ className, label, error, hint, leftIcon, rightIcon, type = 'text', id, disabled, ...props }, ref) => {
+    const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
+
     return (
-      <div className="w-full flex flex-col gap-1.5">
+      <div className="w-full flex flex-col gap-1.5 text-left">
         {label && (
-          <label className="text-xs font-mono tracking-wider uppercase text-zinc-400 font-medium">
+          <label htmlFor={inputId} className="text-xs font-mono font-semibold tracking-wider uppercase text-[#6D7068]">
             {label}
           </label>
         )}
         <div className="relative flex items-center w-full">
           {leftIcon && (
-            <div className="absolute left-3 text-zinc-400 pointer-events-none flex items-center justify-center">
+            <div className="absolute left-3 text-[#6D7068] pointer-events-none flex items-center justify-center">
               {leftIcon}
             </div>
           )}
           <input
+            id={inputId}
             type={type}
             ref={ref}
+            disabled={disabled}
             className={cn(
-              'w-full h-9 bg-zinc-950/80 dark:bg-zinc-900/90 text-zinc-100 text-sm border border-zinc-800 rounded-md px-3 font-mono transition-colors placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 disabled:opacity-50 disabled:cursor-not-allowed',
+              'w-full h-10 bg-[#FFFDF8] text-[#171914] text-sm border border-[#DCDDD3] rounded-[10px] px-3 font-body transition-all placeholder:text-[#9A9C94] focus:outline-none focus:border-[#355C45] focus:ring-2 focus:ring-[#355C45]/20 disabled:opacity-50 disabled:bg-[#F7F4EA] disabled:cursor-not-allowed shadow-2xs',
               leftIcon && 'pl-9',
               rightIcon && 'pr-9',
-              error && 'border-red-500 focus:border-red-500 focus:ring-red-500',
+              error && 'border-[#F3C9B2] focus:border-[#8B2C24] focus:ring-[#8B2C24]/20 bg-[#FFFDFB]',
               className
             )}
             {...props}
           />
           {rightIcon && (
-            <div className="absolute right-3 text-zinc-400 flex items-center justify-center">
+            <div className="absolute right-3 text-[#6D7068] flex items-center justify-center">
               {rightIcon}
             </div>
           )}
         </div>
-        {error && <span className="text-xs text-red-400 font-mono">{error}</span>}
+        {error ? (
+          <span className="text-xs text-[#8B2C24] font-mono">{error}</span>
+        ) : hint ? (
+          <span className="text-xs text-[#6D7068] font-body">{hint}</span>
+        ) : null}
       </div>
     );
   }

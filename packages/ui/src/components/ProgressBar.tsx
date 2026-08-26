@@ -7,6 +7,7 @@ export interface ProgressBarProps {
   label?: string;
   showPercentage?: boolean;
   size?: 'sm' | 'md' | 'lg';
+  variant?: 'brand' | 'accent' | 'lavender' | 'peach';
   className?: string;
 }
 
@@ -16,6 +17,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   label,
   showPercentage = true,
   size = 'md',
+  variant = 'brand',
   className,
 }) => {
   const percentage = Math.min(100, Math.max(0, Math.round((value / max) * 100)));
@@ -26,20 +28,29 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
     lg: 'h-4',
   };
 
+  const barColors = {
+    brand: 'bg-[#355C45]',
+    accent: 'bg-[#C9DDD0]',
+    lavender: 'bg-[#DCD5E8]',
+    peach: 'bg-[#F3C9B2]',
+  };
+
   return (
-    <div className={cn('w-full flex flex-col gap-1.5', className)}>
+    <div className={cn('w-full flex flex-col gap-1.5 text-left', className)}>
       {(label || showPercentage) && (
-        <div className="flex justify-between items-center text-xs font-mono text-zinc-400">
-          {label && <span>{label}</span>}
-          {showPercentage && <span className="font-semibold text-zinc-200">{percentage}%</span>}
+        <div className="flex justify-between items-center text-xs font-mono text-[#6D7068]">
+          {label && <span className="font-medium">{label}</span>}
+          {showPercentage && <span className="font-semibold text-[#171914]">{percentage}%</span>}
         </div>
       )}
-      <div className={cn('w-full bg-zinc-800/80 rounded-full overflow-hidden p-0.5 border border-zinc-700/50', heights[size])}>
+      <div className={cn('w-full bg-[#E2EBDD]/60 rounded-full overflow-hidden p-0.5 border border-[#DCDDD3]', heights[size])}>
         <div
-          className="bg-emerald-500 h-full rounded-full transition-all duration-300 ease-out"
+          className={cn('h-full rounded-full transition-all duration-300 ease-out', barColors[variant])}
           style={{ width: `${percentage}%` }}
         />
       </div>
     </div>
   );
 };
+
+export const Progress = ProgressBar;

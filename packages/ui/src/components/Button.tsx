@@ -3,7 +3,7 @@ import { motion, HTMLMotionProps } from 'framer-motion';
 import { cn } from '@almosthack/utils';
 
 export interface ButtonProps extends HTMLMotionProps<'button'> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'accent';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'destructive' | 'danger' | 'outline' | 'link' | 'accent';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
@@ -27,30 +27,40 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-zinc-400 disabled:opacity-50 disabled:pointer-events-none rounded-md tracking-tight select-none';
+      'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#355C45] focus-visible:ring-offset-1 focus-visible:ring-offset-[#F7F4EA] disabled:opacity-45 disabled:pointer-events-none rounded-[10px] tracking-tight select-none cursor-pointer';
 
-    const variants = {
-      primary: 'bg-zinc-900 text-zinc-50 hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 border border-transparent',
-      secondary: 'bg-zinc-800 text-zinc-100 hover:bg-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 border border-zinc-700/60',
-      outline: 'bg-transparent text-zinc-200 hover:bg-zinc-800/60 border border-zinc-700/80',
-      ghost: 'bg-transparent text-zinc-300 hover:bg-zinc-800/50 hover:text-zinc-50',
-      destructive: 'bg-red-600/90 text-white hover:bg-red-600 border border-red-500/30',
-      accent: 'bg-emerald-500 text-black hover:bg-emerald-400 font-semibold border border-emerald-400/50 shadow-sm',
+    const normalizedVariant = variant === 'danger' ? 'destructive' : variant;
+
+    const variants: Record<string, string> = {
+      primary:
+        'bg-[#355C45] text-[#FFFDF8] hover:bg-[#274535] active:bg-[#1E3629] border border-[#274535] shadow-sm',
+      secondary:
+        'bg-[#FFFDF8] text-[#355C45] hover:bg-[#F7F4EA] active:bg-[#ECEEE5] border border-[#DCDDD3] shadow-xs',
+      outline:
+        'bg-transparent text-[#171914] hover:bg-[#F7F4EA] border border-[#DCDDD3]',
+      ghost:
+        'bg-transparent text-[#171914] hover:bg-[#F7F4EA] hover:text-[#274535] border border-transparent',
+      destructive:
+        'bg-[#FBE6E3] text-[#8B2C24] hover:bg-[#F6D0CB] active:bg-[#F0B8B1] border border-[#F3C9B2]',
+      accent:
+        'bg-[#E2EBDD] text-[#274535] hover:bg-[#D4E3CC] active:bg-[#C5D9BB] border border-[#B8CEB0]',
+      link:
+        'bg-transparent text-[#355C45] hover:underline underline-offset-4 p-0 h-auto font-medium border-0',
     };
 
     const sizes = {
       sm: 'h-8 px-3 text-xs gap-1.5',
       md: 'h-9 px-4 text-sm gap-2',
-      lg: 'h-11 px-6 text-base gap-2.5',
+      lg: 'h-11 px-5 text-base gap-2.5 rounded-[12px]',
     };
 
     return (
       <motion.button
         ref={ref}
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+        whileTap={{ scale: 0.985 }}
+        transition={{ duration: 0.1, ease: 'easeOut' }}
         disabled={disabled || isLoading}
-        className={cn(baseStyles, variants[variant], sizes[size], className)}
+        className={cn(baseStyles, variants[normalizedVariant] || variants.primary, sizes[size], className)}
         {...props}
       >
         {isLoading ? (

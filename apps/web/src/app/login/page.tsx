@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../providers/auth-provider';
 import { ApiClientError } from '@almosthack/api-client';
+import { Button, Input, Card, Badge, Alert } from '@almosthack/ui';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,7 +18,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated && !isAuthLoading) {
-      router.push('/dashboard/overview');
+      router.push('/overview');
     }
   }, [isAuthenticated, isAuthLoading, router]);
 
@@ -33,7 +34,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       await login({ email, password });
-      router.push('/dashboard/overview');
+      router.push('/overview');
     } catch (err: unknown) {
       if (err instanceof ApiClientError) {
         setErrorMsg(err.message || 'Invalid email or password.');
@@ -49,91 +50,86 @@ export default function LoginPage() {
 
   if (isAuthLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black text-zinc-400 font-mono text-sm">
-        Authenticating...
+      <div className="flex min-h-screen items-center justify-center bg-[#F7F4EA] text-[#6D7068] font-mono text-sm">
+        Authenticating session...
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col justify-center bg-black px-6 py-12 text-zinc-100 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="inline-block rounded border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-mono text-xs font-semibold text-emerald-400 uppercase tracking-widest">
-          almosthack // identity
+    <div className="flex min-h-screen flex-col justify-center bg-[#F7F4EA] px-6 py-12 text-[#171914] lg:px-8 font-body">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
+        <div className="inline-flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 bg-[#355C45] rounded-[8px] flex items-center justify-center text-[#FFFDF8] font-extrabold font-heading text-base shadow-xs">
+            AH
+          </div>
+          <Badge variant="accent" size="sm">
+            almosthack // auth
+          </Badge>
         </div>
-        <h2 className="mt-4 text-3xl font-bold tracking-tight text-white font-mono">
+        <h2 className="text-3xl font-extrabold tracking-tight text-[#171914] font-heading">
           System Login
         </h2>
-        <p className="mt-2 text-sm text-zinc-400">
+        <p className="mt-2 text-sm text-[#6D7068] font-body">
           Enter your participant credentials to access the operating system.
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="border border-zinc-800 bg-zinc-950 p-8 shadow-2xl rounded-lg">
+        <Card variant="editorial" className="p-8 shadow-sm">
           {errorMsg && (
-            <div className="mb-6 rounded border border-rose-500/50 bg-rose-500/10 p-3 text-xs text-rose-400 font-mono">
-              [ERROR] {errorMsg}
+            <div className="mb-6">
+              <Alert variant="destructive" title="Authentication Error">
+                {errorMsg}
+              </Alert>
             </div>
           )}
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="email" className="block text-xs font-mono font-medium text-zinc-300 uppercase">
-                Email Address
-              </label>
-              <div className="mt-2">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full rounded border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:border-emerald-500 focus:outline-none font-mono"
-                  placeholder="participant@domain.com"
-                />
-              </div>
-            </div>
+          <form className="space-y-5" onSubmit={handleSubmit}>
+            <Input
+              label="Email Address"
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="builder@domain.com"
+            />
+
+            <Input
+              label="Password"
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••••••"
+            />
 
             <div>
-              <label htmlFor="password" className="block text-xs font-mono font-medium text-zinc-300 uppercase">
-                Password
-              </label>
-              <div className="mt-2">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full rounded border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:border-emerald-500 focus:outline-none font-mono"
-                  placeholder="••••••••••••"
-                />
-              </div>
-            </div>
-
-            <div>
-              <button
+              <Button
                 type="submit"
-                disabled={isSubmitting}
-                className="flex w-full justify-center rounded bg-emerald-500 px-4 py-2.5 text-xs font-mono font-semibold uppercase tracking-wider text-black transition-colors hover:bg-emerald-400 focus:outline-none disabled:opacity-50"
+                variant="primary"
+                size="lg"
+                isLoading={isSubmitting}
+                className="w-full font-mono text-xs uppercase tracking-wider"
               >
-                {isSubmitting ? 'Authenticating...' : 'Sign In'}
-              </button>
+                Sign In
+              </Button>
             </div>
           </form>
 
-          <div className="mt-6 text-center text-xs font-mono text-zinc-400">
+          <div className="mt-6 text-center text-xs font-mono text-[#6D7068]">
             Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-emerald-400 hover:underline">
+            <Link href="/register" className="text-[#355C45] font-semibold hover:underline">
               Register here
             </Link>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

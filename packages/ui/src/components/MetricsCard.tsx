@@ -23,23 +23,27 @@ export const MetricsCard: React.FC<MetricsCardProps> = ({
   className,
 }) => {
   return (
-    <Card className={cn('flex flex-col gap-2 relative overflow-hidden', className)}>
+    <Card variant="editorial" className={cn('flex flex-col gap-2 relative overflow-hidden text-left', className)}>
       <div className="flex items-center justify-between">
-        <span className="text-xs font-mono uppercase tracking-wider text-zinc-400 font-medium">
+        <span className="text-xs font-mono uppercase tracking-wider text-[#6D7068] font-semibold">
           {title}
         </span>
-        {icon && <div className="text-zinc-400 p-1 bg-zinc-900 border border-zinc-800 rounded">{icon}</div>}
+        {icon && (
+          <div className="text-[#355C45] p-1.5 bg-[#F7F4EA] border border-[#DCDDD3] rounded-[8px]">
+            {icon}
+          </div>
+        )}
       </div>
 
       <div className="flex items-baseline justify-between mt-1">
-        <span className="text-2xl font-bold font-heading text-zinc-100 tracking-tight">{value}</span>
+        <span className="text-3xl font-extrabold font-heading text-[#171914] tracking-tight">{value}</span>
         {change && (
           <span
             className={cn(
-              'inline-flex items-center gap-0.5 text-xs font-mono font-medium px-1.5 py-0.5 rounded border',
+              'inline-flex items-center gap-0.5 text-xs font-mono font-bold px-2 py-0.5 rounded-[5px] border',
               isPositive
-                ? 'bg-emerald-950/60 text-emerald-400 border-emerald-800/40'
-                : 'bg-red-950/60 text-red-400 border-red-800/40'
+                ? 'bg-[#E2EBDD] text-[#274535] border-[#B8CEB0]'
+                : 'bg-[#FBE6E3] text-[#8B2C24] border-[#F3C9B2]'
             )}
           >
             {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
@@ -48,7 +52,7 @@ export const MetricsCard: React.FC<MetricsCardProps> = ({
         )}
       </div>
 
-      {subtext && <p className="text-[11px] font-mono text-zinc-500 mt-1">{subtext}</p>}
+      {subtext && <p className="text-[11px] font-mono text-[#6D7068] mt-1">{subtext}</p>}
     </Card>
   );
 };

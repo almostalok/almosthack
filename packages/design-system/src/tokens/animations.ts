@@ -1,17 +1,17 @@
 /**
- * almosthack Animation Tokens
- * Fast, subtle transitions (150ms-250ms). No bounce or exaggerated easing.
- * Inspired by Linear and Raycast interface feel.
+ * AlmostHack Animation Tokens
+ * 
+ * Subtle, purposeful transitions without exaggerated bouncy SaaS effects.
  */
 
 export const animations = {
   duration: {
-    fast: '150ms',
-    normal: '200ms',
-    slow: '250ms',
+    fast: '120ms',
+    normal: '180ms',
+    slow: '240ms',
   },
   easing: {
-    default: 'cubic-bezier(0.16, 1, 0.3, 1)', // Smooth subtle decelerate
+    default: 'cubic-bezier(0.16, 1, 0.3, 1)', // Smooth paper transition
     linear: 'linear',
     easeOut: 'cubic-bezier(0, 0, 0.2, 1)',
     easeIn: 'cubic-bezier(0.4, 0, 1, 1)',
@@ -24,16 +24,18 @@ export const animations = {
       transition: { duration: 0.15, ease: [0.16, 1, 0.3, 1] },
     },
     slideUp: {
-      initial: { opacity: 0, y: 8 },
+      initial: { opacity: 0, y: 6 },
       animate: { opacity: 1, y: 0 },
       exit: { opacity: 0, y: -4 },
-      transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] },
+      transition: { duration: 0.18, ease: [0.16, 1, 0.3, 1] },
     },
-    scaleUp: {
-      initial: { opacity: 0, scale: 0.98 },
-      animate: { opacity: 1, scale: 1 },
-      exit: { opacity: 0, scale: 0.98 },
-      transition: { duration: 0.15, ease: [0.16, 1, 0.3, 1] },
+    modal: {
+      initial: { opacity: 0, scale: 0.98, y: 8 },
+      animate: { opacity: 1, scale: 1, y: 0 },
+      exit: { opacity: 0, scale: 0.98, y: 6 },
+      transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] },
     },
   },
 } as const;
+
+export type AnimationTokens = typeof animations;

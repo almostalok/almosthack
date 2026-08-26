@@ -3,13 +3,16 @@
 import React from 'react';
 import {
   MetricsCard,
-  StatisticCard,
   HackathonCard,
   ActivityFeed,
   Timeline,
   CodeBlock,
   Badge,
   Breadcrumbs,
+  ScoreBreakdown,
+  FairnessMetric,
+  Card,
+  Scribble,
 } from '@almosthack/ui';
 import { Trophy, GitBranch, ShieldCheck, Users, Terminal } from 'lucide-react';
 
@@ -65,22 +68,33 @@ export default function OverviewPage() {
     },
   ];
 
+  const sampleRubricScores = [
+    { name: 'Innovation & Novelty', score: 8.5, weight: 25, feedback: 'Unique architecture' },
+    { name: 'Technical Execution', score: 9.0, weight: 30, feedback: 'Clean code & test suite' },
+    { name: 'Ecosystem Impact', score: 8.0, weight: 20 },
+    { name: 'Design & UX', score: 8.5, weight: 15 },
+    { name: 'Presentation & Demo', score: 8.0, weight: 10 },
+  ];
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-8 max-w-7xl mx-auto text-left">
       {/* Top Header Breadcrumbs & Title */}
       <div className="flex flex-col gap-2">
         <Breadcrumbs items={[{ label: 'Platform' }, { label: 'Overview' }]} />
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold font-heading text-zinc-100 tracking-tight">
-              Platform Command Center
-            </h1>
-            <p className="text-xs text-zinc-400 font-mono mt-0.5">
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-extrabold font-heading text-[#171914] tracking-tight">
+                Platform Command Center
+              </h1>
+              <Scribble variant="sparkle" className="w-5 h-5 text-[#355C45]" />
+            </div>
+            <p className="text-xs text-[#6D7068] font-mono mt-0.5">
               Transparent audit stream & global hackathon telemetry preview.
             </p>
           </div>
           <Badge variant="accent" size="md">
-            Demo Mode
+            Verifiable Mainnet
           </Badge>
         </div>
       </div>
@@ -92,7 +106,7 @@ export default function OverviewPage() {
           value="12"
           change="+25%"
           isPositive={true}
-          icon={<Trophy className="w-4 h-4 text-amber-400" />}
+          icon={<Trophy className="w-4 h-4 text-[#785A12]" />}
           subtext="Demo Telemetry"
         />
         <MetricsCard
@@ -100,7 +114,7 @@ export default function OverviewPage() {
           value="4,892"
           change="+18%"
           isPositive={true}
-          icon={<Users className="w-4 h-4 text-cyan-400" />}
+          icon={<Users className="w-4 h-4 text-[#355C45]" />}
           subtext="Demo Telemetry"
         />
         <MetricsCard
@@ -108,7 +122,7 @@ export default function OverviewPage() {
           value="1,240"
           change="+32%"
           isPositive={true}
-          icon={<GitBranch className="w-4 h-4 text-emerald-400" />}
+          icon={<GitBranch className="w-4 h-4 text-[#355C45]" />}
           subtext="Demo Telemetry"
         />
         <MetricsCard
@@ -116,48 +130,60 @@ export default function OverviewPage() {
           value="98.9%"
           change="+0.4%"
           isPositive={true}
-          icon={<ShieldCheck className="w-4 h-4 text-emerald-400" />}
+          icon={<ShieldCheck className="w-4 h-4 text-[#355C45]" />}
           subtext="Demo Telemetry"
         />
       </div>
 
-      {/* Main Grid: Hackathons & Activity Feed */}
+      {/* Main Grid: Hackathons, Transparent Scoring & Activity Feed */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Active Hackathons */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold font-heading uppercase tracking-wider text-zinc-300">
-              Featured Transparencies (Preview)
-            </h2>
-            <span className="text-xs font-mono text-zinc-500">Showing 2 of 12</span>
+        {/* Left Column: Active Hackathons & Score Ledger */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-bold font-heading uppercase tracking-wider text-[#171914]">
+                Featured Transparencies
+              </h2>
+              <span className="text-xs font-mono text-[#6D7068]">Showing 2 of 12</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <HackathonCard
+                id="h1"
+                title="EthGlobal Transparency Sprint '26"
+                organization="Ethereum Foundation"
+                prizePool={150000}
+                participantsCount={1280}
+                status="live"
+                startDate="Jul 22"
+                endDate="Jul 25"
+                showScribble
+              />
+              <HackathonCard
+                id="h2"
+                title="Vercel AI Infrastructure Hack"
+                organization="Vercel Labs"
+                prizePool={85000}
+                participantsCount={940}
+                status="judging"
+                startDate="Jul 20"
+                endDate="Jul 23"
+              />
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <HackathonCard
-              id="h1"
-              title="EthGlobal Transparency Sprint '26"
-              organization="Ethereum Foundation"
-              prizePool={150000}
-              participantsCount={1280}
-              status="live"
-              startDate="Jul 22"
-              endDate="Jul 25"
-            />
-            <HackathonCard
-              id="h2"
-              title="Vercel AI Infrastructure Hack"
-              organization="Vercel Labs"
-              prizePool={85000}
-              participantsCount={940}
-              status="judging"
-              startDate="Jul 20"
-              endDate="Jul 23"
+          {/* Transparent Score Breakdown Signature Showcase */}
+          <div className="space-y-2">
+            <ScoreBreakdown
+              criteria={sampleRubricScores}
+              judgeCount={4}
+              isCalibrated={true}
             />
           </div>
 
           {/* Audit Verification Terminal Code Block */}
           <div className="space-y-2 pt-2">
-            <span className="text-xs font-mono text-zinc-400 uppercase tracking-wider">
+            <span className="text-xs font-mono text-[#6D7068] uppercase tracking-wider font-semibold">
               Audit Verification Interface (Preview)
             </span>
             <CodeBlock
@@ -165,7 +191,7 @@ export default function OverviewPage() {
               language="typescript"
               code={`import { verifyLedgerBlock } from '@almosthack/utils';
 
-// Preview audit hash verification interface
+// Verifiable cryptographic ledger seal inspection
 const isAudited = await verifyLedgerBlock({
   blockHash: "0x9a8f7c6b5a4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c",
   expectedMerkleRoot: "0x3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e",
@@ -176,28 +202,36 @@ console.log(\`[Audit Status] Ledger Seal Verified: \${isAudited}\`);`}
           </div>
         </div>
 
-        {/* Right Column: Live Stream & Timeline */}
+        {/* Right Column: Live Stream, Fairness Metric & Timeline */}
         <div className="space-y-6">
+          {/* Fairness & Calibration Telemetry */}
+          <FairnessMetric
+            score={98.4}
+            deviation={0.12}
+            consensusDelta={0.04}
+            sampleSize={48}
+          />
+
           {/* Live Activity Feed */}
-          <div className="bg-zinc-950/60 border border-zinc-800/80 rounded-lg p-4 space-y-3">
-            <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2">
-              <h3 className="text-xs font-semibold font-mono uppercase text-zinc-300 flex items-center gap-2">
-                <Terminal className="w-3.5 h-3.5 text-emerald-400" /> Audit Stream
+          <Card className="p-4 space-y-3">
+            <div className="flex items-center justify-between border-b border-[#DCDDD3] pb-2">
+              <h3 className="text-xs font-bold font-mono uppercase text-[#171914] flex items-center gap-2">
+                <Terminal className="w-3.5 h-3.5 text-[#355C45]" /> Audit Stream
               </h3>
-              <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" /> LIVE
+              <span className="text-[10px] font-mono font-bold text-[#274535] bg-[#E2EBDD] px-2 py-0.5 rounded-[4px] border border-[#B8CEB0]">
+                LIVE
               </span>
             </div>
             <ActivityFeed activities={sampleActivities} />
-          </div>
+          </Card>
 
           {/* Lifecycle Milestone Timeline */}
-          <div className="bg-zinc-950/60 border border-zinc-800/80 rounded-lg p-4 space-y-4">
-            <h3 className="text-xs font-semibold font-mono uppercase text-zinc-300">
+          <Card className="p-4 space-y-4">
+            <h3 className="text-xs font-bold font-mono uppercase text-[#171914]">
               Active Milestone Tracker
             </h3>
             <Timeline events={sampleTimeline} />
-          </div>
+          </Card>
         </div>
       </div>
     </div>

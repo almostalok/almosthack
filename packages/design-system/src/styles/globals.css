@@ -4,67 +4,94 @@
 
 @layer base {
   :root {
-    --almosthack-accent: #10B981;
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 98%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 160 84% 39%;
-    --accent-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.375rem;
-  }
+    /* Brand Colors */
+    --ah-green: #355C45;
+    --ah-green-dark: #274535;
+    --ah-green-light: #E2EBDD;
 
-  .dark {
-    --almosthack-accent: #10B981;
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 6%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 6%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 160 84% 39%;
-    --accent-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    /* Surface Tokens */
+    --ah-cream: #F7F4EA;
+    --ah-paper: #FFFDF8;
+    --ah-subtle: #F0ECE1;
+
+    /* Typography & Line Tokens */
+    --ah-ink: #171914;
+    --ah-muted: #6D7068;
+    --ah-line: #DCDDD3;
+    --ah-line-dark: #274535;
+
+    /* Editorial Pastel Accents */
+    --ah-yellow: #E9E5A8;
+    --ah-peach: #F3C9B2;
+    --ah-lavender: #DCD5E8;
+    --ah-mint: #C9DDD0;
+
+    /* Semantic Mappings for Tailwind compatibility */
+    --background: 46 41% 94%;      /* #F7F4EA */
+    --foreground: 84 11% 9%;       /* #171914 */
+    --card: 43 100% 99%;           /* #FFFDF8 */
+    --card-foreground: 84 11% 9%;  /* #171914 */
+    --popover: 43 100% 99%;        /* #FFFDF8 */
+    --popover-foreground: 84 11% 9%;
+    --primary: 145 27% 28%;        /* #355C45 */
+    --primary-foreground: 43 100% 99%; /* #FFFDF8 */
+    --secondary: 95 24% 89%;       /* #E2EBDD */
+    --secondary-foreground: 145 28% 21%; /* #274535 */
+    --muted: 75 4% 42%;            /* #6D7068 */
+    --muted-foreground: 75 4% 42%;
+    --accent: 145 27% 28%;         /* #355C45 */
+    --accent-foreground: 43 100% 99%;
+    --border: 66 11% 85%;          /* #DCDDD3 */
+    --input: 66 11% 85%;           /* #DCDDD3 */
+    --ring: 145 27% 28%;           /* #355C45 */
+    --radius: 0.875rem;            /* 14px */
   }
 
   * {
-    @apply border-border;
+    @apply border-[#DCDDD3];
     box-sizing: border-box;
   }
 
   body {
-    @apply bg-background text-foreground antialiased font-body selection:bg-zinc-800 selection:text-white dark:selection:bg-zinc-200 dark:selection:text-black;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background-color: var(--ah-cream);
+    color: var(--ah-ink);
+    font-family: var(--font-dm-sans), 'DM Sans', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    selection-background-color: #E2EBDD;
+    selection-color: #274535;
   }
 
-  /* Custom scrollbar for high-density developer aesthetic */
+  ::selection {
+    background-color: #E2EBDD;
+    color: #274535;
+  }
+
+  /* Headings Typography */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-baloo), 'Baloo 2', cursive, sans-serif;
+    color: var(--ah-ink);
+    font-weight: 700;
+  }
+
+  /* Monospace & Code */
+  code, pre, kbd, samp {
+    font-family: var(--font-ibm-plex-mono), 'IBM Plex Mono', Menlo, monospace;
+  }
+
+  /* Subtle restrained scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background: #F7F4EA;
   }
   ::-webkit-scrollbar-thumb {
-    background: #3F3F46;
+    background: #DCDDD3;
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #52525B;
+    background: #6D7068;
   }
 }

@@ -48,7 +48,7 @@
   }
 
   * {
-    @apply border-[#DCDDD3];
+    border-color: #DCDDD3;
     box-sizing: border-box;
   }
 
@@ -58,8 +58,6 @@
     font-family: var(--font-dm-sans), 'DM Sans', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    selection-background-color: #E2EBDD;
-    selection-color: #274535;
   }
 
   ::selection {

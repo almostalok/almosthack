@@ -2,17 +2,87 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@almosthack/utils';
 
+export type MascotVariant =
+  | 'default'
+  | 'waving'
+  | 'working'
+  | 'confused'
+  | 'judging'
+  | 'running'
+  | 'celebrating'
+  | 'sleeping';
+
 export interface MascotRobotProps {
   className?: string;
   speechText?: string;
   showBubble?: boolean;
+  variant?: MascotVariant;
 }
 
 export const MascotRobot: React.FC<MascotRobotProps> = ({
   className,
   speechText = 'Spreadsheets called.\nThey quit.',
   showBubble = true,
+  variant = 'default',
 }) => {
+  // Variant-specific screen visuals
+  const renderEyes = () => {
+    switch (variant) {
+      case 'celebrating':
+        // Happy arch eyes ^^
+        return (
+          <>
+            <path d="M29 34C29 31 34 31 34 34" stroke="#03A066" strokeWidth="2" strokeLinecap="round" />
+            <path d="M45 34C45 31 50 31 50 34" stroke="#03A066" strokeWidth="2" strokeLinecap="round" />
+            <path d="M37 38H43" stroke="#03A066" strokeWidth="1.5" strokeLinecap="round" />
+          </>
+        );
+      case 'judging':
+        // Analytical focus visor + monocle grid
+        return (
+          <>
+            <rect x="28" y="28" width="8" height="8" rx="1" fill="#03A066" />
+            <rect x="29" y="29" width="3" height="3" fill="#FFFFFF" />
+            <rect x="44" y="28" width="8" height="8" rx="1" fill="#03A066" />
+            <circle cx="48" cy="32" r="2" fill="#5EEAD4" />
+            <path d="M36 39H44" stroke="#03A066" strokeWidth="1.5" strokeLinecap="round" />
+          </>
+        );
+      case 'sleeping':
+        // Sleepy zzz eyes
+        return (
+          <>
+            <path d="M28 32H34" stroke="#03A066" strokeWidth="2" strokeLinecap="round" />
+            <path d="M44 32H50" stroke="#03A066" strokeWidth="2" strokeLinecap="round" />
+            <text x="54" y="25" fill="#03A066" fontSize="8" fontFamily="monospace" fontWeight="bold">z</text>
+          </>
+        );
+      case 'confused':
+        // Asymmetric eyes ?_?
+        return (
+          <>
+            <circle cx="31" cy="32" r="3" fill="#03A066" />
+            <rect x="45" y="30" width="6" height="3" rx="1" fill="#03A066" />
+            <path d="M36 38C38 36 42 40 44 38" stroke="#03A066" strokeWidth="1.5" strokeLinecap="round" />
+          </>
+        );
+      case 'working':
+      case 'waving':
+      case 'default':
+      default:
+        // Classic pixel eyes
+        return (
+          <>
+            <rect x="29" y="29" width="6" height="6" rx="1" fill="#03A066" />
+            <rect x="30" y="30" width="2" height="2" fill="#FFFFFF" />
+            <rect x="45" y="29" width="6" height="6" rx="1" fill="#03A066" />
+            <rect x="46" y="30" width="2" height="2" fill="#FFFFFF" />
+            <path d="M36 38H44" stroke="#03A066" strokeWidth="1.5" strokeLinecap="round" />
+          </>
+        );
+    }
+  };
+
   return (
     <div className={cn('relative inline-flex items-center select-none', className)}>
       {/* Speech Bubble */}
@@ -20,7 +90,7 @@ export const MascotRobot: React.FC<MascotRobotProps> = ({
         <motion.div
           initial={{ opacity: 0, y: 8, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ delay: 0.4, duration: 0.3, ease: 'easeOut' }}
+          transition={{ delay: 0.3, duration: 0.3, ease: 'easeOut' }}
           className="absolute -top-16 -left-8 sm:-top-14 sm:-left-20 z-20 whitespace-pre-line bg-[#1A1C1A] text-[#EDEDED] border border-[#282C28] px-3 py-1.5 rounded-[10px] shadow-lg text-[11px] font-mono leading-tight text-left"
         >
           <div className="text-[#03A066] font-semibold text-[10px] uppercase tracking-wider mb-0.5">
@@ -82,20 +152,8 @@ export const MascotRobot: React.FC<MascotRobotProps> = ({
           <line x1="25" y1="33" x2="55" y2="33" stroke="#028051" strokeWidth="0.5" strokeOpacity="0.4" />
           <line x1="25" y1="38" x2="55" y2="38" stroke="#028051" strokeWidth="0.5" strokeOpacity="0.4" />
 
-          {/* Pixel Eyes */}
-          <rect x="29" y="29" width="6" height="6" rx="1" fill="#03A066" />
-          <rect x="30" y="30" width="2" height="2" fill="#FFFFFF" />
-
-          <rect x="45" y="29" width="6" height="6" rx="1" fill="#03A066" />
-          <rect x="46" y="30" width="2" height="2" fill="#FFFFFF" />
-
-          {/* Pixel Smirk */}
-          <path
-            d="M36 38H44"
-            stroke="#03A066"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
+          {/* Pixel Expressions */}
+          {renderEyes()}
 
           {/* Neck */}
           <rect x="35" y="50" width="10" height="4" rx="1" fill="#282C28" />

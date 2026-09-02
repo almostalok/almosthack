@@ -64,7 +64,7 @@ export const WorkspaceNavigation: React.FC<WorkspaceNavigationProps> = ({
     {
       id: 'judging',
       label: 'Judging',
-      href: '/judging',
+      href: `/hackathons/${hackathonId}/judging`,
       icon: Scale,
     },
     {

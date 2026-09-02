@@ -46,7 +46,7 @@ export const WorkspaceNavigation: React.FC<WorkspaceNavigationProps> = ({
     {
       id: 'registrations',
       label: 'Registrations',
-      href: '/registrations',
+      href: `/hackathons/${hackathonId}/registrations`,
       icon: Users,
     },
     {

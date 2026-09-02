@@ -38,3 +38,4 @@ export * from './judging';
 export * from './transparent-judging';
 export * from './results';
 export * from './certificates';
+export * from './analytics';

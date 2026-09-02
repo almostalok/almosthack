@@ -28,3 +28,4 @@ export type {
   UpcomingMilestone,
   ActiveHackathonContext,
 } from './dashboard';
+export * from './workspace';

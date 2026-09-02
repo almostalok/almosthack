@@ -1,0 +1,18 @@
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Antenna -->
+  <line x1="40" y1="8" x2="40" y2="18" stroke="#028051" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="40" cy="7" r="4" fill="#03A066"/>
+  <circle cx="40" cy="7" r="2" fill="#FFFFFF"/>
+  <!-- Head -->
+  <rect x="18" y="18" width="44" height="32" rx="8" fill="#161816" stroke="#028051" stroke-width="2.5"/>
+  <!-- Visor with Code Prompt >_ -->
+  <rect x="24" y="24" width="32" height="18" rx="4" fill="#0A1F14" stroke="#03A066" stroke-width="1.5"/>
+  <path d="M28 29L32 33L28 37" stroke="#03A066" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="36" y1="37" x2="42" y2="37" stroke="#5EEAD4" stroke-width="2"/>
+  <!-- Neck & Torso -->
+  <rect x="35" y="50" width="10" height="4" rx="1" fill="#282C28"/>
+  <path d="M24 54C24 52.8954 24.8954 52 26 52H54C55.1046 52 56 52.8954 56 54V66C56 68.2091 54.2091 70 52 70H28C25.7909 70 24 68.2091 24 66V54Z" fill="#161816" stroke="#028051" stroke-width="2"/>
+  <!-- Keyboard / Desk line -->
+  <rect x="18" y="66" width="44" height="6" rx="2" fill="#1F231F" stroke="#028051" stroke-width="1.5"/>
+  <line x1="22" y1="69" x2="58" y2="69" stroke="#03A066" stroke-width="1" stroke-dasharray="2 2"/>
+</svg>

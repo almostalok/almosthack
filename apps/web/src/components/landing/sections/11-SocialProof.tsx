@@ -3,57 +3,34 @@
 import React from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Scribble } from '@almosthack/ui';
-import {
-  Users,
-  ShieldCheck,
-  Trophy,
-  GitCommit,
-  Globe2,
-  CheckCircle2,
-  Sparkles,
-} from 'lucide-react';
+import { Trophy, Users, GitCommit, Globe2, ShieldCheck } from 'lucide-react';
 
 export const SocialProofSection: React.FC = () => {
   const shouldReduceMotion = useReducedMotion();
 
   const proofMetrics = [
-    { value: '1,200+', label: 'Hackathon Organizers', sub: 'From university hackathons to global enterprise series', icon: Users },
+    { value: '1,200+', label: 'Hackathon Organizers', sub: 'From university tech clubs to global enterprise challenges', icon: Users },
     { value: '25,000+', label: 'Builders Onboarded', sub: 'Zero duplicate registration submissions recorded', icon: GitCommit },
-    { value: '80+', label: 'Countries Represented', sub: 'Global distributed judging across time zones', icon: Globe2 },
+    { value: '80+', label: 'Countries Represented', sub: 'Distributed double-blind judging across time zones', icon: Globe2 },
     { value: '100%', label: 'Cryptographic Audit Trail', sub: 'Deterministic consensus without spreadsheet formulas', icon: ShieldCheck },
-  ];
-
-  const organizerNotes = [
-    {
-      role: 'Lead Hackathon Director',
-      event: 'Global Web3 & AI Hack Series',
-      quote: 'We used to lose 4 hours calculating judge variance and arguing about spreadsheet permissions. AlmostHack sealed the leaderboard in 12 seconds.',
-      tag: 'Organizer Verified',
-    },
-    {
-      role: 'Technical Operations Lead',
-      event: 'University Tech Challenge (1,400 builders)',
-      quote: 'Git commit integrity validation eliminated all late submission disputes. The contestants actually trusted the final scoring breakdown.',
-      tag: 'Operations Verified',
-    },
   ];
 
   return (
     <section
       id="social-proof"
-      className="relative py-20 md:py-28 lg:py-36 bg-[#111311] border-t border-[#222622] text-left overflow-hidden"
+      className="relative py-28 md:py-36 lg:py-48 bg-[#111311] border-t border-[#222622] text-left overflow-hidden"
       aria-label="Platform Social Proof and Outcomes"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
         
-        {/* Header */}
-        <div className="max-w-3xl mb-16 md:mb-20">
+        {/* Section Header */}
+        <div className="max-w-4xl mb-20 md:mb-28">
           <motion.div
             initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-[8px] bg-[#1A1D1A] border border-[#282C28] text-xs font-mono text-[#03A066] uppercase tracking-wider mb-5"
+            className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-[8px] bg-[#1A1D1A] border border-[#282C28] text-xs font-mono text-[#03A066] uppercase tracking-wider mb-6 font-semibold"
           >
             <Trophy className="w-4 h-4 text-[#03A066]" />
             <span>COMMUNITY & TELEMETRY PROOF</span>
@@ -64,7 +41,7 @@ export const SocialProofSection: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl tracking-tight text-white leading-[1.12]"
+            className="font-heading font-extrabold text-4xl sm:text-5xl md:text-6xl lg:text-[68px] tracking-tight text-white leading-[1.08]"
           >
             Loved by organizers.
             <br />
@@ -73,7 +50,7 @@ export const SocialProofSection: React.FC = () => {
               <Scribble
                 variant="underline"
                 color="#028051"
-                className="absolute -bottom-2 left-0 w-full h-3 text-[#028051]"
+                className="absolute -bottom-3 left-0 w-full h-4 text-[#028051]"
               />
             </span>
           </motion.h2>
@@ -83,67 +60,40 @@ export const SocialProofSection: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-4 text-base sm:text-lg text-[#A3A3A3] font-body leading-relaxed max-w-2xl"
+            className="mt-6 text-xl sm:text-2xl text-[#A3A3A3] font-body leading-relaxed max-w-3xl font-normal"
           >
-            Real metrics from hundreds of hackathons hosted across universities, developer communities, and developer ecosystems.
+            Real metrics from hundreds of hackathons hosted across developer communities, university clubs, and open-source ecosystems.
           </motion.p>
         </div>
 
-        {/* 4 Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        {/* 4 Large Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {proofMetrics.map((m, idx) => {
             const Icon = m.icon;
             return (
               <motion.div
                 key={m.label}
-                initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: idx * 0.08 }}
-                className="p-5 rounded-[12px] bg-[#161816] border border-[#262A26] hover:border-[#028051]/40 transition-all text-left"
+                className="p-8 rounded-[20px] bg-[#161816] border border-[#262A26] hover:border-[#028051]/50 transition-all text-left shadow-sm"
               >
-                <div className="w-8 h-8 rounded-[7px] bg-[#1F231F] border border-[#282C28] flex items-center justify-center text-[#03A066] mb-3">
-                  <Icon className="w-4 h-4" />
+                <div className="w-12 h-12 rounded-[10px] bg-[#1F231F] border border-[#282C28] flex items-center justify-center text-[#03A066] mb-6">
+                  <Icon className="w-6 h-6" />
                 </div>
-                <div className="text-3xl sm:text-4xl font-heading font-extrabold text-white">
+                <div className="text-4xl sm:text-5xl font-heading font-extrabold text-white">
                   {m.value}
                 </div>
-                <div className="text-sm font-mono font-bold text-[#EDEDED] mt-1">
+                <div className="text-base font-mono font-bold text-[#EDEDED] mt-2">
                   {m.label}
                 </div>
-                <p className="text-xs font-mono text-[#737373] mt-1">
+                <p className="text-xs sm:text-sm font-mono text-[#737373] mt-2 leading-relaxed">
                   {m.sub}
                 </p>
               </motion.div>
             );
           })}
-        </div>
-
-        {/* 2 Restrained Verified Insights */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {organizerNotes.map((note, idx) => (
-            <motion.div
-              key={idx}
-              initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: 0.2 + idx * 0.1 }}
-              className="p-6 rounded-[14px] bg-[#141614] border border-[#282C28] flex flex-col justify-between text-left"
-            >
-              <p className="text-sm text-[#EDEDED] font-body leading-relaxed italic">
-                &ldquo;{note.quote}&rdquo;
-              </p>
-              <div className="mt-6 pt-4 border-t border-[#242824] flex items-center justify-between font-mono text-xs">
-                <div>
-                  <span className="font-bold text-white block">{note.role}</span>
-                  <span className="text-[11px] text-[#737373]">{note.event}</span>
-                </div>
-                <span className="text-[10px] text-[#03A066] bg-[#028051]/15 px-2 py-0.5 rounded border border-[#028051]/30">
-                  {note.tag}
-                </span>
-              </div>
-            </motion.div>
-          ))}
         </div>
 
       </div>

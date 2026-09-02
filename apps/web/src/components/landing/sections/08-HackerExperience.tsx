@@ -1,139 +1,117 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Scribble } from '@almosthack/ui';
 import { MascotRobot } from '../MascotRobot';
 import { HackerDashboardDemo } from '../demos/HackerDashboardDemo';
-import {
-  Compass,
-  UserCheck,
-  Users,
-  Target,
-  FileCheck,
-  Radio,
-  Eye,
-  MessageSquare,
-  Trophy,
-  Award,
-  Sparkles,
-  ArrowRight,
-} from 'lucide-react';
+import { Code2, ArrowRight, CheckCircle2, Sparkles } from 'lucide-react';
+import { cn } from '@almosthack/utils';
 
-export interface HackerExperienceSectionProps {
-  className?: string;
-}
-
-export const HackerExperienceSection: React.FC<HackerExperienceSectionProps> = ({
-  className,
-}) => {
+export const HackerExperienceSection: React.FC = () => {
   const shouldReduceMotion = useReducedMotion();
+  const [selectedHackerFeature, setSelectedHackerFeature] = useState(0);
 
   const hackerFeatures = [
     {
       num: '01',
-      title: 'Discover hackathons',
-      description: 'Find the right event and track.',
-      icon: Compass,
+      title: 'Frictionless Registration',
+      description: 'One-click GitHub & Discord identity auth without repetitive form questionnaires.',
+      iconSrc: '/assets/almosthack/hacker/hacker-build.svg',
+      tabTarget: 'overview' as const,
     },
     {
       num: '02',
-      title: 'Easy registration',
-      description: 'Register without filling the same form three times.',
-      icon: UserCheck,
+      title: 'Squad Formation & Matchmaking',
+      description: 'Find teammates by skillset (frontend, smart contracts, ML) or invite with unique invite links.',
+      iconSrc: '/assets/almosthack/hacker/hacker-team.svg',
+      tabTarget: 'overview' as const,
     },
     {
       num: '03',
-      title: 'Team formation',
-      description: 'Find teammates and manage your team.',
-      icon: Users,
+      title: 'Continuous Git Integrity Sync',
+      description: 'Connect your public or private GitHub repository for automatic commit timeline tracking.',
+      iconSrc: '/assets/almosthack/hacker/hacker-submit.svg',
+      tabTarget: 'submission' as const,
     },
     {
       num: '04',
-      title: 'Track & problem discovery',
-      description: "Know exactly what you're building against.",
-      icon: Target,
+      title: 'Multi-Track Submission Builder',
+      description: 'Submit demo links, pitch videos, and architecture diagrams into sponsor bounty tracks.',
+      iconSrc: '/assets/almosthack/hacker/hacker-submit.svg',
+      tabTarget: 'submission' as const,
     },
     {
       num: '05',
-      title: 'Submission management',
-      description: 'Submit without deadline panic.',
-      icon: FileCheck,
+      title: 'Zero-Dispute Deadline Freeze',
+      description: 'Cryptographic commit hashing prevents unfair post-deadline pushes and disqualification disputes.',
+      iconSrc: '/assets/almosthack/hacker/hacker-deadline.svg',
+      tabTarget: 'submission' as const,
     },
     {
       num: '06',
-      title: 'Submission status',
-      description: 'Know what happens after you hit submit.',
-      icon: Radio,
+      title: 'Live Evaluation Status Tracker',
+      description: 'See exactly when judges are reviewing your project without waiting in the dark.',
+      iconSrc: '/assets/almosthack/judge/judge-scorecard.svg',
+      tabTarget: 'judging' as const,
     },
     {
       num: '07',
-      title: 'Transparent judging',
-      description: 'Understand how your work is evaluated.',
-      icon: Eye,
+      title: 'Double-Blind Anonymized Evaluation',
+      description: 'Compete on code and execution merit alone without fear of prestige or university bias.',
+      iconSrc: '/assets/almosthack/transparent/fairness-check.svg',
+      tabTarget: 'judging' as const,
     },
     {
       num: '08',
-      title: 'Judge feedback',
-      description: 'See useful feedback from judges.',
-      icon: MessageSquare,
+      title: 'Explainable Score Breakdown',
+      description: 'Inspect full rubric criteria feedback, judge notes, and normalized score percentiles.',
+      iconSrc: '/assets/almosthack/transparent/score-normalization.svg',
+      tabTarget: 'results' as const,
     },
     {
       num: '09',
-      title: 'Results & rankings',
-      description: 'Results without mystery.',
-      icon: Trophy,
+      title: 'Public Cryptographic Leaderboard',
+      description: 'Immutable final standings with tamper-proof blockchain and ledger verification hashes.',
+      iconSrc: '/assets/almosthack/hacker/hacker-results.svg',
+      tabTarget: 'results' as const,
     },
     {
       num: '10',
-      title: 'Certificates',
-      description: 'Proof that you survived.',
-      icon: Award,
+      title: 'Verifiable Digital Credentials',
+      description: 'One-click cryptographic certificate claim for your GitHub profile and resume.',
+      iconSrc: '/assets/almosthack/organizer/organizer-results.svg',
+      tabTarget: 'results' as const,
     },
   ];
 
   return (
     <section
       id="hackers"
-      className="relative py-16 md:py-24 lg:py-32 overflow-hidden text-left bg-[#131413] border-t border-[#222622]"
+      className="relative py-28 md:py-36 lg:py-48 bg-[#111311] border-t border-[#222622] text-left overflow-hidden"
       aria-label="Hacker and Contestant Experience"
     >
-      {/* Background Ambient Glow (brand green only) */}
-      <div
-        className="absolute top-1/3 left-1/4 w-96 h-96 bg-[#028051]/5 rounded-full blur-3xl pointer-events-none -z-10"
-        aria-hidden="true"
-      />
-      <div
-        className="absolute bottom-10 right-10 w-80 h-80 bg-[#028051]/5 rounded-full blur-3xl pointer-events-none -z-10"
-        aria-hidden="true"
-      />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
         
-        {/* ==================================================== */}
-        {/* SECTION HEADER: Core Message & Headlines             */}
-        {/* ==================================================== */}
-        <div className="max-w-3xl mb-16 lg:mb-20">
-          
-          {/* Eyebrow */}
+        {/* Section Header */}
+        <div className="max-w-4xl mb-16 md:mb-24">
           <motion.div
             initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-[8px] bg-[#1A1D1A] border border-[#282C28] text-xs font-mono text-[#03A066] font-medium tracking-wider uppercase mb-5"
+            className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-[8px] bg-[#1A1D1A] border border-[#282C28] text-xs font-mono text-[#03A066] uppercase tracking-wider mb-6 font-semibold"
           >
-            <span className="w-2 h-2 rounded-full bg-[#03A066] animate-pulse" />
-            <span>FOR HACKERS</span>
+            <Code2 className="w-4 h-4 text-[#03A066]" />
+            <span>FOR HACKERS & CONTESTANTS</span>
           </motion.div>
 
-          {/* Primary Headline */}
           <motion.h2
             initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl tracking-tight text-white leading-[1.12]"
+            className="font-heading font-extrabold text-4xl sm:text-5xl md:text-6xl lg:text-[68px] tracking-tight text-white leading-[1.08]"
           >
             They came to build.
             <br />
@@ -142,124 +120,103 @@ export const HackerExperienceSection: React.FC<HackerExperienceSectionProps> = (
               <Scribble
                 variant="underline"
                 color="#028051"
-                className="absolute -bottom-2 left-0 w-full h-3 text-[#028051]"
+                className="absolute -bottom-3 left-0 w-full h-4 text-[#028051]"
               />
             </span>
           </motion.h2>
 
-          {/* Supporting Subtitle */}
           <motion.p
             initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-4 text-base sm:text-lg font-mono text-[#5EEAD4] font-semibold"
+            className="mt-6 text-xl sm:text-2xl text-[#A3A3A3] font-body leading-relaxed max-w-3xl font-normal"
           >
-            Less admin. More shipping.
-          </motion.p>
-
-          {/* Supporting Copy */}
-          <motion.p
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.25 }}
-            className="mt-3 text-base sm:text-lg text-[#A3A3A3] font-body leading-relaxed max-w-2xl"
-          >
-            Registration, teams, submissions, deadlines and results — without making hackers navigate another maze of forms and spreadsheets.
+            Less admin. More shipping. Registration, team formation, GitHub commit tracking, and transparent scoring that treats builders with respect.
           </motion.p>
         </div>
 
-        {/* ==================================================== */}
-        {/* MAIN GRID: Mandatory Feature List + Product Demo     */}
-        {/* ==================================================== */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+        {/* 2-Column Interactive Hacker Experience (Left 10-Item Nav -> Right Hacker Portal Demo) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
           
-          {/* LEFT: Complete 10-Item Hacker Feature List */}
-          <div className="lg:col-span-5 space-y-2.5">
-            <div className="mb-4">
-              <h3 className="text-xs font-mono uppercase tracking-wider text-[#737373] font-bold">
-                The Hacker Lifecycle Matrix
-              </h3>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2">
-              {hackerFeatures.map((feat, index) => {
-                const Icon = feat.icon;
-                return (
-                  <motion.div
-                    key={feat.num}
-                    initial={shouldReduceMotion ? false : { opacity: 0, x: -10 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.3, delay: index * 0.04 }}
-                    className="p-3 rounded-[10px] bg-[#161816] hover:bg-[#1A1D1A] border border-[#242824] hover:border-[#028051]/40 transition-all duration-150 flex items-start gap-3 group text-left"
+          {/* LEFT: 10-Item Hacker Feature Matrix */}
+          <div className="lg:col-span-6 space-y-2.5">
+            {hackerFeatures.map((feat, idx) => {
+              const isSelected = selectedHackerFeature === idx;
+              return (
+                <button
+                  key={feat.num}
+                  type="button"
+                  onClick={() => setSelectedHackerFeature(idx)}
+                  onMouseEnter={() => setSelectedHackerFeature(idx)}
+                  onFocus={() => setSelectedHackerFeature(idx)}
+                  className={cn(
+                    'w-full p-4 rounded-[12px] border transition-all text-left flex items-start gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#028051] cursor-pointer',
+                    isSelected
+                      ? 'bg-[#181D18] border-[#028051] shadow-sm'
+                      : 'bg-[#141614] border-[#242824] hover:bg-[#1A1D1A] hover:border-[#2C302C]'
+                  )}
+                >
+                  <div
+                    className={cn(
+                      'w-9 h-9 rounded-[8px] border flex items-center justify-center font-mono text-xs font-bold shrink-0',
+                      isSelected
+                        ? 'bg-[#028051] text-white border-[#03A066]'
+                        : 'bg-[#1E221E] text-[#8C908C] border-[#282C28]'
+                    )}
                   >
-                    <div className="w-8 h-8 rounded-[7px] bg-[#1F231F] border border-[#282C28] flex items-center justify-center font-mono text-[11px] font-bold text-[#03A066] group-hover:bg-[#028051] group-hover:text-white transition-colors shrink-0">
-                      {feat.num}
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="text-sm font-heading font-bold text-[#EDEDED] group-hover:text-white transition-colors">
+                    {feat.num}
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between">
+                      <h3
+                        className={cn(
+                          'text-base font-heading font-bold',
+                          isSelected ? 'text-white' : 'text-[#EDEDED]'
+                        )}
+                      >
                         {feat.title}
-                      </h4>
-                      <p className="text-xs text-[#8C908C] font-body mt-0.5 leading-snug">
-                        {feat.description}
-                      </p>
+                      </h3>
+                      {isSelected ? (
+                        <span className="text-xs font-mono text-[#03A066] font-bold">
+                          ACTIVE →
+                        </span>
+                      ) : (
+                        <ArrowRight className="w-4 h-4 text-[#4A4E4A]" />
+                      )}
                     </div>
-                  </motion.div>
-                );
-              })}
-            </div>
+                    <p className="text-xs sm:text-sm text-[#8C908C] font-body mt-1 leading-relaxed">
+                      {feat.description}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
 
-          {/* RIGHT: Hacker Dashboard Demo & Mascot */}
-          <div className="lg:col-span-7 relative z-10">
-            
-            {/* Mascot Robot Annotation */}
-            <div className="absolute -top-12 sm:-top-14 right-4 sm:right-6 z-30 pointer-events-auto">
-              <MascotRobot speechText={"Build stuff.\nWe'll handle the paperwork."} />
+          {/* RIGHT: Large Interactive Contestant Portal Demo + Mascot */}
+          <div className="lg:col-span-6 lg:sticky lg:top-28 relative">
+            {/* Mascot Robot positioned with builder note */}
+            <div className="absolute -top-14 sm:-top-16 right-4 sm:right-6 z-30 pointer-events-auto">
+              <MascotRobot
+                variant="working"
+                speechText={"Ship code.\nWe'll handle the rest."}
+              />
             </div>
 
-            {/* Decorative Corner Framing */}
+            {/* Decorative Grid Frame */}
             <div
-              className="absolute -inset-3 bg-gradient-to-br from-[#028051]/10 via-transparent to-transparent rounded-[20px] -z-10 border border-[#282C28]/40"
+              className="absolute -inset-4 bg-gradient-to-tl from-[#028051]/15 via-transparent to-transparent rounded-[24px] -z-10 border border-[#282C28]/50"
               aria-hidden="true"
             />
 
-            {/* Product Demo */}
-            <motion.div
-              initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.98, y: 16 }}
-              whileInView={{ opacity: 1, scale: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
-            >
-              <HackerDashboardDemo />
-            </motion.div>
+            <HackerDashboardDemo
+              initialTab={hackerFeatures[selectedHackerFeature].tabTarget}
+            />
           </div>
 
         </div>
-
-        {/* ==================================================== */}
-        {/* BOTTOM INSIGHT: Visual Rest & Supporting Proof       */}
-        {/* ==================================================== */}
-        <motion.div
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="mt-16 lg:mt-24 p-5 rounded-[12px] bg-[#161816] border border-[#242824] flex flex-col sm:flex-row items-center justify-between gap-4 text-left"
-        >
-          <div className="flex items-center gap-3">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#03A066] shrink-0 animate-pulse" />
-            <p className="text-sm font-mono text-[#C2C6C2]">
-              <strong className="text-white">Zero spreadsheet sync errors.</strong> Builders focus on code, architecture, and shipping.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-xs font-mono text-[#03A066] font-semibold shrink-0">
-            <span>Automated Repo Verification Active</span>
-            <Sparkles className="w-3.5 h-3.5" />
-          </div>
-        </motion.div>
 
       </div>
     </section>

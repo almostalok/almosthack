@@ -1,0 +1,11 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="6" y="8" width="36" height="32" rx="3" fill="#181A18" stroke="#028051" stroke-width="1.5"/>
+  <line x1="6" y1="16" x2="42" y2="16" stroke="#282C28" stroke-width="1.5"/>
+  <line x1="6" y1="24" x2="42" y2="24" stroke="#282C28" stroke-width="1.5"/>
+  <line x1="6" y1="32" x2="42" y2="32" stroke="#282C28" stroke-width="1.5"/>
+  <line x1="18" y1="8" x2="18" y2="40" stroke="#282C28" stroke-width="1.5"/>
+  <line x1="30" y1="8" x2="30" y2="40" stroke="#282C28" stroke-width="1.5"/>
+  <!-- Corrupted formula cell #REF! -->
+  <rect x="19" y="17" width="10" height="6" fill="#222822"/>
+  <line x1="21" y1="20" x2="27" y2="20" stroke="#5EEAD4" stroke-width="1.5"/>
+</svg>

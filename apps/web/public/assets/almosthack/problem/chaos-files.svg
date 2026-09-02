@@ -1,0 +1,8 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="8" y="14" width="26" height="24" rx="3" fill="#161816" stroke="#282C28" stroke-width="1.5" transform="rotate(-6 8 14)"/>
+  <rect x="14" y="10" width="26" height="26" rx="3" fill="#181A18" stroke="#028051" stroke-width="1.5"/>
+  <line x1="20" y1="18" x2="32" y2="18" stroke="#EDEDED" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="20" y1="24" x2="28" y2="24" stroke="#5EEAD4" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Question mark -->
+  <text x="32" y="32" fill="#03A066" font-size="12" font-family="monospace" font-weight="bold">?</text>
+</svg>

@@ -447,11 +447,21 @@ export const ResultPanel: React.FC = () => {
 // ==========================================
 export interface HackerDashboardDemoProps {
   className?: string;
+  initialTab?: 'overview' | 'submission' | 'judging' | 'results';
 }
 
-export const HackerDashboardDemo: React.FC<HackerDashboardDemoProps> = ({ className }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'submission' | 'judging' | 'results'>('overview');
+export const HackerDashboardDemo: React.FC<HackerDashboardDemoProps> = ({
+  className,
+  initialTab = 'overview',
+}) => {
+  const [activeTab, setActiveTab] = useState<'overview' | 'submission' | 'judging' | 'results'>(initialTab);
   const shouldReduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
 
   return (
     <div

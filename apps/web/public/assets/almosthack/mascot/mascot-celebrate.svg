@@ -1,0 +1,23 @@
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Confetti Pixels -->
+  <rect x="12" y="14" width="3" height="3" fill="#5EEAD4"/>
+  <rect x="22" y="8" width="4" height="2" fill="#03A066"/>
+  <rect x="64" y="12" width="3" height="3" fill="#5EEAD4"/>
+  <rect x="56" y="6" width="2" height="4" fill="#03A066"/>
+  <!-- Antenna -->
+  <line x1="40" y1="8" x2="40" y2="18" stroke="#028051" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="40" cy="7" r="4" fill="#03A066"/>
+  <!-- Head -->
+  <rect x="18" y="18" width="44" height="32" rx="8" fill="#161816" stroke="#028051" stroke-width="2.5"/>
+  <!-- Visor with Happy Arch Eyes (^^) -->
+  <rect x="24" y="24" width="32" height="18" rx="4" fill="#0A1F14" stroke="#03A066" stroke-width="1.5"/>
+  <path d="M29 34C29 31 34 31 34 34" stroke="#03A066" stroke-width="2" stroke-linecap="round"/>
+  <path d="M45 34C45 31 50 31 50 34" stroke="#03A066" stroke-width="2" stroke-linecap="round"/>
+  <path d="M37 38H43" stroke="#03A066" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Torso -->
+  <path d="M24 54C24 52.8954 24.8954 52 26 52H54C55.1046 52 56 52.8954 56 54V66C56 68.2091 54.2091 70 52 70H28C25.7909 70 24 68.2091 24 66V54Z" fill="#161816" stroke="#028051" stroke-width="2"/>
+  <!-- Trophy in Hand -->
+  <path d="M60 52L68 46V54C68 56 66 58 64 58H62" stroke="#5EEAD4" stroke-width="2" stroke-linecap="round"/>
+  <path d="M64 44H72V50C72 52 70 54 68 54" stroke="#5EEAD4" stroke-width="2" stroke-linecap="round"/>
+  <path d="M68 54V60M64 60H72" stroke="#5EEAD4" stroke-width="2" stroke-linecap="round"/>
+</svg>

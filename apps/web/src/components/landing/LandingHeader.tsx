@@ -15,8 +15,9 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ onBookDemo, classN
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { label: 'For Organizers', href: '#organizers' },
+    { label: 'For Organizers', href: '#organizer-experience' },
     { label: 'For Hackers', href: '#hackers' },
+    { label: 'Transparency', href: '#transparency' },
     { label: 'How It Works', href: '#how-it-works' },
     { label: 'Features', href: '#features' },
   ];
@@ -35,25 +36,25 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ onBookDemo, classN
   return (
     <header
       className={cn(
-        'sticky top-0 z-50 w-full bg-[#131413]/90 backdrop-blur-md border-b border-[#222622] transition-colors',
+        'sticky top-0 z-50 w-full bg-[#131413]/92 backdrop-blur-md border-b border-[#222622] transition-colors',
         className
       )}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 h-20 flex items-center justify-between">
         {/* Left: Brand Logo */}
         <Link
           href="/"
-          className="flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#028051] rounded-lg p-1"
+          className="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#028051] rounded-lg p-1"
           aria-label="AlmostHack Homepage"
         >
-          <div className="w-8 h-8 rounded-[8px] bg-[#028051] flex items-center justify-center font-heading font-extrabold text-sm text-white shadow-sm group-hover:bg-[#03A066] transition-colors border border-[#03A066]/40">
+          <div className="w-10 h-10 rounded-[10px] bg-[#028051] flex items-center justify-center font-heading font-extrabold text-base text-white shadow-sm group-hover:bg-[#03A066] transition-colors border border-[#03A066]/50">
             AH
           </div>
           <div className="flex flex-col text-left">
-            <span className="font-heading font-extrabold text-base tracking-tight text-white leading-none">
+            <span className="font-heading font-extrabold text-xl tracking-tight text-white leading-none">
               almosthack
             </span>
-            <span className="text-[10px] font-mono text-[#737373] tracking-wider uppercase mt-0.5">
+            <span className="text-[11px] font-mono text-[#737373] tracking-wider uppercase mt-1">
               hackathon os
             </span>
           </div>
@@ -66,7 +67,7 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ onBookDemo, classN
               key={link.label}
               href={link.href}
               onClick={(e) => handleScrollTo(e, link.href)}
-              className="text-sm font-medium text-[#A3A3A3] hover:text-white transition-colors focus-visible:outline-none focus-visible:text-white focus-visible:ring-1 focus-visible:ring-[#028051] rounded px-1.5 py-0.5"
+              className="text-[15px] font-medium text-[#A3A3A3] hover:text-white transition-colors focus-visible:outline-none focus-visible:text-white focus-visible:ring-1 focus-visible:ring-[#028051] rounded px-2 py-1"
             >
               {link.label}
             </a>
@@ -74,10 +75,10 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ onBookDemo, classN
         </nav>
 
         {/* Right: Actions */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-5">
           <Link
             href="/login"
-            className="text-sm font-medium text-[#A3A3A3] hover:text-white transition-colors px-3 py-1.5 rounded-[8px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#028051]"
+            className="text-[15px] font-medium text-[#A3A3A3] hover:text-white transition-colors px-3 py-2 rounded-[8px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#028051]"
           >
             Log in
           </Link>
@@ -88,7 +89,7 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ onBookDemo, classN
               const target = document.querySelector('#book-demo') || document.querySelector('#hero');
               if (target) target.scrollIntoView({ behavior: 'smooth' });
             })}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-white bg-[#028051] hover:bg-[#03A066] active:bg-[#015033] px-4 py-2 rounded-[10px] shadow-sm transition-all border border-[#03A066]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#028051] focus-visible:ring-offset-2 focus-visible:ring-offset-[#131413] cursor-pointer"
+            className="inline-flex items-center gap-2 text-[15px] font-semibold text-white bg-[#028051] hover:bg-[#03A066] active:bg-[#015033] px-5 py-2.5 rounded-[10px] shadow-sm transition-all border border-[#03A066]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#028051] focus-visible:ring-offset-2 focus-visible:ring-offset-[#131413] cursor-pointer"
           >
             <span>Book a Demo</span>
             <ArrowRight className="w-4 h-4" />
@@ -100,11 +101,11 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ onBookDemo, classN
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-[8px] text-[#A3A3A3] hover:text-white hover:bg-[#1A1C1A] border border-[#282C28] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#028051]"
+            className="p-2.5 rounded-[8px] text-[#A3A3A3] hover:text-white hover:bg-[#1A1D1A] border border-[#282C28] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#028051]"
             aria-expanded={mobileMenuOpen}
             aria-label="Toggle navigation menu"
           >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </div>
@@ -117,25 +118,25 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ onBookDemo, classN
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2, ease: 'easeInOut' }}
-            className="md:hidden border-b border-[#222622] bg-[#161816] px-4 pt-3 pb-6 space-y-4"
+            className="md:hidden border-b border-[#222622] bg-[#161816] px-5 pt-4 pb-7 space-y-4"
           >
-            <nav className="flex flex-col space-y-2">
+            <nav className="flex flex-col space-y-2.5">
               {navLinks.map((link) => (
                 <a
                   key={link.label}
                   href={link.href}
                   onClick={(e) => handleScrollTo(e, link.href)}
-                  className="px-3 py-2 rounded-[8px] text-sm font-medium text-[#A3A3A3] hover:text-white hover:bg-[#1F231F] transition-colors"
+                  className="px-3.5 py-2.5 rounded-[8px] text-base font-medium text-[#A3A3A3] hover:text-white hover:bg-[#1F231F] transition-colors"
                 >
                   {link.label}
                 </a>
               ))}
             </nav>
 
-            <div className="pt-3 border-t border-[#282C28] flex flex-col gap-2.5">
+            <div className="pt-4 border-t border-[#282C28] flex flex-col gap-3">
               <Link
                 href="/login"
-                className="w-full text-center py-2 text-sm font-medium text-[#EDEDED] bg-[#1A1C1A] hover:bg-[#222622] border border-[#282C28] rounded-[10px]"
+                className="w-full text-center py-2.5 text-base font-medium text-[#EDEDED] bg-[#1A1D1A] hover:bg-[#222622] border border-[#282C28] rounded-[10px]"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Log in
@@ -151,7 +152,7 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ onBookDemo, classN
                     if (target) target.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="w-full inline-flex items-center justify-center gap-2 py-2.5 text-sm font-semibold text-white bg-[#028051] hover:bg-[#03A066] active:bg-[#015033] rounded-[10px] shadow-sm transition-colors border border-[#03A066]/50"
+                className="w-full inline-flex items-center justify-center gap-2 py-3 text-base font-semibold text-white bg-[#028051] hover:bg-[#03A066] active:bg-[#015033] rounded-[10px] shadow-sm transition-colors border border-[#03A066]/50"
               >
                 <span>Book a Demo</span>
                 <ArrowRight className="w-4 h-4" />

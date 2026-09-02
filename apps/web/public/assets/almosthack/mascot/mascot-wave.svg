@@ -1,0 +1,27 @@
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Antenna -->
+  <line x1="40" y1="8" x2="40" y2="18" stroke="#028051" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="40" cy="7" r="4" fill="#03A066"/>
+  <circle cx="40" cy="7" r="2" fill="#FFFFFF"/>
+  <!-- Side Bolts -->
+  <rect x="14" y="28" width="4" height="8" rx="1.5" fill="#282C28" stroke="#028051" stroke-width="1.5"/>
+  <rect x="62" y="28" width="4" height="8" rx="1.5" fill="#282C28" stroke="#028051" stroke-width="1.5"/>
+  <!-- Head -->
+  <rect x="18" y="18" width="44" height="32" rx="8" fill="#161816" stroke="#028051" stroke-width="2.5"/>
+  <!-- Visor -->
+  <rect x="24" y="24" width="32" height="18" rx="4" fill="#0A1F14" stroke="#03A066" stroke-width="1.5"/>
+  <!-- Waving Visor Eyes (Happy ^^) -->
+  <path d="M29 33C29 30 33 30 33 33" stroke="#03A066" stroke-width="2" stroke-linecap="round"/>
+  <path d="M47 33C47 30 51 30 51 33" stroke="#03A066" stroke-width="2" stroke-linecap="round"/>
+  <path d="M37 38H43" stroke="#03A066" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Waving Arm (Right) -->
+  <path d="M56 56L68 44L72 48" stroke="#028051" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="72" cy="48" r="3" fill="#03A066"/>
+  <!-- Sparkles near hand -->
+  <path d="M74 38L75 41L78 42L75 43L74 46L73 43L70 42L73 41L74 38Z" fill="#5EEAD4"/>
+  <!-- Neck & Torso -->
+  <rect x="35" y="50" width="10" height="4" rx="1" fill="#282C28"/>
+  <path d="M24 54C24 52.8954 24.8954 52 26 52H54C55.1046 52 56 52.8954 56 54V66C56 68.2091 54.2091 70 52 70H28C25.7909 70 24 68.2091 24 66V54Z" fill="#161816" stroke="#028051" stroke-width="2"/>
+  <rect x="36" y="58" width="8" height="6" rx="2" fill="#0A1F14" stroke="#03A066" stroke-width="1"/>
+  <circle cx="40" cy="61" r="1.5" fill="#03A066"/>
+</svg>

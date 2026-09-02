@@ -96,6 +96,8 @@ export const RegistrationGrowthChart: React.FC<RegistrationGrowthChartProps> = (
             <svg
               viewBox={`0 0 ${width} ${height}`}
               className="w-full h-full overflow-visible"
+              role="img"
+              aria-label={`Registration Growth Chart showing ${data[data.length - 1]?.cumulative || 0} total builders across ${data.length} intervals`}
             >
               <defs>
                 <linearGradient id="regGrad" x1="0" y1="0" x2="0" y2="1">

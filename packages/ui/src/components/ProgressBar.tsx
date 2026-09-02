@@ -35,8 +35,20 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
     peach: 'bg-[#F3C9B2]',
   };
 
+  const ariaValueText = label
+    ? `${label}: ${percentage}%`
+    : `${percentage}% complete`;
+
   return (
-    <div className={cn('w-full flex flex-col gap-1.5 text-left', className)}>
+    <div
+      className={cn('w-full flex flex-col gap-1.5 text-left', className)}
+      role="progressbar"
+      aria-valuenow={percentage}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuetext={ariaValueText}
+      aria-label={label || 'Progress'}
+    >
       {(label || showPercentage) && (
         <div className="flex justify-between items-center text-xs font-mono text-[#6D7068]">
           {label && <span className="font-medium">{label}</span>}

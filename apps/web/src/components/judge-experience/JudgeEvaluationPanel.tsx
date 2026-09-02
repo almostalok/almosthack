@@ -117,6 +117,10 @@ export const JudgeEvaluationPanel: React.FC<JudgeEvaluationPanelProps> = ({
                   step={0.5}
                   value={currentScore}
                   disabled={isEvaluated}
+                  aria-valuemin={0}
+                  aria-valuemax={max}
+                  aria-valuenow={currentScore}
+                  aria-valuetext={`${currentScore} out of ${max} for ${c.name}`}
                   onChange={(e) =>
                     onScoreChange(c.id, parseFloat(e.target.value))
                   }
@@ -137,6 +141,7 @@ export const JudgeEvaluationPanel: React.FC<JudgeEvaluationPanelProps> = ({
                 disabled={isEvaluated}
                 onChange={(e) => onCommentChange(c.id, e.target.value)}
                 placeholder="Optional criterion note..."
+                aria-label={`Optional notes for criterion ${c.name}`}
                 className="w-full px-2.5 py-1.5 bg-[#FFFDF8] border border-[#DCDDD3] rounded-[4px] text-xs font-body text-[#171914] placeholder-[#6D7068] focus:outline-none focus:border-[#028051] disabled:opacity-50"
               />
             </div>

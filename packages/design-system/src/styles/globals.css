@@ -65,6 +65,12 @@
     color: #274535;
   }
 
+  /* Universal focus ring for accessible keyboard navigation */
+  :focus-visible {
+    outline: 2px solid #028051;
+    outline-offset: 2px;
+  }
+
   /* Headings Typography */
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-baloo), 'Baloo 2', cursive, sans-serif;
@@ -91,5 +97,17 @@
   }
   ::-webkit-scrollbar-thumb:hover {
     background: #6D7068;
+  }
+
+  /* Reduced motion preference honoring */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }

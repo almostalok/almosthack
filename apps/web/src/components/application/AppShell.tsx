@@ -50,10 +50,18 @@ export const AppShell: React.FC<AppShellProps> = ({
   return (
     <div
       className={cn(
-        'flex h-screen w-screen overflow-hidden bg-[#F7F4EA] text-[#171914] font-body text-left antialiased',
+        'flex h-screen w-screen overflow-hidden bg-[#F7F4EA] text-[#171914] font-body text-left antialiased relative',
         className
       )}
     >
+      {/* Skip to Main Content Link for Keyboard / Screen Reader Navigation */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#355C45] focus:text-[#FFFDF8] focus:rounded-[8px] focus:font-mono focus:text-xs focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#355C45]"
+      >
+        Skip to main content
+      </a>
+
       {/* Desktop Persistent Sidebar */}
       <div className="hidden lg:flex h-full shrink-0">
         <AppSidebar

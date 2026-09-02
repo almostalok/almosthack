@@ -22,6 +22,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       leftIcon,
       rightIcon,
       disabled,
+      type = 'button',
       ...props
     },
     ref
@@ -49,22 +50,27 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const sizes = {
-      sm: 'h-8 px-3 text-xs gap-1.5',
-      md: 'h-9 px-4 text-sm gap-2',
-      lg: 'h-11 px-5 text-base gap-2.5 rounded-[12px]',
+      sm: 'min-h-[32px] px-3 text-xs gap-1.5',
+      md: 'min-h-[38px] px-4 text-sm gap-2',
+      lg: 'min-h-[44px] px-5 text-base gap-2.5 rounded-[12px]',
     };
 
     return (
       <motion.button
         ref={ref}
+        type={type}
         whileTap={{ scale: 0.985 }}
         transition={{ duration: 0.1, ease: 'easeOut' }}
         disabled={disabled || isLoading}
+        aria-busy={isLoading ? true : undefined}
         className={cn(baseStyles, variants[normalizedVariant] || variants.primary, sizes[size], className)}
         {...props}
       >
         {isLoading ? (
-          <span className="animate-spin mr-1.5 h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full" />
+          <span
+            className="animate-spin mr-1.5 h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full"
+            aria-hidden="true"
+          />
         ) : (
           leftIcon
         )}

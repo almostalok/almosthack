@@ -105,6 +105,7 @@ export const HackerHeroCommandCenter: React.FC<HackerHeroCommandCenterProps> = (
             <select
               id="hackathon-switcher"
               value={activeHackathon.id}
+              aria-label="Switch active hackathon workspace"
               onChange={(e) => onSelectHackathon(e.target.value)}
               className="px-3 py-1.5 bg-[#F7F4EA] border border-[#DCDDD3] rounded-[6px] text-xs font-mono font-bold text-[#171914] focus:outline-none focus:border-[#028051] cursor-pointer"
             >

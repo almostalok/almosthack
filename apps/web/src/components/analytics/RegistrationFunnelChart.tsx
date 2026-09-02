@@ -90,7 +90,15 @@ export const RegistrationFunnelChart: React.FC<RegistrationFunnelChartProps> = (
                 </div>
 
                 {/* Progress bar */}
-                <div className="h-2 w-full bg-[#EAE7DC] rounded-full overflow-hidden">
+                <div
+                  className="h-2 w-full bg-[#EAE7DC] rounded-full overflow-hidden"
+                  role="progressbar"
+                  aria-valuenow={st.percentage}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`${st.stage} conversion progress`}
+                  aria-valuetext={`${st.stage}: ${st.count} participants (${st.percentage}%)`}
+                >
                   <div
                     style={{ width: `${st.percentage}%` }}
                     className="h-full bg-[#028051] rounded-full transition-all duration-300"

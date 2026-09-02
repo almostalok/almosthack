@@ -18,6 +18,8 @@ export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElemen
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
   ({ className, label, error, hint, options, id, disabled, children, ...props }, ref) => {
     const selectId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
+    const errorId = selectId ? `${selectId}-error` : undefined;
+    const hintId = selectId ? `${selectId}-hint` : undefined;
 
     return (
       <div className="w-full flex flex-col gap-1.5 text-left">
@@ -31,6 +33,8 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             id={selectId}
             ref={ref}
             disabled={disabled}
+            aria-invalid={!!error}
+            aria-describedby={error ? errorId : hint ? hintId : undefined}
             className={cn(
               'w-full h-10 bg-[#FFFDF8] text-[#171914] text-sm border border-[#DCDDD3] rounded-[10px] pl-3 pr-9 font-body transition-all appearance-none cursor-pointer focus:outline-none focus:border-[#355C45] focus:ring-2 focus:ring-[#355C45]/20 disabled:opacity-50 disabled:bg-[#F7F4EA] disabled:cursor-not-allowed shadow-2xs',
               error && 'border-[#F3C9B2] focus:border-[#8B2C24] focus:ring-[#8B2C24]/20',
@@ -51,9 +55,13 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           </div>
         </div>
         {error ? (
-          <span className="text-xs text-[#8B2C24] font-mono">{error}</span>
+          <span id={errorId} role="alert" className="text-xs text-[#8B2C24] font-mono">
+            {error}
+          </span>
         ) : hint ? (
-          <span className="text-xs text-[#6D7068] font-body">{hint}</span>
+          <span id={hintId} className="text-xs text-[#6D7068] font-body">
+            {hint}
+          </span>
         ) : null}
       </div>
     );

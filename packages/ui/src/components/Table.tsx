@@ -11,7 +11,12 @@ export const Table: React.FC<TableProps> = ({
   children,
   ...props
 }) => (
-  <div className="w-full overflow-x-auto border border-[#DCDDD3] rounded-[14px] bg-[#FFFDF8] shadow-xs">
+  <div
+    tabIndex={0}
+    role="region"
+    aria-label="Data table"
+    className="w-full overflow-x-auto border border-[#DCDDD3] rounded-[14px] bg-[#FFFDF8] shadow-xs focus-visible:ring-1 focus-visible:ring-[#028051]"
+  >
     <table className={cn('w-full text-left text-xs font-body text-[#171914]', compact ? 'text-xs' : 'text-sm', className)} {...props}>
       {children}
     </table>
@@ -51,9 +56,10 @@ export const TableRow: React.FC<React.HTMLAttributes<HTMLTableRowElement>> = ({
 export const TableHead: React.FC<React.ThHTMLAttributes<HTMLTableCellElement>> = ({
   className,
   children,
+  scope = 'col',
   ...props
 }) => (
-  <th className={cn('px-5 py-3.5 font-semibold text-[#6D7068] text-left select-none', className)} {...props}>
+  <th scope={scope} className={cn('px-5 py-3.5 font-semibold text-[#6D7068] text-left select-none', className)} {...props}>
     {children}
   </th>
 );

@@ -125,6 +125,7 @@ export const HackerProgressMilestones: React.FC<HackerProgressMilestonesProps> =
           return (
             <div
               key={s.id}
+              aria-label={`Milestone ${idx + 1}: ${s.label} (${s.detail})`}
               className={`p-3 rounded-[8px] border transition-all flex flex-col justify-between space-y-2 ${getStatusBadgeClass(
                 s.status
               )}`}

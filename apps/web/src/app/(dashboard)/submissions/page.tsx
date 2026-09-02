@@ -7,9 +7,17 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { PageContainer } from '@/components/application';
 import { SubmissionsManagementView } from '@/components/submissions';
+import { HackerDashboardView } from '@/components/hacker-experience';
+import { useAuth } from '@/providers/auth-provider';
 import { Skeleton } from '@almosthack/ui';
 
 export default function GlobalSubmissionsPage() {
+  const { user } = useAuth();
+  const isParticipant =
+    user?.roles?.includes('PARTICIPANT') || user?.roles?.includes('HACKER');
+  const isOrganizer =
+    user?.roles?.includes('ORGANIZER') || user?.roles?.includes('ADMIN');
+
   const { data: orgs = [], isLoading } = useQuery({
     queryKey: ['user-organizations'],
     queryFn: async () => {
@@ -29,6 +37,14 @@ export default function GlobalSubmissionsPage() {
       <PageContainer maxWidth="7xl" className="space-y-6">
         <Skeleton className="h-10 w-64 rounded-[8px]" />
         <Skeleton className="h-96 rounded-[12px]" />
+      </PageContainer>
+    );
+  }
+
+  if (isParticipant && !isOrganizer) {
+    return (
+      <PageContainer maxWidth="7xl" className="space-y-6">
+        <HackerDashboardView initialTab="submission" />
       </PageContainer>
     );
   }

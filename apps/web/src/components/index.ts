@@ -29,3 +29,5 @@ export type {
   ActiveHackathonContext,
 } from './dashboard';
 export * from './workspace';
+export * from './create-hackathon';
+export * from './configuration';

@@ -12,6 +12,7 @@ import {
   Scale,
   Award,
   Trophy,
+  Stamp,
   Megaphone,
   ShieldCheck,
   Settings,
@@ -78,6 +79,12 @@ export const WorkspaceNavigation: React.FC<WorkspaceNavigationProps> = ({
       label: 'Results',
       href: `/hackathons/${hackathonId}/results`,
       icon: Award,
+    },
+    {
+      id: 'certificates',
+      label: 'Certificates',
+      href: `/hackathons/${hackathonId}/certificates`,
+      icon: Stamp,
     },
     {
       id: 'announcements',

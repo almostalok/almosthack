@@ -37,3 +37,4 @@ export * from './submissions';
 export * from './judging';
 export * from './transparent-judging';
 export * from './results';
+export * from './certificates';

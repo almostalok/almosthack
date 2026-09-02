@@ -42,3 +42,4 @@ export * from './analytics';
 export * from './announcements';
 export * from './audit-log';
 export * from './judge-experience';
+export * from './hacker-experience';

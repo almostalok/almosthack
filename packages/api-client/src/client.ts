@@ -244,8 +244,20 @@ export class ApiClient {
     return this.get<T>(`/organizations/${organizationId}/hackathons`, options);
   }
 
+  public getHackathons<T = any>(options?: RequestOptions): Promise<T> {
+    return this.get<T>('/hackathons', options);
+  }
+
   public getHackathon<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
     return this.get<T>(`/hackathons/${hackathonId}`, options);
+  }
+
+  public getHackathonAnnouncements<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/hackathons/${hackathonId}/announcements`, options);
+  }
+
+  public getUserCertificates<T = any>(userId: string, options?: RequestOptions): Promise<T> {
+    return this.get<T>(`/users/${userId}/certificates`, options);
   }
 
   public getHackathonLifecycle<T = any>(hackathonId: string, options?: RequestOptions): Promise<T> {

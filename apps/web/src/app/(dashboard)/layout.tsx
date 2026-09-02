@@ -1,17 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { DashboardShell, CommandPalette, Badge, Button } from '@almosthack/ui';
-import { useKeyboardShortcuts } from '@almosthack/hooks';
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { AppShell } from '../../components/application';
 import { useAuth } from '../../providers/auth-provider';
-import { NotificationBell } from '../../components/notifications/NotificationBell';
+import { RoleName } from '@almosthack/types';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
   const router = useRouter();
-  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -19,15 +16,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [isLoading, isAuthenticated, router]);
 
-  useKeyboardShortcuts({
-    'meta+k': () => setIsCommandPaletteOpen(true),
-    'ctrl+k': () => setIsCommandPaletteOpen(true),
-  });
-
   if (isLoading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-[#F7F4EA] text-[#6D7068] font-mono text-sm">
-        Hydrating session context...
+      <div className="flex h-screen w-screen items-center justify-center bg-[#F7F4EA] text-[#6D7068] font-mono text-xs">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 rounded-full border-2 border-[#DCDDD3] border-t-[#028051] animate-spin" />
+          <span>Hydrating AlmostHack application shell...</span>
+        </div>
       </div>
     );
   }
@@ -36,50 +31,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return null;
   }
 
-  const headerActions = (
-    <div className="flex items-center gap-3">
-      <NotificationBell />
-      <div className="hidden sm:flex flex-col text-right">
-        <span className="text-xs font-bold text-[#171914] font-body">{user.name}</span>
-        <span className="text-[10px] font-mono text-[#6D7068]">{user.email}</span>
-      </div>
-      <Badge variant="accent" size="sm">
-        {user.roles?.[0] || 'PARTICIPANT'}
-      </Badge>
-      <Button
-        variant="secondary"
-        size="sm"
-        onClick={async () => {
-          await logout();
-          router.push('/login');
-        }}
-        className="text-xs"
-      >
-        Logout
-      </Button>
-    </div>
-  );
+  const primaryRole = (user.roles?.[0] as RoleName) || RoleName.ORGANIZER;
 
   return (
-    <>
-      <DashboardShell
-        currentPath={pathname}
-        onNavigate={(href) => router.push(href)}
-        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
-        userName={user.name}
-        userEmail={user.email}
-        role={user.roles?.[0] || 'PARTICIPANT'}
-        headerActions={headerActions}
-      >
-        {children}
-      </DashboardShell>
-
-      {/* Raycast/Linear-style Command Palette Overlay */}
-      <CommandPalette
-        isOpen={isCommandPaletteOpen}
-        onClose={() => setIsCommandPaletteOpen(false)}
-        onSelectAction={(href) => router.push(href)}
-      />
-    </>
+    <AppShell initialRole={primaryRole}>
+      {children}
+    </AppShell>
   );
 }

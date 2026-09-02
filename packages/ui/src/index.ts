@@ -30,6 +30,8 @@ export * from './components/Popover';
 export * from './components/TopHeader';
 export * from './components/SidebarNav';
 export * from './components/DashboardShell';
+export * from './components/PageContainer';
+export * from './components/PageHeader';
 
 // AlmostHack-Specific Presentational Components & Assets
 export * from './components/ScoreBreakdown';

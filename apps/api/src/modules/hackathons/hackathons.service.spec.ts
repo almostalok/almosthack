@@ -439,8 +439,8 @@ describe('HackathonsService Unit Tests', () => {
       const liveRecord = {
         ...sampleHackathonRecord,
         status: HackathonStatus.PUBLISHED,
-        startsAt: new Date('2026-08-01T00:00:00Z'),
-        endsAt: new Date('2026-08-30T00:00:00Z'),
+        startsAt: new Date(Date.now() - 1000 * 3600 * 24),
+        endsAt: new Date(Date.now() + 1000 * 3600 * 24 * 10),
       };
       prisma.hackathon.findUnique.mockResolvedValue(liveRecord);
 

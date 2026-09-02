@@ -647,6 +647,28 @@ export class ApiClient {
   public cancelAnnouncement<T = any>(hackathonId: string, announcementId: string, options?: RequestOptions): Promise<T> {
     return this.post<T>(`/hackathons/${hackathonId}/announcements/${announcementId}/cancel`, {}, options);
   }
+
+  public getAuditLogs<T = any>(
+    params?: {
+      page?: number;
+      limit?: number;
+      action?: string;
+      actorId?: string;
+      targetEntity?: string;
+      targetId?: string;
+      startDate?: string;
+      endDate?: string;
+    },
+    options?: RequestOptions
+  ): Promise<T> {
+    return this.get<T>('/audit-logs', {
+      ...options,
+      params: {
+        ...options?.params,
+        ...params,
+      },
+    });
+  }
 }
 
 

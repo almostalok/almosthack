@@ -16,6 +16,7 @@ import {
   BarChart3,
   Megaphone,
   ShieldCheck,
+  ShieldAlert,
   Settings,
 } from 'lucide-react';
 import { cn } from '@almosthack/utils';
@@ -100,10 +101,16 @@ export const WorkspaceNavigation: React.FC<WorkspaceNavigationProps> = ({
       icon: Megaphone,
     },
     {
-      id: 'integrity',
-      label: 'Audit & Integrity',
-      href: `/hackathons/${hackathonId}/integrity`,
+      id: 'audit-log',
+      label: 'Audit Log',
+      href: `/hackathons/${hackathonId}/audit-log`,
       icon: ShieldCheck,
+    },
+    {
+      id: 'integrity',
+      label: 'Integrity Forensics',
+      href: `/hackathons/${hackathonId}/integrity`,
+      icon: ShieldAlert,
     },
     {
       id: 'settings',

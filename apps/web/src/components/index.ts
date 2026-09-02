@@ -32,3 +32,4 @@ export * from './workspace';
 export * from './create-hackathon';
 export * from './configuration';
 export * from './registrations';
+export * from './teams';

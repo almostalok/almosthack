@@ -52,7 +52,7 @@ export const WorkspaceNavigation: React.FC<WorkspaceNavigationProps> = ({
     {
       id: 'teams',
       label: 'Teams',
-      href: '/teams',
+      href: `/hackathons/${hackathonId}/teams`,
       icon: Users2,
     },
     {

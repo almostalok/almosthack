@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '@almosthack/utils';
-import { Breadcrumbs, BreadcrumbItem } from './Breadcrumbs';
+import { Breadcrumbs, BreadcrumbItem } from '@almosthack/ui';
 
 export interface PageHeaderProps {
   title: string;

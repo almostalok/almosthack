@@ -35,3 +35,4 @@ export * from './registrations';
 export * from './teams';
 export * from './submissions';
 export * from './judging';
+export * from './transparent-judging';

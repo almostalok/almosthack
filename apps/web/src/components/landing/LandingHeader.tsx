@@ -1,166 +1,263 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ArrowRight } from 'lucide-react';
-import { cn } from '@almosthack/utils';
+import { ChevronDown, ArrowRight, Menu, X, Sparkles } from 'lucide-react';
 
-export interface LandingHeaderProps {
+interface LandingHeaderProps {
   onBookDemo?: () => void;
-  className?: string;
 }
 
-export const LandingHeader: React.FC<LandingHeaderProps> = ({ onBookDemo, className }) => {
+export const LandingHeader: React.FC<LandingHeaderProps> = ({ onBookDemo }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [scrolled, setScrolled] = useState(false);
 
-  const navLinks = [
-    { label: 'For Organizers', href: '#organizer-experience' },
-    { label: 'For Hackers', href: '#hackers' },
-    { label: 'Transparency', href: '#transparency' },
-    { label: 'How It Works', href: '#how-it-works' },
-    { label: 'Features', href: '#features' },
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const navItems = [
+    {
+      label: 'Product',
+      hasDropdown: true,
+      items: [
+        { label: 'Overview', href: '#hero', desc: 'The entire hackathon OS' },
+        { label: 'Pipeline & Workflow', href: '#pipeline', desc: 'End-to-end operational flow' },
+        { label: 'Features Matrix', href: '#features', desc: 'All platform capabilities' },
+        { label: 'Command Center', href: '#command-center', desc: 'Real-time telemetry & controls' },
+      ],
+    },
+    {
+      label: 'For Organizers',
+      hasDropdown: true,
+      items: [
+        { label: 'Organizer Workspace', href: '#organizers', desc: 'Complete control without spreadsheets' },
+        { label: 'Team Management', href: '#pipeline', desc: 'Auto-formation & invite links' },
+        { label: 'Audit Logs & Integrity', href: '#pipeline', desc: 'Git commit audit trails' },
+      ],
+    },
+    {
+      label: 'For Judges',
+      hasDropdown: true,
+      items: [
+        { label: 'Judge Scoring Portal', href: '#judges', desc: 'Distraction-free rubrics' },
+        { label: 'Double-Blind Evaluation', href: '#judges', desc: 'Fair, unbiased consensus' },
+        { label: 'Transparent Judging', href: '#transparent-judging', desc: 'Explainable scorecards' },
+      ],
+    },
+    {
+      label: 'For Hackers',
+      hasDropdown: true,
+      items: [
+        { label: 'Hacker Experience', href: '#hackers', desc: 'Know exactly what to do next' },
+        { label: 'GitHub Submission', href: '#hackers', desc: 'Automatic repo sync & milestones' },
+        { label: 'Verifiable Certificates', href: '#certificates', desc: 'Cryptographic credentials' },
+      ],
+    },
+    {
+      label: 'Resources',
+      hasDropdown: true,
+      items: [
+        { label: 'How It Works', href: '#how-it-works', desc: '5-step event timeline' },
+        { label: 'FAQ', href: '#faq', desc: 'Frequently asked questions' },
+        { label: 'Documentation', href: '/docs', desc: 'Guides & API reference' },
+      ],
+    },
+    {
+      label: 'Pricing',
+      hasDropdown: false,
+      href: '#pricing',
+    },
   ];
 
-  const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    if (href.startsWith('#')) {
-      e.preventDefault();
-      const target = document.querySelector(href);
-      if (target) {
-        target.scrollIntoView({ behavior: 'smooth' });
-      }
-      setMobileMenuOpen(false);
-    }
-  };
-
   return (
-    <header
-      className={cn(
-        'sticky top-0 z-50 w-full bg-[#131413]/92 backdrop-blur-md border-b border-[#222622] transition-colors',
-        className
-      )}
-    >
-      <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 h-20 flex items-center justify-between">
-        {/* Left: Brand Logo */}
-        <Link
-          href="/"
-          className="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#028051] rounded-lg p-1"
-          aria-label="AlmostHack Homepage"
+    <header className="fixed top-3 sm:top-5 left-0 right-0 z-50 px-3 sm:px-6 pointer-events-none">
+      <div className="max-w-[1240px] mx-auto pointer-events-auto">
+        <nav
+          className={`flex items-center justify-between px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl bg-[#0F1210]/90 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.6)] transition-all duration-300 ${
+            scrolled ? 'bg-[#0B0D0C]/95 border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.8)]' : ''
+          }`}
+          aria-label="Main Navigation"
         >
-          <div className="w-10 h-10 rounded-[10px] bg-[#028051] flex items-center justify-center font-heading font-extrabold text-base text-white shadow-sm group-hover:bg-[#03A066] transition-colors border border-[#03A066]/50">
-            AH
-          </div>
-          <div className="flex flex-col text-left">
-            <span className="font-heading font-extrabold text-xl tracking-tight text-white leading-none">
-              almosthack
+          {/* Brand Logo */}
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 rounded-lg bg-[#028051] flex items-center justify-center shadow-[0_0_15px_rgba(2,128,81,0.6)] group-hover:scale-105 transition-transform">
+              {/* Modern AlmostHack clover/cross emblem */}
+              <div className="w-4 h-4 relative flex items-center justify-center">
+                <div className="w-2.5 h-2.5 border-2 border-[#A8E63B] rounded-sm transform rotate-45" />
+                <div className="absolute w-1 h-1 bg-white rounded-full" />
+              </div>
+            </div>
+            <span className="font-bold text-lg tracking-tight text-white group-hover:text-[#A8E63B] transition-colors">
+              AlmostHack
             </span>
-            <span className="text-[11px] font-mono text-[#737373] tracking-wider uppercase mt-1">
-              hackathon os
-            </span>
-          </div>
-        </Link>
-
-        {/* Center: Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8" aria-label="Main Navigation">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              onClick={(e) => handleScrollTo(e, link.href)}
-              className="text-[15px] font-medium text-[#A3A3A3] hover:text-white transition-colors focus-visible:outline-none focus-visible:text-white focus-visible:ring-1 focus-visible:ring-[#028051] rounded px-2 py-1"
-            >
-              {link.label}
-            </a>
-          ))}
-        </nav>
-
-        {/* Right: Actions */}
-        <div className="hidden md:flex items-center gap-5">
-          <Link
-            href="/login"
-            className="text-[15px] font-medium text-[#A3A3A3] hover:text-white transition-colors px-3 py-2 rounded-[8px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#028051]"
-          >
-            Log in
           </Link>
 
-          <button
-            type="button"
-            onClick={onBookDemo || (() => {
-              const target = document.querySelector('#book-demo') || document.querySelector('#hero');
-              if (target) target.scrollIntoView({ behavior: 'smooth' });
-            })}
-            className="inline-flex items-center gap-2 text-[15px] font-semibold text-white bg-[#028051] hover:bg-[#03A066] active:bg-[#015033] px-5 py-2.5 rounded-[10px] shadow-sm transition-all border border-[#03A066]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#028051] focus-visible:ring-offset-2 focus-visible:ring-offset-[#131413] cursor-pointer"
-          >
-            <span>Book a Demo</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
+          {/* Desktop Navigation Links */}
+          <div className="hidden lg:flex items-center gap-1 xl:gap-2">
+            {navItems.map((item) => (
+              <div
+                key={item.label}
+                className="relative"
+                onMouseEnter={() => item.hasDropdown && setActiveDropdown(item.label)}
+                onMouseLeave={() => item.hasDropdown && setActiveDropdown(null)}
+              >
+                {item.hasDropdown ? (
+                  <button
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-colors ${
+                      activeDropdown === item.label
+                        ? 'text-white bg-white/[0.06]'
+                        : 'text-[#A7AEA7] hover:text-white hover:bg-white/[0.04]'
+                    }`}
+                    aria-expanded={activeDropdown === item.label}
+                  >
+                    <span>{item.label}</span>
+                    <ChevronDown className={`w-3.5 h-3.5 text-[#737A73] transition-transform duration-200 ${
+                      activeDropdown === item.label ? 'rotate-180 text-white' : ''
+                    }`} />
+                  </button>
+                ) : (
+                  <a
+                    href={item.href || '#'}
+                    className="px-3 py-1.5 rounded-lg text-[13px] font-medium text-[#A7AEA7] hover:text-white hover:bg-white/[0.04] transition-colors inline-block"
+                  >
+                    {item.label}
+                  </a>
+                )}
 
-        {/* Mobile Hamburger Button */}
-        <div className="flex md:hidden items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2.5 rounded-[8px] text-[#A3A3A3] hover:text-white hover:bg-[#1A1D1A] border border-[#282C28] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#028051]"
-            aria-expanded={mobileMenuOpen}
-            aria-label="Toggle navigation menu"
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-        </div>
-      </div>
+                {/* Dropdown Menu */}
+                {item.hasDropdown && activeDropdown === item.label && (
+                  <div className="absolute top-full left-0 pt-2 w-64 animate-in fade-in slide-in-from-top-1 duration-150">
+                    <div className="p-2 rounded-xl bg-[#141815] border border-white/10 shadow-[0_16px_36px_rgba(0,0,0,0.8)] backdrop-blur-2xl">
+                      {item.items?.map((subItem) => (
+                        <a
+                          key={subItem.label}
+                          href={subItem.href}
+                          className="block p-2 rounded-lg hover:bg-white/[0.06] transition-colors group"
+                        >
+                          <div className="text-xs font-semibold text-white group-hover:text-[#A8E63B] transition-colors">
+                            {subItem.label}
+                          </div>
+                          {subItem.desc && (
+                            <div className="text-[11px] text-[#737A73] mt-0.5 leading-tight">
+                              {subItem.desc}
+                            </div>
+                          )}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
 
-      {/* Mobile Drawer Navigation */}
-      <AnimatePresence>
+          {/* Right Action CTAs */}
+          <div className="hidden sm:flex items-center gap-3">
+            <Link
+              href="/login"
+              className="px-3.5 py-1.5 text-[13px] font-medium text-[#A7AEA7] hover:text-white transition-colors"
+            >
+              Sign in
+            </Link>
+
+            <Link
+              href="/hackathons/new"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold bg-[#A8E63B] text-[#0B0D0C] hover:bg-[#bcf05b] hover:shadow-[0_0_20px_rgba(168,230,59,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+            >
+              <span>Create a Hackathon</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* Mobile Menu Toggle Button */}
+          <div className="flex sm:hidden items-center gap-2">
+            <Link
+              href="/hackathons/new"
+              className="px-3 py-1.5 rounded-full text-xs font-bold bg-[#A8E63B] text-[#0B0D0C]"
+            >
+              Create
+            </Link>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg text-[#A7AEA7] hover:text-white hover:bg-white/[0.06]"
+              aria-label="Toggle navigation menu"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
+        </nav>
+
+        {/* Mobile Dropdown Panel */}
         {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
-            className="md:hidden border-b border-[#222622] bg-[#161816] px-5 pt-4 pb-7 space-y-4"
-          >
-            <nav className="flex flex-col space-y-2.5">
-              {navLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  onClick={(e) => handleScrollTo(e, link.href)}
-                  className="px-3.5 py-2.5 rounded-[8px] text-base font-medium text-[#A3A3A3] hover:text-white hover:bg-[#1F231F] transition-colors"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </nav>
+          <div className="sm:hidden mt-2 p-4 rounded-2xl bg-[#0F1210]/95 backdrop-blur-2xl border border-white/10 shadow-2xl space-y-4">
+            <div className="space-y-1">
+              <a
+                href="#hero"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-lg text-sm font-medium text-white hover:bg-white/[0.06]"
+              >
+                Product
+              </a>
+              <a
+                href="#organizers"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-lg text-sm font-medium text-white hover:bg-white/[0.06]"
+              >
+                For Organizers
+              </a>
+              <a
+                href="#judges"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-lg text-sm font-medium text-white hover:bg-white/[0.06]"
+              >
+                For Judges
+              </a>
+              <a
+                href="#hackers"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-lg text-sm font-medium text-white hover:bg-white/[0.06]"
+              >
+                For Hackers
+              </a>
+              <a
+                href="#how-it-works"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-lg text-sm font-medium text-white hover:bg-white/[0.06]"
+              >
+                How It Works
+              </a>
+              <a
+                href="#faq"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-lg text-sm font-medium text-white hover:bg-white/[0.06]"
+              >
+                FAQ
+              </a>
+            </div>
 
-            <div className="pt-4 border-t border-[#282C28] flex flex-col gap-3">
+            <div className="pt-3 border-t border-white/[0.08] flex flex-col gap-2">
               <Link
                 href="/login"
-                className="w-full text-center py-2.5 text-base font-medium text-[#EDEDED] bg-[#1A1D1A] hover:bg-[#222622] border border-[#282C28] rounded-[10px]"
-                onClick={() => setMobileMenuOpen(false)}
+                className="w-full text-center py-2.5 rounded-xl text-sm font-medium text-white bg-white/[0.04] border border-white/[0.08]"
               >
-                Log in
+                Sign in
               </Link>
-              <button
-                type="button"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  if (onBookDemo) {
-                    onBookDemo();
-                  } else {
-                    const target = document.querySelector('#book-demo') || document.querySelector('#hero');
-                    if (target) target.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
-                className="w-full inline-flex items-center justify-center gap-2 py-3 text-base font-semibold text-white bg-[#028051] hover:bg-[#03A066] active:bg-[#015033] rounded-[10px] shadow-sm transition-colors border border-[#03A066]/50"
+              <Link
+                href="/hackathons/new"
+                className="w-full text-center py-2.5 rounded-xl text-sm font-bold bg-[#A8E63B] text-black"
               >
-                <span>Book a Demo</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+                Create a Hackathon →
+              </Link>
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
+      </div>
     </header>
   );
 };

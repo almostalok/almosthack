@@ -25,14 +25,14 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata = {
-  title: 'almosthack — The Transparent Hackathon Operating System',
-  description: 'Verifiable, auditable, and explainable hackathon operating system.',
+  title: 'AlmostHack — The Hackathon Operating System',
+  description: 'One platform to create, manage, judge and run your entire hackathon — without the chaos.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${baloo.variable} ${dmSans.variable} ${ibmPlexMono.variable}`}>
-      <body className="bg-[#F7F4EA] text-[#171914] min-h-screen antialiased selection:bg-[#E2EBDD] selection:text-[#274535] font-body">
+    <html lang="en" className={`dark ${baloo.variable} ${dmSans.variable} ${ibmPlexMono.variable}`}>
+      <body className="bg-[#0B0D0C] text-[#F5F7F4] min-h-screen antialiased selection:bg-[#A8E63B]/20 selection:text-[#A8E63B] font-body">
         <QueryProvider>
           <AuthProvider>{children}</AuthProvider>
         </QueryProvider>

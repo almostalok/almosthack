@@ -17,8 +17,8 @@ export const OrganizerFeaturesSection: React.FC = () => {
       title: 'Hackathon Management',
       description: "Create your event, define rules, configure tracks and launch when you're ready.",
       visual: (
-        <div className="mt-4 p-2.5 rounded-lg bg-[#0B0D0C]/80 border border-white/[0.06] text-[11px] font-mono space-y-1.5">
-          <div className="flex items-center justify-between text-[#A7AEA7]">
+        <div className="mt-4 p-2.5 rounded-lg bg-[#070908] border border-white/[0.06] text-[11px] font-mono space-y-1.5">
+          <div className="flex items-center justify-between text-[#9AA29A]">
             <span>Tracks Configured</span>
             <span className="text-[#A8E63B]">4 Active</span>
           </div>
@@ -35,8 +35,8 @@ export const OrganizerFeaturesSection: React.FC = () => {
       title: 'Registrations & Teams',
       description: 'Manage participants, teams, invites and participation from one place.',
       visual: (
-        <div className="mt-4 p-2.5 rounded-lg bg-[#0B0D0C]/80 border border-white/[0.06] text-[11px] font-mono space-y-1.5">
-          <div className="flex items-center justify-between text-[#A7AEA7]">
+        <div className="mt-4 p-2.5 rounded-lg bg-[#070908] border border-white/[0.06] text-[11px] font-mono space-y-1.5">
+          <div className="flex items-center justify-between text-[#9AA29A]">
             <span>Team Auto-Formation</span>
             <span className="text-[#A8E63B]">Enabled</span>
           </div>
@@ -52,13 +52,13 @@ export const OrganizerFeaturesSection: React.FC = () => {
       title: 'GitHub & Submissions',
       description: 'Connect repositories, track projects and collect structured submissions.',
       visual: (
-        <div className="mt-4 p-2.5 rounded-lg bg-[#0B0D0C]/80 border border-white/[0.06] text-[11px] font-mono space-y-1.5">
-          <div className="flex items-center justify-between text-[#A7AEA7]">
+        <div className="mt-4 p-2.5 rounded-lg bg-[#070908] border border-white/[0.06] text-[11px] font-mono space-y-1.5">
+          <div className="flex items-center justify-between text-[#9AA29A]">
             <span>Git Commit Auditing</span>
             <span className="text-[#A8E63B]">100% Synced</span>
           </div>
           <div className="text-[10px] text-[#737A73] truncate">
-            commit: <span className="text-white">a8f29c1</span> (during event window)
+            commit: <span className="text-white">a8f29c1</span> (during build window)
           </div>
         </div>
       ),
@@ -68,8 +68,8 @@ export const OrganizerFeaturesSection: React.FC = () => {
       title: 'Judging',
       description: 'Give judges everything they need to evaluate projects consistently and fairly.',
       visual: (
-        <div className="mt-4 p-2.5 rounded-lg bg-[#0B0D0C]/80 border border-white/[0.06] text-[11px] font-mono space-y-1.5">
-          <div className="flex items-center justify-between text-[#A7AEA7]">
+        <div className="mt-4 p-2.5 rounded-lg bg-[#070908] border border-white/[0.06] text-[11px] font-mono space-y-1.5">
+          <div className="flex items-center justify-between text-[#9AA29A]">
             <span>Rubric Consensus</span>
             <span className="text-[#A8E63B]">Double-Blind</span>
           </div>
@@ -87,8 +87,8 @@ export const OrganizerFeaturesSection: React.FC = () => {
       title: 'Transparent Results',
       description: 'Make scores, feedback and results clearer for participants.',
       visual: (
-        <div className="mt-4 p-2.5 rounded-lg bg-[#0B0D0C]/80 border border-white/[0.06] text-[11px] font-mono space-y-1.5">
-          <div className="flex items-center justify-between text-[#A7AEA7]">
+        <div className="mt-4 p-2.5 rounded-lg bg-[#070908] border border-white/[0.06] text-[11px] font-mono space-y-1.5">
+          <div className="flex items-center justify-between text-[#9AA29A]">
             <span>Leaderboard Consensus</span>
             <span className="text-[#A8E63B]">Published</span>
           </div>
@@ -104,8 +104,8 @@ export const OrganizerFeaturesSection: React.FC = () => {
       title: 'Certificates',
       description: 'Recognize participants, winners and contributors with verifiable certificates.',
       visual: (
-        <div className="mt-4 p-2.5 rounded-lg bg-[#0B0D0C]/80 border border-white/[0.06] text-[11px] font-mono space-y-1.5">
-          <div className="flex items-center justify-between text-[#A7AEA7]">
+        <div className="mt-4 p-2.5 rounded-lg bg-[#070908] border border-white/[0.06] text-[11px] font-mono space-y-1.5">
+          <div className="flex items-center justify-between text-[#9AA29A]">
             <span>Verifiable Credentials</span>
             <span className="text-[#A8E63B]">✓ Cryptographic</span>
           </div>
@@ -118,8 +118,8 @@ export const OrganizerFeaturesSection: React.FC = () => {
   ];
 
   return (
-    <section id="features" className="relative py-20 lg:py-28 bg-[#0B0D0C] border-t border-white/[0.06]">
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 text-center">
+    <section id="features" className="relative py-28 lg:py-36 bg-[#050706] border-t border-white/[0.06]">
+      <div className="max-w-[1240px] mx-auto px-4 sm:px-6 text-center">
         {/* Section Eyebrow & Title */}
         <div className="space-y-3 mb-14">
           <div className="text-[11px] font-mono tracking-widest text-[#A8E63B] uppercase font-semibold">
@@ -137,10 +137,10 @@ export const OrganizerFeaturesSection: React.FC = () => {
             return (
               <div
                 key={feature.title}
-                className="group p-6 rounded-2xl bg-[#111412] border border-white/[0.08] hover:border-white/20 hover:bg-[#151917] transition-all duration-300 shadow-xl flex flex-col justify-between"
+                className="group p-6 rounded-2xl bg-[#0E1210] border border-white/[0.08] hover:border-white/20 hover:bg-[#121713] transition-all duration-300 shadow-xl flex flex-col justify-between"
               >
                 <div>
-                  <div className="w-10 h-10 rounded-xl bg-[#151917] border border-white/10 flex items-center justify-center text-[#A8E63B] mb-4 group-hover:scale-105 group-hover:bg-[#1f2622] group-hover:border-[#A8E63B]/40 transition-all">
+                  <div className="w-10 h-10 rounded-xl bg-[#121713] border border-white/10 flex items-center justify-center text-[#A8E63B] mb-4 group-hover:scale-105 group-hover:bg-[#18201a] group-hover:border-[#A8E63B]/40 transition-all">
                     <Icon className="w-5 h-5" />
                   </div>
 
@@ -148,7 +148,7 @@ export const OrganizerFeaturesSection: React.FC = () => {
                     {feature.title}
                   </h3>
 
-                  <p className="text-xs sm:text-sm text-[#A7AEA7] leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#9AA29A] leading-relaxed">
                     {feature.description}
                   </p>
                 </div>

@@ -6,20 +6,15 @@ import {
   Trophy,
   Award,
   ArrowRight,
-  Users,
-  Activity,
-  Layers,
-  Sparkles,
-  CheckCircle2,
 } from 'lucide-react';
 
 export const SocialProofSection: React.FC = () => {
   return (
-    <section id="showcase-grid" className="relative py-20 lg:py-28 bg-[#0B0D0C] border-t border-white/[0.06]">
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+    <section id="showcase-grid" className="relative py-28 lg:py-36 bg-[#050706] border-t border-white/[0.06]">
+      <div className="max-w-[1240px] mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Card 1: RESULTS DAY */}
-          <div className="p-6 sm:p-7 rounded-2xl bg-[#111412] border border-white/[0.08] flex flex-col justify-between hover:border-white/20 transition-all duration-300 shadow-xl group">
+          <div className="p-6 sm:p-7 rounded-2xl bg-[#0E1210] border border-white/[0.08] flex flex-col justify-between hover:border-white/20 transition-all duration-300 shadow-xl group">
             <div className="space-y-4">
               <div className="text-[11px] font-mono tracking-widest text-amber-400 uppercase font-semibold">
                 RESULTS DAY
@@ -29,9 +24,16 @@ export const SocialProofSection: React.FC = () => {
                 Make results clear <br /> and credible.
               </h3>
 
-              {/* Leaderboard Table Preview */}
-              <div className="p-4 rounded-xl bg-[#0B0D0C]/90 border border-white/[0.08] space-y-2.5 font-mono text-xs">
-                <div className="flex items-center justify-between p-2 rounded-lg bg-amber-400/10 border border-amber-400/20 text-amber-200">
+              {/* Leaderboard Table Preview with Podium Bars */}
+              <div className="relative p-4 rounded-xl bg-[#070908] border border-white/[0.08] space-y-2.5 font-mono text-xs overflow-hidden">
+                {/* Subtle gold podium glow bar visual on the right */}
+                <div className="absolute right-4 bottom-3 flex items-end gap-1.5 opacity-20 pointer-events-none">
+                  <div className="w-4 h-10 bg-amber-400/40 rounded-t" />
+                  <div className="w-4 h-16 bg-amber-400 rounded-t" />
+                  <div className="w-4 h-7 bg-amber-400/30 rounded-t" />
+                </div>
+
+                <div className="relative z-10 flex items-center justify-between p-2 rounded-lg bg-amber-400/10 border border-amber-400/20 text-amber-200">
                   <div className="flex items-center gap-2.5">
                     <span className="w-5 h-5 rounded-full bg-amber-400 text-black font-bold flex items-center justify-center text-[10px]">
                       1
@@ -41,24 +43,24 @@ export const SocialProofSection: React.FC = () => {
                   <span className="font-bold text-amber-400">92.4</span>
                 </div>
 
-                <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                <div className="relative z-10 flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
                   <div className="flex items-center gap-2.5">
                     <span className="w-5 h-5 rounded-full bg-white/20 text-white font-bold flex items-center justify-center text-[10px]">
                       2
                     </span>
-                    <span className="font-sans font-medium text-[#A7AEA7]">Team Quantum</span>
+                    <span className="font-sans font-medium text-[#9AA29A]">Team Quantum</span>
                   </div>
-                  <span className="font-bold text-[#A7AEA7]">89.7</span>
+                  <span className="font-bold text-[#9AA29A]">89.7</span>
                 </div>
 
-                <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                <div className="relative z-10 flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
                   <div className="flex items-center gap-2.5">
                     <span className="w-5 h-5 rounded-full bg-amber-700/40 text-amber-300 font-bold flex items-center justify-center text-[10px]">
                       3
                     </span>
-                    <span className="font-sans font-medium text-[#A7AEA7]">Team Nova</span>
+                    <span className="font-sans font-medium text-[#9AA29A]">Team Nova</span>
                   </div>
-                  <span className="font-bold text-[#A7AEA7]">87.9</span>
+                  <span className="font-bold text-[#9AA29A]">87.9</span>
                 </div>
               </div>
             </div>
@@ -75,7 +77,7 @@ export const SocialProofSection: React.FC = () => {
           </div>
 
           {/* Card 2: CERTIFICATES */}
-          <div id="certificates" className="p-6 sm:p-7 rounded-2xl bg-[#111412] border border-white/[0.08] flex flex-col justify-between hover:border-white/20 transition-all duration-300 shadow-xl group">
+          <div id="certificates" className="p-6 sm:p-7 rounded-2xl bg-[#0E1210] border border-white/[0.08] flex flex-col justify-between hover:border-white/20 transition-all duration-300 shadow-xl group">
             <div className="space-y-4">
               <div className="text-[11px] font-mono tracking-widest text-[#A8E63B] uppercase font-semibold">
                 CERTIFICATES
@@ -86,14 +88,14 @@ export const SocialProofSection: React.FC = () => {
               </h3>
 
               {/* Certificate Preview Card */}
-              <div className="p-5 rounded-xl bg-gradient-to-br from-[#1C211E] to-[#121614] border border-[#A8E63B]/30 shadow-lg space-y-2 text-center relative overflow-hidden">
+              <div className="p-5 rounded-xl bg-gradient-to-br from-[#141A16] to-[#0A0D0B] border border-[#A8E63B]/30 shadow-lg space-y-2 text-center relative overflow-hidden">
                 <div className="text-[9px] font-mono tracking-widest text-[#A8E63B] uppercase">
                   CERTIFICATE OF PARTICIPATION
                 </div>
                 <div className="text-lg font-bold text-white font-serif tracking-wide pt-1">
                   Alok Sharma
                 </div>
-                <div className="text-[11px] text-[#A7AEA7]">Build India 2026</div>
+                <div className="text-[11px] text-[#9AA29A]">Build India 2026</div>
 
                 <div className="flex items-center justify-between pt-3 border-t border-white/[0.08] text-[9px] font-mono text-[#737A73]">
                   <span>ID: AH-2026-7X34B</span>
@@ -116,31 +118,31 @@ export const SocialProofSection: React.FC = () => {
           </div>
 
           {/* Card 3: BUILT FOR THE PEOPLE WHO RUN HACKATHONS */}
-          <div className="p-6 sm:p-7 rounded-2xl bg-[#111412] border border-white/[0.08] flex flex-col justify-between hover:border-white/20 transition-all duration-300 shadow-xl group">
+          <div className="p-6 sm:p-7 rounded-2xl bg-[#0E1210] border border-white/[0.08] flex flex-col justify-between hover:border-white/20 transition-all duration-300 shadow-xl group">
             <div className="space-y-4">
               <div className="text-[11px] font-mono tracking-widest text-[#A8E63B] uppercase font-semibold">
                 BUILT FOR THE PEOPLE WHO RUN HACKATHONS
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="p-3.5 rounded-xl bg-[#0B0D0C]/80 border border-white/[0.06]">
+                <div className="p-3.5 rounded-xl bg-[#070908] border border-white/[0.06]">
                   <div className="text-2xl sm:text-3xl font-bold font-mono text-[#A8E63B]">500+</div>
-                  <div className="text-xs text-[#A7AEA7] mt-1">Hackathons run</div>
+                  <div className="text-xs text-[#9AA29A] mt-1">Hackathons run</div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-[#0B0D0C]/80 border border-white/[0.06]">
+                <div className="p-3.5 rounded-xl bg-[#070908] border border-white/[0.06]">
                   <div className="text-2xl sm:text-3xl font-bold font-mono text-white">100K+</div>
-                  <div className="text-xs text-[#A7AEA7] mt-1">Participants</div>
+                  <div className="text-xs text-[#9AA29A] mt-1">Participants</div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-[#0B0D0C]/80 border border-white/[0.06]">
+                <div className="p-3.5 rounded-xl bg-[#070908] border border-white/[0.06]">
                   <div className="text-2xl sm:text-3xl font-bold font-mono text-white">50K+</div>
-                  <div className="text-xs text-[#A7AEA7] mt-1">Projects submitted</div>
+                  <div className="text-xs text-[#9AA29A] mt-1">Projects submitted</div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-[#0B0D0C]/80 border border-white/[0.06]">
+                <div className="p-3.5 rounded-xl bg-[#070908] border border-white/[0.06]">
                   <div className="text-2xl sm:text-3xl font-bold font-mono text-[#A8E63B]">98%</div>
-                  <div className="text-xs text-[#A7AEA7] mt-1">Organizer satisfaction</div>
+                  <div className="text-xs text-[#9AA29A] mt-1">Organizer satisfaction</div>
                 </div>
               </div>
             </div>
@@ -151,7 +153,7 @@ export const SocialProofSection: React.FC = () => {
           </div>
 
           {/* Card 4: ALWAYS IN CONTROL (COMMAND CENTER) */}
-          <div id="command-center" className="p-6 sm:p-7 rounded-2xl bg-[#111412] border border-white/[0.08] flex flex-col justify-between hover:border-white/20 transition-all duration-300 shadow-xl group">
+          <div id="command-center" className="p-6 sm:p-7 rounded-2xl bg-[#0E1210] border border-white/[0.08] flex flex-col justify-between hover:border-white/20 transition-all duration-300 shadow-xl group">
             <div className="space-y-4">
               <div className="text-[11px] font-mono tracking-widest text-[#A8E63B] uppercase font-semibold">
                 ALWAYS IN CONTROL
@@ -163,22 +165,22 @@ export const SocialProofSection: React.FC = () => {
 
               {/* Mini Status Telemetry */}
               <div className="space-y-3">
-                <div className="text-xs font-semibold text-[#A7AEA7]">Live Event Status</div>
+                <div className="text-xs font-semibold text-[#9AA29A]">Live Event Status</div>
 
                 <div className="grid grid-cols-4 gap-2 text-center">
-                  <div className="p-2 rounded-lg bg-[#0B0D0C]/90 border border-white/[0.06]">
+                  <div className="p-2 rounded-lg bg-[#070908] border border-white/[0.06]">
                     <div className="text-xs sm:text-sm font-bold font-mono text-white">1,248</div>
                     <div className="text-[9px] text-[#737A73]">Participants</div>
                   </div>
-                  <div className="p-2 rounded-lg bg-[#0B0D0C]/90 border border-white/[0.06]">
+                  <div className="p-2 rounded-lg bg-[#070908] border border-white/[0.06]">
                     <div className="text-xs sm:text-sm font-bold font-mono text-white">312</div>
                     <div className="text-[9px] text-[#737A73]">Teams</div>
                   </div>
-                  <div className="p-2 rounded-lg bg-[#0B0D0C]/90 border border-white/[0.06]">
+                  <div className="p-2 rounded-lg bg-[#070908] border border-white/[0.06]">
                     <div className="text-xs sm:text-sm font-bold font-mono text-white">218</div>
                     <div className="text-[9px] text-[#737A73]">Submissions</div>
                   </div>
-                  <div className="p-2 rounded-lg bg-[#0B0D0C]/90 border border-white/[0.06]">
+                  <div className="p-2 rounded-lg bg-[#070908] border border-white/[0.06]">
                     <div className="text-xs sm:text-sm font-bold font-mono text-[#A8E63B]">64%</div>
                     <div className="text-[9px] text-[#737A73]">Judging</div>
                   </div>

@@ -5,11 +5,10 @@ import Link from 'next/link';
 import {
   CheckCircle2,
   ArrowRight,
-  Sparkles,
-  Trophy,
-  Rocket,
   Clock,
   Check,
+  Trophy,
+  Rocket,
 } from 'lucide-react';
 
 export const OrganizerExperienceSection: React.FC = () => {
@@ -24,11 +23,11 @@ export const OrganizerExperienceSection: React.FC = () => {
   ];
 
   return (
-    <section id="organizers" className="relative py-20 lg:py-28 bg-[#0B0D0C] border-t border-white/[0.06]">
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+    <section id="organizers" className="relative py-28 lg:py-36 bg-[#050706] border-t border-white/[0.06]">
+      <div className="max-w-[1240px] mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Card 1: FOR ORGANIZERS */}
-          <div className="p-6 sm:p-7 rounded-2xl bg-[#111412] border border-white/[0.08] flex flex-col justify-between hover:border-white/20 transition-all duration-300 shadow-xl group">
+          <div className="p-6 sm:p-7 rounded-2xl bg-[#0E1210] border border-white/[0.08] flex flex-col justify-between hover:border-white/20 transition-all duration-300 shadow-xl group">
             <div className="space-y-4">
               <div className="text-[11px] font-mono tracking-widest text-[#A8E63B] uppercase font-semibold">
                 FOR ORGANIZERS
@@ -41,7 +40,7 @@ export const OrganizerExperienceSection: React.FC = () => {
               {/* Checklist */}
               <div className="space-y-2.5 pt-2">
                 {organizerPoints.map((point) => (
-                  <div key={point} className="flex items-start gap-2 text-xs sm:text-[13px] text-[#A7AEA7]">
+                  <div key={point} className="flex items-start gap-2 text-xs sm:text-[13px] text-[#9AA29A]">
                     <CheckCircle2 className="w-4 h-4 text-[#A8E63B] shrink-0 mt-0.5" />
                     <span>{point}</span>
                   </div>
@@ -52,7 +51,7 @@ export const OrganizerExperienceSection: React.FC = () => {
             {/* Visual Graphic & CTA */}
             <div className="mt-8 space-y-5">
               {/* Graphic: Pie / Metrics preview */}
-              <div className="p-4 rounded-xl bg-[#0B0D0C]/90 border border-white/[0.06] flex items-center justify-between">
+              <div className="p-4 rounded-xl bg-[#070908] border border-white/[0.06] flex items-center justify-between">
                 <div className="space-y-1">
                   <div className="text-[10px] font-mono text-[#737A73]">TRACK DISTRIBUTION</div>
                   <div className="text-xs font-semibold text-white">AI (42%) • Web3 (38%) • Infra (20%)</div>
@@ -62,7 +61,7 @@ export const OrganizerExperienceSection: React.FC = () => {
 
               <Link
                 href="/hackathons/new"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-[#151917] text-[#A8E63B] border border-[#A8E63B]/30 hover:bg-[#A8E63B] hover:text-black transition-all w-full justify-center group-hover:shadow-[0_0_15px_rgba(168,230,59,0.2)]"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-[#121713] text-[#A8E63B] border border-[#A8E63B]/30 hover:bg-[#A8E63B] hover:text-black transition-all w-full justify-center group-hover:shadow-[0_0_15px_rgba(168,230,59,0.2)]"
               >
                 <span>Explore Organizer Workspace</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -71,7 +70,7 @@ export const OrganizerExperienceSection: React.FC = () => {
           </div>
 
           {/* Card 2: FOR JUDGES */}
-          <div id="judges" className="p-6 sm:p-7 rounded-2xl bg-[#111412] border border-white/[0.08] flex flex-col justify-between hover:border-white/20 transition-all duration-300 shadow-xl group">
+          <div id="judges" className="p-6 sm:p-7 rounded-2xl bg-[#0E1210] border border-white/[0.08] flex flex-col justify-between hover:border-white/20 transition-all duration-300 shadow-xl group">
             <div className="space-y-4">
               <div className="text-[11px] font-mono tracking-widest text-purple-400 uppercase font-semibold">
                 FOR JUDGES
@@ -81,9 +80,14 @@ export const OrganizerExperienceSection: React.FC = () => {
                 Spend less time managing submissions. More time judging them.
               </h3>
 
-              {/* Visual Card Mockup */}
-              <div className="p-4 rounded-xl bg-[#0B0D0C]/90 border border-white/[0.08] space-y-3 font-mono text-xs">
-                <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+              {/* Visual Card Mockup with Trophy Glow Graphic */}
+              <div className="relative p-4 rounded-xl bg-[#070908] border border-white/[0.08] space-y-3 font-mono text-xs overflow-hidden">
+                {/* Subtle purple trophy aura graphic */}
+                <div className="absolute top-2 right-2 opacity-25 text-purple-400 pointer-events-none">
+                  <Trophy className="w-16 h-16" />
+                </div>
+
+                <div className="relative z-10 flex items-center justify-between pb-2 border-b border-white/[0.06]">
                   <div>
                     <div className="text-[10px] text-[#737A73]">ASSIGNED TO YOU</div>
                     <div className="text-xs font-bold text-white">12 submissions</div>
@@ -94,11 +98,11 @@ export const OrganizerExperienceSection: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="text-[11px] font-sans font-semibold text-[#F5F7F4]">
+                <div className="relative z-10 text-[11px] font-sans font-semibold text-[#F5F7F3]">
                   Team Alpha — CodeFlow
                 </div>
 
-                <div className="space-y-1.5 text-[11px] text-[#A7AEA7]">
+                <div className="relative z-10 space-y-1.5 text-[11px] text-[#9AA29A]">
                   <div className="flex justify-between">
                     <span>Innovation</span>
                     <span className="text-white font-bold">8 / 10</span>
@@ -127,7 +131,7 @@ export const OrganizerExperienceSection: React.FC = () => {
             <div className="mt-8">
               <a
                 href="#transparent-judging"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-[#151917] text-purple-300 border border-purple-500/30 hover:bg-purple-500/20 transition-all w-full justify-center"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-[#121713] text-purple-300 border border-purple-500/30 hover:bg-purple-500/20 transition-all w-full justify-center"
               >
                 <span>See the Judge Experience</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -136,7 +140,7 @@ export const OrganizerExperienceSection: React.FC = () => {
           </div>
 
           {/* Card 3: FOR HACKERS */}
-          <div id="hackers" className="p-6 sm:p-7 rounded-2xl bg-[#111412] border border-white/[0.08] flex flex-col justify-between hover:border-white/20 transition-all duration-300 shadow-xl group">
+          <div id="hackers" className="p-6 sm:p-7 rounded-2xl bg-[#0E1210] border border-white/[0.08] flex flex-col justify-between hover:border-white/20 transition-all duration-300 shadow-xl group">
             <div className="space-y-4">
               <div className="text-[11px] font-mono tracking-widest text-cyan-400 uppercase font-semibold">
                 FOR HACKERS
@@ -146,22 +150,27 @@ export const OrganizerExperienceSection: React.FC = () => {
                 Know exactly <br /> what to do next.
               </h3>
 
-              {/* Visual Hacker Status Mockup */}
-              <div className="p-4 rounded-xl bg-[#0B0D0C]/90 border border-white/[0.08] space-y-3 font-mono text-xs">
-                <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+              {/* Visual Hacker Status Mockup with Rocket Graphic */}
+              <div className="relative p-4 rounded-xl bg-[#070908] border border-white/[0.08] space-y-3 font-mono text-xs overflow-hidden">
+                {/* Subtle blue rocket aura graphic */}
+                <div className="absolute top-2 right-2 opacity-25 text-cyan-400 pointer-events-none">
+                  <Rocket className="w-16 h-16" />
+                </div>
+
+                <div className="relative z-10 flex items-center justify-between pb-2 border-b border-white/[0.06]">
                   <span className="font-sans font-bold text-white">Build India 2026</span>
                   <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#A8E63B]/10 text-[#A8E63B] border border-[#A8E63B]/30">
                     LIVE
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between text-[11px] text-[#A7AEA7]">
+                <div className="relative z-10 flex items-center justify-between text-[11px] text-[#9AA29A]">
                   <span>Submission deadline</span>
                   <span className="font-bold text-amber-300">18h 42m</span>
                 </div>
 
                 {/* Milestones Stepper */}
-                <div className="space-y-2 pt-1 font-sans text-xs">
+                <div className="relative z-10 space-y-2 pt-1 font-sans text-xs">
                   <div className="flex items-center gap-2 text-[#A8E63B]">
                     <div className="w-4 h-4 rounded-full bg-[#A8E63B]/20 flex items-center justify-center">
                       <Check className="w-3 h-3 text-[#A8E63B]" />
@@ -187,6 +196,13 @@ export const OrganizerExperienceSection: React.FC = () => {
                     <span className="font-medium text-white">Submission</span>
                   </div>
                 </div>
+
+                {/* Continue Project Button inside Hacker Card matching reference */}
+                <div className="relative z-10 pt-1">
+                  <div className="w-full py-1.5 rounded-lg bg-[#A8E63B] text-black font-sans font-bold text-[11px] text-center shadow-sm">
+                    Continue Project →
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -194,7 +210,7 @@ export const OrganizerExperienceSection: React.FC = () => {
             <div className="mt-8">
               <Link
                 href="/register"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-[#151917] text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/20 transition-all w-full justify-center"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-[#121713] text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/20 transition-all w-full justify-center"
               >
                 <span>Explore Hacker Experience</span>
                 <ArrowRight className="w-3.5 h-3.5" />

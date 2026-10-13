@@ -5,8 +5,8 @@ import Link from 'next/link';
 
 export const LandingFooter: React.FC = () => {
   return (
-    <footer className="relative bg-[#0B0D0C] border-t border-white/[0.08] text-[#A7AEA7] pt-16 pb-12">
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+    <footer className="relative bg-[#050706] border-t border-white/[0.08] text-[#9AA29A] pt-16 pb-12">
+      <div className="max-w-[1240px] mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-2 md:grid-cols-12 gap-8 lg:gap-12 pb-12 border-b border-white/[0.06]">
           {/* Brand Column */}
           <div className="col-span-2 md:col-span-4 space-y-4">
@@ -30,7 +30,7 @@ export const LandingFooter: React.FC = () => {
                 href="https://github.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-[#151917] border border-white/[0.08] flex items-center justify-center text-[#A7AEA7] hover:text-white hover:border-white/20 transition-all"
+                className="w-8 h-8 rounded-lg bg-[#0E1210] border border-white/[0.08] flex items-center justify-center text-[#9AA29A] hover:text-white hover:border-white/20 transition-all"
                 aria-label="GitHub"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -43,7 +43,7 @@ export const LandingFooter: React.FC = () => {
                 href="https://twitter.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-[#151917] border border-white/[0.08] flex items-center justify-center text-[#A7AEA7] hover:text-white hover:border-white/20 transition-all"
+                className="w-8 h-8 rounded-lg bg-[#0E1210] border border-white/[0.08] flex items-center justify-center text-[#9AA29A] hover:text-white hover:border-white/20 transition-all"
                 aria-label="Twitter"
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
@@ -56,7 +56,7 @@ export const LandingFooter: React.FC = () => {
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-[#151917] border border-white/[0.08] flex items-center justify-center text-[#A7AEA7] hover:text-white hover:border-white/20 transition-all"
+                className="w-8 h-8 rounded-lg bg-[#0E1210] border border-white/[0.08] flex items-center justify-center text-[#9AA29A] hover:text-white hover:border-white/20 transition-all"
                 aria-label="LinkedIn"
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
@@ -69,7 +69,7 @@ export const LandingFooter: React.FC = () => {
                 href="https://discord.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-lg bg-[#151917] border border-white/[0.08] flex items-center justify-center text-[#A7AEA7] hover:text-white hover:border-white/20 transition-all"
+                className="w-8 h-8 rounded-lg bg-[#0E1210] border border-white/[0.08] flex items-center justify-center text-[#9AA29A] hover:text-white hover:border-white/20 transition-all"
                 aria-label="Discord"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">

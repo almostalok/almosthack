@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ChevronDown, MessageSquare, ArrowRight, HelpCircle } from 'lucide-react';
+import { ChevronDown, MessageSquare, ArrowRight } from 'lucide-react';
 
 export const FAQSection: React.FC = () => {
   const [openItems, setOpenItems] = useState<{ [key: number]: boolean }>({});
@@ -28,8 +28,8 @@ export const FAQSection: React.FC = () => {
       a: 'Yes. Teams connect their GitHub repositories directly so AlmostHack can audit commit history, detect pre-event development, and verify PR activity during the build window.',
     },
     {
-      q: 'Can I integrate with other tools?',
-      a: 'AlmostHack integrates with GitHub, Discord, Google, Docker, email providers, and provides webhooks and REST APIs to sync data with external systems.',
+      q: 'How are results calculated?',
+      a: 'Scores are computed using robust consensus methods—including trimmed means, Olympic averaging, and z-score normalization—to ensure fairness and eliminate outlier bias.',
     },
   ];
 
@@ -47,20 +47,20 @@ export const FAQSection: React.FC = () => {
       a: 'Yes. Organization accounts can run concurrent hackathons, clone tracks and rubrics from past events, and maintain organizational archives from a single dashboard.',
     },
     {
-      q: 'How are results calculated?',
-      a: 'Scores are computed using robust consensus methods—including trimmed means, Olympic averaging, and z-score normalization—to ensure fairness and eliminate outlier bias.',
+      q: 'How secure is my data?',
+      a: 'All data is encrypted in transit and at rest. Role-based access control (RBAC), double-blind judge obfuscation, and immutable audit logs ensure complete institutional integrity.',
     },
   ];
 
   return (
-    <section id="faq" className="relative py-20 lg:py-28 bg-[#0B0D0C] border-t border-white/[0.06]">
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+    <section id="faq" className="relative py-28 lg:py-36 bg-[#050706] border-t border-white/[0.06]">
+      <div className="max-w-[1240px] mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           {/* Left Column: Graphic Speech Bubble */}
           <div className="lg:col-span-2 hidden lg:flex flex-col items-center pt-8">
-            <div className="relative w-20 h-20 rounded-2xl bg-[#151917] border border-[#028051] flex items-center justify-center shadow-[0_0_25px_rgba(2,128,81,0.4)]">
+            <div className="relative w-20 h-20 rounded-2xl bg-[#0E1210] border border-[#028051] flex items-center justify-center shadow-[0_0_25px_rgba(2,128,81,0.4)]">
               <MessageSquare className="w-10 h-10 text-[#A8E63B]" />
-              <div className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full bg-[#028051] flex items-center justify-center text-white border-2 border-[#0B0D0C] text-xs font-bold">
+              <div className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full bg-[#028051] flex items-center justify-center text-white border-2 border-[#050706] text-xs font-bold">
                 ?
               </div>
             </div>
@@ -80,7 +80,7 @@ export const FAQSection: React.FC = () => {
 
               <Link
                 href="/docs"
-                className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-[#A7AEA7] hover:text-white transition-colors"
+                className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-[#9AA29A] hover:text-white transition-colors"
               >
                 <span>View all docs</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -96,7 +96,7 @@ export const FAQSection: React.FC = () => {
                   return (
                     <div
                       key={faq.q}
-                      className="rounded-xl bg-[#111412] border border-white/[0.08] overflow-hidden transition-all duration-200"
+                      className="rounded-xl bg-[#0E1210] border border-white/[0.08] overflow-hidden transition-all duration-200"
                     >
                       <button
                         onClick={() => toggleItem(idx)}
@@ -111,7 +111,7 @@ export const FAQSection: React.FC = () => {
                         />
                       </button>
                       {isOpen && (
-                        <div className="px-4 pb-4 text-xs text-[#A7AEA7] leading-relaxed border-t border-white/[0.04] pt-2">
+                        <div className="px-4 pb-4 text-xs text-[#9AA29A] leading-relaxed border-t border-white/[0.04] pt-2">
                           {faq.a}
                         </div>
                       )}
@@ -128,7 +128,7 @@ export const FAQSection: React.FC = () => {
                   return (
                     <div
                       key={faq.q}
-                      className="rounded-xl bg-[#111412] border border-white/[0.08] overflow-hidden transition-all duration-200"
+                      className="rounded-xl bg-[#0E1210] border border-white/[0.08] overflow-hidden transition-all duration-200"
                     >
                       <button
                         onClick={() => toggleItem(actualIdx)}
@@ -143,7 +143,7 @@ export const FAQSection: React.FC = () => {
                         />
                       </button>
                       {isOpen && (
-                        <div className="px-4 pb-4 text-xs text-[#A7AEA7] leading-relaxed border-t border-white/[0.04] pt-2">
+                        <div className="px-4 pb-4 text-xs text-[#9AA29A] leading-relaxed border-t border-white/[0.04] pt-2">
                           {faq.a}
                         </div>
                       )}

@@ -44,8 +44,8 @@ export const HowItWorksSection: React.FC = () => {
   ];
 
   return (
-    <section id="how-it-works" className="relative py-20 lg:py-28 bg-[#0B0D0C] border-t border-white/[0.06] overflow-hidden">
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+    <section id="how-it-works" className="relative py-28 lg:py-36 bg-[#050706] border-t border-white/[0.06] overflow-hidden">
+      <div className="max-w-[1240px] mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           {/* Left Title */}
           <div className="lg:col-span-3 space-y-3 text-left">
@@ -69,7 +69,7 @@ export const HowItWorksSection: React.FC = () => {
                   <div key={step.num} className="flex flex-col items-start group">
                     {/* Step Icon Badge */}
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="w-12 h-12 rounded-xl bg-[#151917] border border-white/10 flex items-center justify-center text-[#A8E63B] shadow-md group-hover:border-[#A8E63B]/50 group-hover:scale-105 transition-all">
+                      <div className="w-12 h-12 rounded-xl bg-[#0E1210] border border-white/10 flex items-center justify-center text-[#A8E63B] shadow-md group-hover:border-[#A8E63B]/50 group-hover:scale-105 transition-all">
                         <Icon className="w-5 h-5" />
                       </div>
                       <span className="font-mono text-sm font-bold text-[#A8E63B]">{step.num}</span>
@@ -79,7 +79,7 @@ export const HowItWorksSection: React.FC = () => {
                       {step.title}
                     </h3>
 
-                    <p className="text-xs text-[#A7AEA7] leading-relaxed">
+                    <p className="text-xs text-[#9AA29A] leading-relaxed">
                       {step.desc}
                     </p>
                   </div>

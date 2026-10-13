@@ -1,13 +1,13 @@
 'use client';
 
 import React from 'react';
-import { ShieldCheck, ArrowRight, CheckCircle2, Quote } from 'lucide-react';
+import { ShieldCheck, ArrowRight } from 'lucide-react';
 
 export const TransparentHackathonSection: React.FC = () => {
   return (
-    <section id="transparent-judging" className="relative py-20 lg:py-28 bg-[#0B0D0C] border-t border-white/[0.06]">
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+    <section id="transparent-judging" className="relative py-28 lg:py-36 bg-[#050706] border-t border-white/[0.06]">
+      <div className="max-w-[1240px] mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
           {/* Left Column: Copy & Link */}
           <div className="lg:col-span-4 space-y-4 text-left">
             <div className="text-[11px] font-mono tracking-widest text-[#A8E63B] uppercase font-semibold">
@@ -18,7 +18,7 @@ export const TransparentHackathonSection: React.FC = () => {
               Judging shouldn&apos;t feel like a black box.
             </h2>
 
-            <p className="text-sm text-[#A7AEA7] leading-relaxed">
+            <p className="text-sm text-[#9AA29A] leading-relaxed">
               Give participants meaningful visibility into how their projects were evaluated — while
               keeping private judge information protected.
             </p>
@@ -42,7 +42,7 @@ export const TransparentHackathonSection: React.FC = () => {
               {/* Layer 2 mid */}
               <div className="absolute w-32 h-36 rounded-2xl bg-white/[0.04] border border-white/15 transform translate-x-2 -translate-y-2 backdrop-blur-md" />
               {/* Layer 1 front */}
-              <div className="relative w-32 h-36 rounded-2xl bg-[#151917]/90 border border-[#028051] flex items-center justify-center shadow-[0_0_30px_rgba(2,128,81,0.3)] backdrop-blur-xl">
+              <div className="relative w-32 h-36 rounded-2xl bg-[#0E1210]/95 border border-[#028051] flex items-center justify-center shadow-[0_0_30px_rgba(2,128,81,0.35)] backdrop-blur-xl">
                 <ShieldCheck className="w-14 h-14 text-[#A8E63B]" />
               </div>
             </div>
@@ -51,12 +51,12 @@ export const TransparentHackathonSection: React.FC = () => {
           {/* Right Cards: Evaluation Breakdown + Status + Testimonial */}
           <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4">
             {/* Score Breakdown Card */}
-            <div className="sm:col-span-1 lg:col-span-7 p-4 rounded-xl bg-[#111412] border border-white/[0.08] shadow-xl space-y-2.5 font-mono text-xs">
+            <div className="sm:col-span-1 lg:col-span-7 p-4 rounded-xl bg-[#0E1210] border border-white/[0.08] shadow-xl space-y-2.5 font-mono text-xs">
               <div className="text-xs font-sans font-bold text-white pb-1.5 border-b border-white/[0.06]">
                 Your Evaluation
               </div>
 
-              <div className="space-y-1.5 text-[11px] text-[#A7AEA7]">
+              <div className="space-y-1.5 text-[11px] text-[#9AA29A]">
                 <div className="flex justify-between">
                   <span>Innovation</span>
                   <span className="text-white font-bold">8 / 10</span>
@@ -83,7 +83,7 @@ export const TransparentHackathonSection: React.FC = () => {
             {/* Status & Testimonial Column */}
             <div className="sm:col-span-1 lg:col-span-5 flex flex-col gap-3">
               {/* Status Badge Card */}
-              <div className="p-3.5 rounded-xl bg-[#111412] border border-white/[0.08] shadow-xl text-center space-y-1">
+              <div className="p-3.5 rounded-xl bg-[#0E1210] border border-white/[0.08] shadow-xl text-center space-y-1">
                 <div className="text-2xl font-bold font-mono text-white">4 / 4</div>
                 <div className="text-[11px] text-[#737A73]">evaluations complete</div>
                 <div className="pt-1">
@@ -95,9 +95,9 @@ export const TransparentHackathonSection: React.FC = () => {
               </div>
 
               {/* Quote Card */}
-              <div className="p-3.5 rounded-xl bg-[#111412] border border-white/[0.08] shadow-xl space-y-1.5">
+              <div className="p-3.5 rounded-xl bg-[#0E1210] border border-white/[0.08] shadow-xl space-y-1.5">
                 <div className="text-[#A8E63B] text-xl font-serif leading-none">“</div>
-                <p className="text-[11px] text-[#A7AEA7] italic leading-snug">
+                <p className="text-[11px] text-[#9AA29A] italic leading-snug">
                   AlmostHack transformed how we run our hackathons. It&apos;s powerful and loved by our
                   community.
                 </p>

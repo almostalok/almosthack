@@ -11,22 +11,21 @@ interface LeadCaptureSectionProps {
 
 export const LeadCaptureSection: React.FC<LeadCaptureSectionProps> = ({ onSuccessDemo }) => {
   return (
-    <section className="relative py-16 lg:py-24 bg-[#0B0D0C]">
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+    <section className="relative py-24 lg:py-32 bg-[#050706]">
+      <div className="max-w-[1240px] mx-auto px-4 sm:px-6">
         {/* Rounded Banner Container with Landscape Background */}
-        <div className="relative rounded-3xl overflow-hidden border border-white/15 shadow-2xl p-8 sm:p-12 lg:p-14 min-h-[280px] flex items-center">
-          {/* Exact Landscape Background Asset */}
+        <div className="relative rounded-3xl overflow-hidden border border-white/15 shadow-2xl p-8 sm:p-12 lg:p-14 min-h-[260px] flex items-center">
+          {/* Official Landscape Background Asset */}
           <div className="absolute inset-0 z-0">
             <Image
               src="/bg-landscape.jpg"
               alt="AlmostHack Landscape Environment"
               fill
-              sizes="(max-width: 1280px) 100vw, 1280px"
-              className="object-cover object-bottom opacity-70 select-none pointer-events-none"
+              sizes="(max-width: 1240px) 100vw, 1240px"
+              className="object-cover object-bottom opacity-75 select-none pointer-events-none"
             />
             {/* Dark Atmosphere Gradients */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0B0D0C]/95 via-[#0B0D0C]/80 to-[#0B0D0C]/90" />
-            <div className="absolute inset-0 bg-[#0B0D0C]/40" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#050706]/95 via-[#050706]/85 to-[#050706]/80" />
           </div>
 
           {/* Banner Content Layout */}
@@ -38,7 +37,7 @@ export const LeadCaptureSection: React.FC<LeadCaptureSectionProps> = ({ onSucces
                 <span className="text-[#A8E63B]">best hackathon</span> yet?
               </h2>
 
-              <p className="text-sm sm:text-base text-[#A7AEA7] leading-relaxed max-w-xl">
+              <p className="text-sm sm:text-base text-[#9AA29A] leading-relaxed max-w-xl">
                 Replace spreadsheets, scattered tools and judging chaos with one operational workspace.
               </p>
             </div>
@@ -47,7 +46,7 @@ export const LeadCaptureSection: React.FC<LeadCaptureSectionProps> = ({ onSucces
             <div className="lg:col-span-5 flex flex-wrap items-center justify-start lg:justify-end gap-3.5">
               <Link
                 href="/hackathons/new"
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full text-sm font-bold bg-[#A8E63B] text-[#0B0D0C] hover:bg-[#bcf05b] hover:shadow-[0_0_25px_rgba(168,230,59,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-xs sm:text-sm font-bold bg-[#A8E63B] text-[#050706] hover:bg-[#bcf05b] hover:shadow-[0_0_20px_rgba(168,230,59,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
                 <span>Create a Hackathon</span>
                 <ArrowRight className="w-4 h-4" />
@@ -55,14 +54,14 @@ export const LeadCaptureSection: React.FC<LeadCaptureSectionProps> = ({ onSucces
 
               <button
                 onClick={onSuccessDemo}
-                className="inline-flex items-center gap-2 px-5 py-3.5 rounded-full text-sm font-medium bg-[#151917]/90 text-white border border-white/15 hover:bg-white/[0.08] hover:border-white/25 transition-all backdrop-blur-md"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-xs sm:text-sm font-medium bg-[#0E1210]/90 text-white border border-white/15 hover:bg-white/[0.08] hover:border-white/25 transition-all backdrop-blur-md"
               >
                 <MessageSquare className="w-4 h-4 text-[#A8E63B]" />
                 <span>Talk to Us</span>
               </button>
 
               {/* AlmostHack Flag Insignia */}
-              <div className="hidden xl:flex items-center justify-center w-12 h-12 rounded-2xl bg-[#141815] border border-white/10 text-[#A8E63B] shadow-lg ml-2">
+              <div className="hidden xl:flex items-center justify-center w-12 h-12 rounded-2xl bg-[#0E1210] border border-white/10 text-[#A8E63B] shadow-lg ml-1">
                 <Flag className="w-5 h-5" />
               </div>
             </div>

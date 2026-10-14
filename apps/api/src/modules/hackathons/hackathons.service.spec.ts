@@ -25,10 +25,10 @@ describe('HackathonsService Unit Tests', () => {
   const mockUserEmail = 'organizer@almosthack.org';
 
   const validDates = {
-    registrationStartsAt: '2026-09-01T00:00:00.000Z',
-    registrationEndsAt: '2026-09-10T00:00:00.000Z',
-    startsAt: '2026-09-15T00:00:00.000Z',
-    endsAt: '2026-09-20T00:00:00.000Z',
+    registrationStartsAt: '2027-09-01T00:00:00.000Z',
+    registrationEndsAt: '2027-09-10T00:00:00.000Z',
+    startsAt: '2027-09-15T00:00:00.000Z',
+    endsAt: '2027-09-20T00:00:00.000Z',
   };
 
   const sampleHackathonRecord = {
